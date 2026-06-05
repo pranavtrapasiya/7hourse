@@ -205,7 +205,7 @@ python-dotenv==1.0.1
 python-engineio==4.13.1
 python-json-logger==4.0.0
 python-socketio==5.16.1
-pywin32==311
+
 PyYAML==6.0.3
 pyzmq==27.1.0
 qh3==1.6.0
