@@ -1,0 +1,402 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+{% load aps_tags %}
+
+{% block content %}
+<!-- ── FILTER BAR ─────────────────────────────────────── -->
+<form method="get" id="filterForm">
+  <div class="filter-bar mb-4">
+    <!-- Search -->
+    <div class="filter-search" style="position: relative;">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-search" id="searchIcon"></i>
+          <span class="spinner-border spinner-border-sm text-primary d-none" id="searchSpinner" style="width: 14px; height: 14px;"></span>
+        </span>
+        <input type="text" name="q" class="form-control" placeholder="Search products..."
+               value="{{ search_query }}" autocomplete="off" id="searchInput">
+        {% if search_query %}
+        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+      <!-- Suggestions Dropdown -->
+      <div id="suggestionsDropdown" class="suggestions-dropdown d-none">
+        <div id="suggestionsList"></div>
+      </div>
+    </div>
+
+    <!-- Filters row -->
+    <div class="filter-controls">
+      <select name="category" class="form-select" id="filterCategory" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat.pk }}" {% if category_id == cat.pk|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="subcategory" class="form-select" onchange="this.form.submit()">
+        <option value="">All Subcategories</option>
+        {% for sub in subcategories %}
+        <option value="{{ sub.pk }}" {% if subcategory_id == sub.pk|stringformat:'s' %}selected{% endif %}>{{ sub.name }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="sort" class="form-select" onchange="this.form.submit()">
+        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
+        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+        <option value="product_name" {% if sort == 'product_name' %}selected{% endif %}>Name A–Z</option>
+        <option value="-product_name" {% if sort == '-product_name' %}selected{% endif %}>Name Z–A</option>
+
+      </select>
+
+      <button type="submit" class="btn btn-primary d-none d-md-block">
+        <i class="bi bi-funnel-fill"></i>
+      </button>
+    </div>
+  </div>
+</form>
+
+<!-- ── RESULTS INFO & ACTIONS ─────────────────────────── -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <span class="text-muted small" id="resultsCountText">
+    {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}
+    {% if search_query %} for "<strong>{{ search_query }}</strong>"{% endif %}
+  </span>
+  <div class="d-inline-flex align-items-center gap-2">
+    <a href="{% url 'export_products_csv' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+      <i class="bi bi-file-earmark-spreadsheet-fill text-green"></i>Export CSV
+    </a>
+    <a href="{% url 'deleted_products' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+      <i class="bi bi-trash-fill text-muted"></i>Trash
+    </a>
+    <a href="{% url 'product_add' %}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+      <i class="bi bi-plus-lg"></i>Add Product
+    </a>
+  </div>
+</div>
+
+<!-- ── PRODUCT GRID ───────────────────────────────────── -->
+{% if page_obj %}
+<div class="row g-3 mb-4" id="productGrid">
+  {% for product in page_obj %}
+  <div class="col-6 col-md-4 col-lg-5th">
+    <a href="{% url 'product_detail' product.pk %}" class="product-card-link">
+      <div class="product-card">
+        <div class="product-card-img">
+          {% if product.primary_image %}
+          <img src="{{ product.primary_image.url }}" alt="{{ product.product_name }}" loading="lazy">
+          {% else %}
+          <div class="no-image"><i class="bi bi-image"></i></div>
+          {% endif %}
+          <div class="product-card-asin">{{ product.asin_code }}</div>
+        </div>
+        <div class="product-card-body">
+          <div class="product-card-name">{{ product.product_name }}</div>
+
+          <div class="d-flex gap-1 flex-wrap mt-1">
+            {% if product.category %}
+            <span class="badge-cat">{{ product.category.name }}</span>
+            {% endif %}
+            {% if product.subcategory %}
+            <span class="badge-subcat">{{ product.subcategory.name }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ── PAGINATION ─────────────────────────────────────── -->
+<div id="paginationWrapper">
+{% if page_obj.has_other_pages %}
+<nav aria-label="Product pagination">
+  <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_id %}category={{ category_id }}&{% endif %}{% if subcategory_id %}subcategory={{ subcategory_id }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}">
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+    <li class="page-item">
+      <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_id %}category={{ category_id }}&{% endif %}{% if subcategory_id %}subcategory={{ subcategory_id }}&{% endif %}sort={{ sort }}&page={{ num }}">{{ num }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_id %}category={{ category_id }}&{% endif %}{% if subcategory_id %}subcategory={{ subcategory_id }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-search"></i>
+  <h5>No products found</h5>
+  <p>Try adjusting your search or filters.</p>
+  <a href="{% url 'product_list' %}" class="btn btn-outline-secondary me-2">Clear Filters</a>
+  <a href="{% url 'product_add' %}" class="btn btn-primary">Add Product</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Keep track of original state for restoration on empty query
+const originalGridHTML = document.getElementById('productGrid') ? document.getElementById('productGrid').innerHTML : '';
+const originalPaginationHTML = document.getElementById('paginationWrapper') ? document.getElementById('paginationWrapper').innerHTML : '';
+const originalCountHTML = document.getElementById('resultsCountText') ? document.getElementById('resultsCountText').innerHTML : '';
+
+let searchTimer;
+let currentFocus = -1;
+let currentAbortController = null;
+
+const searchInput = document.getElementById('searchInput');
+const searchIcon = document.getElementById('searchIcon');
+const searchSpinner = document.getElementById('searchSpinner');
+const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+const suggestionsList = document.getElementById('suggestionsList');
+const productGrid = document.getElementById('productGrid');
+const paginationWrapper = document.getElementById('paginationWrapper');
+const resultsCountText = document.getElementById('resultsCountText');
+
+// Intercept form submit and prevent page reload if search input is focused
+document.getElementById('filterForm').addEventListener('submit', function(e) {
+  if (document.activeElement === searchInput) {
+    e.preventDefault();
+  }
+});
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark style="background:rgba(79,156,249,0.3);color:var(--accent);padding:0 2px;border-radius:3px;font-weight:700;">$1</mark>');
+}
+
+function showSpinner(show) {
+  if (show) {
+    searchIcon.classList.add('d-none');
+    searchSpinner.classList.remove('d-none');
+  } else {
+    searchIcon.classList.remove('d-none');
+    searchSpinner.classList.add('d-none');
+  }
+}
+
+function clearSuggestions() {
+  suggestionsDropdown.classList.add('d-none');
+  suggestionsList.innerHTML = '';
+  currentFocus = -1;
+}
+
+// Perform AJAX search with AbortController
+function performRealtimeSearch(query) {
+  // Cancel previous pending request if any
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+  const { signal } = currentAbortController;
+
+  showSpinner(true);
+  
+  fetch(`/api/products/search/?q=${encodeURIComponent(query)}`, { signal })
+    .then(r => r.json())
+    .then(data => {
+      showSpinner(false);
+      
+      // 1. Render suggestions list
+      if (data.suggestions && data.suggestions.length > 0) {
+        suggestionsList.innerHTML = data.suggestions.map((p, i) => `
+          <a href="/products/${p.id}/" class="suggestion-item" data-idx="${i}">
+            <div class="suggestion-thumb">
+              ${p.has_image 
+                ? `<img src="${p.image_url}" alt="">` 
+                : `<i class="bi bi-image text-muted"></i>`}
+            </div>
+            <div class="suggestion-details">
+              <div class="suggestion-name">${highlightMatch(p.product_name, query)}</div>
+            </div>
+          </a>
+        `).join('');
+        suggestionsDropdown.classList.remove('d-none');
+      } else {
+        suggestionsList.innerHTML = '<div class="p-3 text-muted text-center small"><i class="bi bi-info-circle me-1"></i>No suggestions found</div>';
+        suggestionsDropdown.classList.remove('d-none');
+      }
+
+      // 2. Update the product grid dynamically
+      if (productGrid) {
+        if (data.results && data.results.length > 0) {
+          productGrid.innerHTML = data.results.map(p => `
+            <div class="col-6 col-md-4 col-lg-5th">
+              <a href="/products/${p.id}/" class="product-card-link">
+                <div class="product-card">
+                  <div class="product-card-img">
+                    ${p.has_image 
+                      ? `<img src="${p.image_url}" alt="${p.product_name}" loading="lazy">` 
+                      : `<div class="no-image"><i class="bi bi-image"></i></div>`}
+                    <div class="product-card-asin">${p.asin_code}</div>
+                  </div>
+                  <div class="product-card-body">
+                    <div class="product-card-name">${highlightMatch(p.product_name, query)}</div>
+                    <div class="d-flex gap-1 flex-wrap mt-1">
+                      ${p.category ? `<span class="badge-cat">${p.category}</span>` : ''}
+                      ${p.subcategory ? `<span class="badge-subcat">${p.subcategory}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          `).join('');
+        } else {
+          productGrid.innerHTML = `
+            <div class="col-12 w-100 text-center py-5">
+              <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No products found</h5>
+                <p>Try adjusting your search query.</p>
+              </div>
+            </div>`;
+        }
+      }
+
+      // 3. Update result count text
+      if (resultsCountText) {
+        resultsCountText.innerHTML = `${data.total} product${data.total !== 1 ? 's' : ''} found for "<strong>${query}</strong>"`;
+      }
+
+      // 4. Hide pagination during search
+      if (paginationWrapper) {
+        paginationWrapper.style.display = 'none';
+      }
+    })
+    .catch(err => {
+      // Don't show spinner error if it was aborted
+      if (err.name !== 'AbortError') {
+        showSpinner(false);
+        console.error(err);
+      }
+    });
+}
+
+// Input Listener with 200ms Debounce
+searchInput.addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  
+  if (q.length < 1) {
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+    clearSuggestions();
+    showSpinner(false);
+    
+    // Restore original state
+    if (productGrid) productGrid.innerHTML = originalGridHTML;
+    if (paginationWrapper) {
+      paginationWrapper.innerHTML = originalPaginationHTML;
+      paginationWrapper.style.display = '';
+    }
+    if (resultsCountText) resultsCountText.innerHTML = originalCountHTML;
+    return;
+  }
+  
+  searchTimer = setTimeout(() => {
+    performRealtimeSearch(q);
+  }, 200);
+});
+
+// Keyboard Navigation
+searchInput.addEventListener('keydown', function(e) {
+  const items = suggestionsList.querySelectorAll('.suggestion-item');
+  
+  if (e.key === 'ArrowDown') {
+    if (items.length === 0) return;
+    e.preventDefault();
+    currentFocus++;
+    addActive(items);
+  } else if (e.key === 'ArrowUp') {
+    if (items.length === 0) return;
+    e.preventDefault();
+    currentFocus--;
+    addActive(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (currentFocus > -1 && items[currentFocus]) {
+      items[currentFocus].click();
+    } else {
+      // If nothing selected, just trigger real-time search immediately
+      clearTimeout(searchTimer);
+      performRealtimeSearch(this.value.trim());
+      clearSuggestions();
+    }
+  } else if (e.key === 'Escape') {
+    clearSuggestions();
+  }
+});
+
+function addActive(items) {
+  if (!items) return false;
+  removeActive(items);
+  if (currentFocus >= items.length) currentFocus = 0;
+  if (currentFocus < 0) currentFocus = items.length - 1;
+  
+  items[currentFocus].classList.add('active');
+  items[currentFocus].scrollIntoView({ block: 'nearest' });
+}
+
+function removeActive(items) {
+  for (let i = 0; i < items.length; i++) {
+    items[i].classList.remove('active');
+  }
+}
+
+// Click outside suggestions container to hide
+document.addEventListener('click', function(e) {
+  if (!suggestionsDropdown.contains(e.target) && e.target !== searchInput) {
+    clearSuggestions();
+  }
+});
+
+// Focus back on search input opens suggestions if not empty
+searchInput.addEventListener('focus', function() {
+  const q = this.value.trim();
+  if (q.length >= 1 && suggestionsList.children.length > 0) {
+    suggestionsDropdown.classList.remove('d-none');
+  }
+});
+
+// Category filter → reload subcategory options via AJAX then submit
+document.getElementById('filterCategory').addEventListener('change', function() {
+  const catId = this.value;
+  const subcatSel = document.querySelector('select[name="subcategory"]');
+  subcatSel.innerHTML = '<option value="">All Subcategories</option>';
+  if (catId) {
+    fetch(`{% url 'ajax_subcategories' %}?category_id=${catId}`)
+      .then(r => r.json())
+      .then(data => {
+        data.subcategories.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id; opt.textContent = s.name;
+          subcatSel.appendChild(opt);
+        });
+      });
+  }
+});
+</script>
+{% endblock %}
