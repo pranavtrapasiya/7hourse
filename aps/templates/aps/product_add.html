@@ -1,0 +1,271 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.upload-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-upload {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; padding: 16px 10px; border-radius: 12px;
+  background: var(--surface-2); border: 1.5px dashed var(--border);
+  cursor: pointer; color: var(--text-muted); font-size: 0.82rem; font-weight: 500;
+  transition: all 0.2s ease; user-select: none;
+}
+.btn-upload:hover, .btn-upload:active {
+  border-color: var(--accent); color: var(--accent); background: var(--surface-3);
+}
+.btn-upload i { font-size: 1.5rem; }
+.img-preview-box {
+  position: relative; border-radius: 12px; overflow: hidden;
+  aspect-ratio: 1; background: var(--surface-2); margin-top: 14px;
+  border: 1px solid var(--border); display: none;
+}
+.img-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+.img-discard {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(220,53,69,.9); border: none; border-radius: 50%;
+  width: 30px; height: 30px; color: #fff; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.asin-badge {
+  font-family: monospace; background: var(--surface-2);
+  padding: 8px 14px; border-radius: 8px; font-size: 0.95rem; color: var(--accent);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" novalidate id="productForm">
+  {% csrf_token %}
+  <div class="row g-4">
+
+    <!-- ── LEFT: BASIC DETAILS ──────────────────────── -->
+    <div class="col-12 col-lg-8">
+      <div class="content-card mb-4">
+        <div class="content-card-header">
+          <i class="bi bi-info-circle-fill text-blue"></i>
+          <h5 class="mb-0">Basic Details</h5>
+        </div>
+
+        {% if is_edit %}
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div>
+            <span class="form-label small text-muted mb-0 d-block">ASIN Code</span>
+            <span class="asin-badge">{{ product.asin_code }}</span>
+          </div>
+        </div>
+        {% else %}
+        <div class="mb-3 p-2 rounded" style="background:var(--surface-2);border:1px solid var(--border);">
+          <div class="d-flex align-items-center gap-2 small text-muted">
+            <i class="bi bi-upc-scan text-green"></i>
+            Product code will be auto-generated on save.
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label fw-500">Product Name <span class="text-danger">*</span></label>
+          {{ product_form.product_name }}
+          {% if product_form.product_name.errors %}
+          <div class="invalid-feedback d-block">{{ product_form.product_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-500">SH Code</label>
+          {{ product_form.sh_code }}
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-500">Category <span class="text-danger">*</span></label>
+            {{ product_form.category }}
+            {% if product_form.category.errors %}
+            <div class="invalid-feedback d-block">{{ product_form.category.errors.0 }}</div>
+            {% endif %}
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-500">Subcategory</label>
+            {{ product_form.subcategory }}
+          </div>
+        </div>
+
+        <div class="mb-3 mt-3">
+          <label class="form-label fw-500">Description</label>
+          {{ product_form.description }}
+          {% if product_form.description.errors %}
+          <div class="invalid-feedback d-block">{{ product_form.description.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-500">Tags</label>
+          {{ product_form.tags }}
+          <div class="form-text">Comma-separated tags (e.g. plastic, metal, tools)</div>
+          {% if product_form.tags.errors %}
+          <div class="invalid-feedback d-block">{{ product_form.tags.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mt-3 p-3 rounded-3" style="background:var(--surface-2);border:1px solid var(--border);">
+          <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-info-circle"></i>
+            Location, pricing, carton details and media are added via
+            <strong class="text-accent ms-1">Warehouse Inventory</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: MAIN IMAGE ────────────────────────── -->
+    <div class="col-12 col-lg-4">
+      <div class="content-card mb-4">
+        <div class="content-card-header">
+          <i class="bi bi-image text-purple"></i>
+          <h5 class="mb-0">Main Image</h5>
+          <span class="badge bg-secondary ms-auto">1 image</span>
+        </div>
+
+        {% if is_edit and product.main_image %}
+        <div class="mb-3">
+          <div class="small text-muted mb-2">Current image</div>
+          <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+            <img src="{{ product.main_image.url }}" class="w-100"
+                 style="max-height:200px;object-fit:contain;background:var(--surface-2);"
+                 alt="{{ product.product_name }}">
+          </div>
+          <div class="form-text mt-1">Upload a new image to replace it.</div>
+        </div>
+        {% endif %}
+
+        <!--
+          TWO inputs, both named "main_image".
+          Labels directly trigger them — no JS .click() needed.
+          Only the one with a file selected will POST data.
+          Whichever is selected last wins (Django reads the last value).
+        -->
+        <div class="upload-btns">
+          <label for="galleryInput" class="btn-upload">
+            <i class="bi bi-image"></i>
+            <span>From Gallery</span>
+          </label>
+          <label for="cameraInput" class="btn-upload">
+            <i class="bi bi-camera"></i>
+            <span>Take Photo</span>
+          </label>
+        </div>
+
+        <!-- Gallery file input (no capture) -->
+        <input type="file"
+               id="galleryInput"
+               name="main_image"
+               accept="image/jpeg,image/png,image/webp"
+               style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;">
+
+        <!-- Camera file input (capture opens camera directly on mobile) -->
+        <input type="file"
+               id="cameraInput"
+               name="main_image"
+               accept="image/jpeg,image/png,image/webp"
+               capture="environment"
+               style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;">
+
+        <div class="form-text mt-2">JPG, PNG, WEBP — max 10MB.</div>
+        {% if product_form.main_image.errors %}
+        <div class="invalid-feedback d-block mt-1">{{ product_form.main_image.errors.0 }}</div>
+        {% endif %}
+
+        <!-- Preview shown after selection -->
+        <div class="img-preview-box" id="imgPreviewBox">
+          <img id="imgPreview" src="" alt="Preview">
+          <button type="button" class="img-discard" id="discardImgBtn" title="Remove">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+        <i class="bi bi-{% if is_edit %}check-circle{% else %}plus-circle{% endif %}-fill me-2"></i>
+        {% if is_edit %}Update Product{% else %}Save Product{% endif %}
+      </button>
+
+      {% if is_edit %}
+      <a href="{% url 'product_detail' product.pk %}" class="btn btn-outline-secondary w-100 mt-2">
+        <i class="bi bi-arrow-left me-2"></i>Cancel
+      </a>
+      {% endif %}
+    </div>
+
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const AJAX_SUBCATS_URL = "{% url 'ajax_subcategories' %}";
+
+// ── Category → Subcategory AJAX ─────────────────────────
+document.getElementById('id_category').addEventListener('change', function() {
+  const catId = this.value;
+  const sel = document.getElementById('id_subcategory');
+  sel.innerHTML = '<option value="">Loading...</option>';
+  if (!catId) { sel.innerHTML = '<option value="">— Select Subcategory —</option>'; return; }
+  fetch(`${AJAX_SUBCATS_URL}?category_id=${catId}`)
+    .then(r => r.json())
+    .then(data => {
+      sel.innerHTML = '<option value="">— Select Subcategory —</option>';
+      data.subcategories.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.id; o.textContent = s.name;
+        sel.appendChild(o);
+      });
+    })
+    .catch(() => { sel.innerHTML = '<option value="">— Select Subcategory —</option>'; });
+});
+
+// ── Image Preview (works for BOTH gallery & camera inputs) ──
+const imgPreviewBox = document.getElementById('imgPreviewBox');
+const imgPreview    = document.getElementById('imgPreview');
+const discardBtn    = document.getElementById('discardImgBtn');
+
+function showPreview(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imgPreview.src = e.target.result;
+    imgPreviewBox.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('galleryInput').addEventListener('change', function() {
+  if (this.files[0]) {
+    // Clear the other input so only this one submits
+    document.getElementById('cameraInput').value = '';
+    showPreview(this.files[0]);
+  }
+});
+
+document.getElementById('cameraInput').addEventListener('change', function() {
+  if (this.files[0]) {
+    // Clear the other input so only this one submits
+    document.getElementById('galleryInput').value = '';
+    showPreview(this.files[0]);
+  }
+});
+
+discardBtn.addEventListener('click', () => {
+  imgPreview.src = '';
+  imgPreviewBox.style.display = 'none';
+  document.getElementById('galleryInput').value = '';
+  document.getElementById('cameraInput').value = '';
+});
+
+// ── Submit state ─────────────────────────────────────────
+document.getElementById('productForm').addEventListener('submit', () => {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+});
+</script>
+{% endblock %}
