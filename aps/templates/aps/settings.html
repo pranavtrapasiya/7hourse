@@ -1,0 +1,185 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- ── ADD CATEGORY ─────────────────────────────────── -->
+  <div class="col-12 col-lg-6">
+    <div class="content-card">
+      <div class="content-card-header">
+        <i class="bi bi-tag-fill text-amber"></i>
+        <h5 class="mb-0">Add Category</h5>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="category">
+        <div class="mb-3">
+          <label class="form-label fw-500">Category Name <span class="text-danger">*</span></label>
+          {{ cat_form.name }}
+          {% if cat_form.name.errors %}
+          <div class="invalid-feedback d-block">{{ cat_form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+          <i class="bi bi-plus-circle-fill me-2"></i>Add Category
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── ADD SUBCATEGORY ──────────────────────────────── -->
+  <div class="col-12 col-lg-6">
+    <div class="content-card">
+      <div class="content-card-header">
+        <i class="bi bi-tags-fill text-blue"></i>
+        <h5 class="mb-0">Add Subcategory</h5>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="subcategory">
+        <div class="mb-3">
+          <label class="form-label fw-500">Category <span class="text-danger">*</span></label>
+          {{ subcat_form.category }}
+          {% if subcat_form.category.errors %}
+          <div class="invalid-feedback d-block">{{ subcat_form.category.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-500">Subcategory Name <span class="text-danger">*</span></label>
+          {{ subcat_form.name }}
+          {% if subcat_form.name.errors %}
+          <div class="invalid-feedback d-block">{{ subcat_form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+          <i class="bi bi-plus-circle-fill me-2"></i>Add Subcategory
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── PRODUCT CODE SETTINGS ────────────────────── -->
+<div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="content-card">
+      <div class="content-card-header">
+        <i class="bi bi-upc-scan text-green"></i>
+        <h5 class="mb-0">Product Code Settings</h5>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="product_code_settings">
+
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <div class="form-check form-switch">
+              {{ code_form.enabled }}
+              <label class="form-check-label fw-500" for="id_code_enabled">
+                Enable Auto Product Code Generation
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-500">Prefix Format</label>
+            {{ code_form.prefix_format }}
+            <div class="form-text">Placeholders: <code>{YEAR}</code> <code>{MONTH}</code> <code>{SEQ}</code></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label fw-500">Sequence Length</label>
+            {{ code_form.sequence_length }}
+          </div>
+          <div class="col-6 col-md-3 d-flex align-items-end">
+            <div class="form-check form-switch mb-2">
+              {{ code_form.reset_monthly }}
+              <label class="form-check-label fw-500" for="id_reset_monthly">Reset Monthly</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="mb-4 p-3 rounded" style="background:var(--surface-2);border:1px solid var(--border);">
+          <span class="spec-label d-block mb-1">Preview Code</span>
+          <span class="fw-700 fs-5 text-accent" id="livePreview">{{ preview_code }}</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+          <i class="bi bi-check-circle-fill me-2"></i>Save Code Settings
+        </button>
+      </form>
+
+      {% if products_without_code > 0 %}
+      <div class="mt-3 p-3 rounded" style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <i class="bi bi-exclamation-triangle-fill text-amber me-1"></i>
+            <strong>{{ products_without_code }}</strong> product(s) have no product code.
+          </div>
+          <form method="post" action="{% url 'migrate_product_codes' %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Generate codes for {{ products_without_code }} product(s)?')">
+              <i class="bi bi-lightning-fill me-1"></i>Generate Codes for Existing Products
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ── EXISTING CATEGORIES ─────────────────────────── -->
+{% if categories %}
+<div class="mt-4">
+  <h6 class="section-label mb-3">Existing Categories & Subcategories</h6>
+  <div class="row g-3">
+    {% for cat in categories %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="content-card">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="bi bi-tag-fill text-amber"></i>
+          <h6 class="mb-0 fw-600">{{ cat.name }}</h6>
+          <span class="badge bg-secondary ms-auto">{{ cat.subcategories.count }}</span>
+        </div>
+        {% if cat.subcategories.all %}
+        <div class="d-flex flex-wrap gap-1 mt-2">
+          {% for sub in cat.subcategories.all %}
+          <span class="badge-subcat">{{ sub.name }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0 mt-1">No subcategories yet.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live preview update
+const fmtInput = document.getElementById('id_prefix_format');
+const seqInput = document.getElementById('id_seq_length');
+const preview  = document.getElementById('livePreview');
+
+function updatePreview() {
+  if (!fmtInput || !seqInput) return;
+  fetch(`/ajax/preview-code/?format=${encodeURIComponent(fmtInput.value)}&seq_len=${seqInput.value}`)
+    .then(r => r.json())
+    .then(d => { preview.textContent = d.preview; })
+    .catch(() => {});
+}
+
+if (fmtInput) fmtInput.addEventListener('input', updatePreview);
+if (seqInput) seqInput.addEventListener('input', updatePreview);
+</script>
+{% endblock %}
