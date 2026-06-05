@@ -82,3 +82,11 @@ WARNING 2026-06-05 07:53:56,174 log Not Found: /.well-known/appspecific/com.chro
 WARNING 2026-06-05 07:53:56,175 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
 WARNING 2026-06-05 07:55:31,100 log Not Found: /location/
 WARNING 2026-06-05 07:55:31,101 basehttp "GET /location/?product_id=11 HTTP/1.1" 404 4783
+WARNING 2026-06-05 08:38:43,158 log Not Found: /favicon.ico
+WARNING 2026-06-05 08:38:43,159 basehttp "GET /favicon.ico HTTP/1.1" 404 7406
+WARNING 2026-06-05 08:38:49,007 log Forbidden (Origin checking failed - https://executives-tests-depth-assurance.trycloudflare.com does not match any trusted origins.): /login/
+WARNING 2026-06-05 08:38:49,008 basehttp "POST /login/?next=/ HTTP/1.1" 403 2606
+WARNING 2026-06-05 08:41:30,647 log Not Found: /favicon.ico
+WARNING 2026-06-05 08:41:30,650 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-05 08:47:18,950 log Not Found: /favicon.ico
+WARNING 2026-06-05 08:47:18,951 basehttp "GET /favicon.ico HTTP/1.1" 404 7414
