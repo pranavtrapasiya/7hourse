@@ -1,0 +1,84 @@
+WARNING 2026-05-30 03:21:38,928 log Not Found: /favicon.ico
+WARNING 2026-05-30 03:21:38,929 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 03:28:37,666 log Not Found: /favicon.ico
+WARNING 2026-05-30 03:28:37,667 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 03:28:38,626 log Not Found: /favicon.ico
+WARNING 2026-05-30 03:28:38,627 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 12:31:17,292 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:31:17,308 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 12:35:44,122 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:35:44,124 basehttp "GET /favicon.ico HTTP/1.1" 404 6064
+WARNING 2026-05-30 12:35:54,737 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:35:54,767 basehttp "GET /favicon.ico HTTP/1.1" 404 6064
+WARNING 2026-05-30 12:36:00,310 log Forbidden (Origin checking failed - https://tidy-swans-move.loca.lt does not match any trusted origins.): /login/
+WARNING 2026-05-30 12:36:00,311 basehttp "POST /login/?next=/ HTTP/1.1" 403 2579
+WARNING 2026-05-30 12:36:13,688 log Forbidden (Origin checking failed - https://tidy-swans-move.loca.lt does not match any trusted origins.): /login/
+WARNING 2026-05-30 12:36:13,692 basehttp "POST /login/?next=/ HTTP/1.1" 403 2579
+WARNING 2026-05-30 12:38:23,368 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:38:23,371 basehttp "GET /favicon.ico HTTP/1.1" 404 6067
+WARNING 2026-05-30 12:38:32,261 log Forbidden (Origin checking failed - https://pretty-rings-reply.loca.lt does not match any trusted origins.): /login/
+WARNING 2026-05-30 12:38:32,264 basehttp "POST /login/?next=/ HTTP/1.1" 403 2582
+ERROR 2026-05-30 12:47:24,332 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2026-05-30 12:47:24,335 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2026-05-30 12:47:24,348 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2026-05-30 12:47:24,350 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2026-05-30 12:47:26,336 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:47:26,337 basehttp "GET /favicon.ico HTTP/1.1" 404 6059
+ERROR 2026-05-30 12:55:02,696 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2026-05-30 12:55:02,709 basehttp You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2026-05-30 12:55:41,733 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:55:41,735 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 12:55:42,796 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-05-30 12:55:42,800 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 6166
+WARNING 2026-05-30 12:55:59,785 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-05-30 12:55:59,787 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 6166
+WARNING 2026-05-30 12:56:00,563 log Not Found: /favicon.ico
+WARNING 2026-05-30 12:56:00,565 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 12:56:02,342 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-05-30 12:56:02,343 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 6166
+WARNING 2026-05-30 14:12:18,950 log Not Found: /favicon.ico
+WARNING 2026-05-30 14:12:18,952 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-05-30 14:13:39,877 log Not Found: /favicon.ico
+WARNING 2026-05-30 14:13:39,880 basehttp "GET /favicon.ico HTTP/1.1" 404 6059
+WARNING 2026-06-04 09:55:16,050 log Not Found: /favicon.ico
+WARNING 2026-06-04 09:55:16,073 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-06-04 16:49:31,927 log Not Found: /favicon.ico
+WARNING 2026-06-04 16:49:31,929 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-06-04 17:05:22,395 log Not Found: /favicon.ico
+WARNING 2026-06-04 17:05:22,400 basehttp "GET /favicon.ico HTTP/1.1" 404 6055
+WARNING 2026-06-04 20:43:29,489 log Not Found: /favicon.ico
+WARNING 2026-06-04 20:43:29,491 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-04 20:49:51,388 log Not Found: /favicon.ico
+WARNING 2026-06-04 20:49:51,390 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-05 07:10:32,961 log Not Found: /favicon.ico
+WARNING 2026-06-05 07:10:32,962 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-05 07:27:00,761 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:27:00,767 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:27:11,267 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:27:11,278 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:27:12,726 log Not Found: /favicon.ico
+WARNING 2026-06-05 07:27:12,727 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-05 07:35:11,465 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:35:11,466 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:38:34,108 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:38:34,109 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:41:00,439 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:41:00,441 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:41:07,049 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:41:07,050 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:48:44,532 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:48:44,534 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:48:47,089 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:48:47,090 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:48:48,277 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:48:48,281 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:53:48,024 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:53:48,027 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:53:48,730 log Not Found: /favicon.ico
+WARNING 2026-06-05 07:53:48,731 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
+WARNING 2026-06-05 07:53:51,852 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:53:51,853 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:53:56,174 log Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-06-05 07:53:56,175 basehttp "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7481
+WARNING 2026-06-05 07:55:31,100 log Not Found: /location/
+WARNING 2026-06-05 07:55:31,101 basehttp "GET /location/?product_id=11 HTTP/1.1" 404 4783
