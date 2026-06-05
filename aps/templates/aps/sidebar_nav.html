@@ -1,0 +1,59 @@
+{% load aps_tags %}
+<nav class="sidebar-nav">
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a href="{% url 'dashboard' %}" class="nav-link {% active_class request 'dashboard' %}">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'location' %}" class="nav-link {% active_class request 'location' %}">
+        <i class="bi bi-geo-alt-fill"></i>
+        <span>Location</span>
+      </a>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-label">Orders</li>
+    <li class="nav-item">
+      <a href="{% url 'order_create' %}" class="nav-link {% active_class request 'order_create' %}">
+        <i class="bi bi-cart-plus-fill"></i>
+        <span>New Order</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'order_list' %}" class="nav-link {% active_class request 'order_list' %}">
+        <i class="bi bi-receipt"></i>
+        <span>Order List</span>
+      </a>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-label">Products</li>
+    <li class="nav-item">
+      <a href="{% url 'product_add' %}" class="nav-link {% active_class request 'product_add' %}">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Add Product</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'product_list' %}" class="nav-link {% active_class request 'product_list' %}">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+        <span>Product List</span>
+      </a>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-label">System</li>
+    <li class="nav-item">
+      <a href="{% url 'settings' %}" class="nav-link {% active_class request 'settings' %}">
+        <i class="bi bi-sliders2"></i>
+        <span>Settings</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'logout' %}" class="nav-link nav-link-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</nav>
