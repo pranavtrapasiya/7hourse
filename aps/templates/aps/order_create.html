@@ -1,0 +1,461 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+{% load aps_tags %}
+
+{% block extra_css %}
+<style>
+/* ── Search Grid (same as location) ── */
+.search-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:576px){.search-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:992px){.search-grid{grid-template-columns:repeat(4,1fr)}}
+.product-search-card{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1.5px solid var(--border);cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text)}
+.product-search-card:hover,.product-search-card.active-card{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(79,156,249,.15);color:var(--text)}
+.product-search-card-img{aspect-ratio:1;background:var(--surface-3);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.product-search-card-img img{width:100%;height:100%;object-fit:cover}
+.product-search-card-img i{font-size:2rem;color:var(--text-dim)}
+.product-search-card-body{padding:10px 12px}
+.product-search-card-name{font-size:.82rem;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Location Cards ── */
+.loc-cards{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:576px){.loc-cards{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:992px){.loc-cards{grid-template-columns:repeat(3,1fr)}}
+.loc-card{background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s}
+.loc-card:hover{border-color:var(--accent);background:var(--surface-3)}
+.loc-card.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(34,197,94,.2)}
+.loc-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.loc-badge{background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;font-size:.82rem}
+.loc-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.loc-meta-item{font-size:.78rem;color:var(--text-muted)}
+.loc-meta-value{font-weight:600;color:var(--text);font-size:.85rem}
+
+/* ── Order Modal ── */
+.order-modal .modal-dialog{max-width:860px}
+@media(max-width:767px){.order-modal .modal-dialog{margin:8px;max-width:100%}}
+.order-form-grid{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:768px){.order-form-grid{grid-template-columns:1fr 280px}}
+.order-form-left{padding:16px}
+.order-form-right{padding:16px;background:var(--surface-2);border-top:1px solid var(--border)}
+@media(min-width:768px){.order-form-right{border-top:none;border-left:1px solid var(--border)}}
+
+/* ── Summary Panel ── */
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+.summary-row:last-child{border-bottom:none}
+.summary-label{color:var(--text-muted);font-weight:500}
+.summary-value{font-weight:700;font-family:var(--font-mono);font-size:.92rem}
+.summary-total{font-size:1.15rem;color:var(--green)}
+.summary-remaining{color:var(--amber)}
+
+/* ── Step Indicator ── */
+.step-indicator{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.step-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)}
+.step-badge.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-badge.done{background:rgba(34,197,94,.15);border-color:var(--green);color:var(--green)}
+
+/* ── Selected Product Bar ── */
+.selected-bar{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap}
+.selected-bar-thumb{width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--surface-3);flex-shrink:0}
+.selected-bar-thumb img{width:100%;height:100%;object-fit:cover}
+.selected-bar-info{flex:1;min-width:0}
+.selected-bar-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selected-bar-code{font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono)}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Step Indicators -->
+<div class="step-indicator">
+  <span class="step-badge active" id="step1Badge"><i class="bi bi-1-circle-fill"></i> Search Product</span>
+  <span class="step-badge" id="step2Badge"><i class="bi bi-2-circle-fill"></i> Select Location</span>
+  <span class="step-badge" id="step3Badge"><i class="bi bi-3-circle-fill"></i> Create Order</span>
+</div>
+
+<!-- STEP 1: Search Product -->
+<div class="content-card mb-4" id="step1">
+  <div class="content-card-header">
+    <i class="bi bi-search text-blue"></i>
+    <h5 class="mb-0">Search Product</h5>
+  </div>
+  <div class="input-group">
+    <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+    <input type="text" id="productSearchInput" class="form-control form-control-lg"
+           placeholder="Type product name to search..." autocomplete="off">
+    <button class="btn btn-primary" id="searchBtn" type="button">
+      <i class="bi bi-search"></i>
+    </button>
+  </div>
+  <div id="searchResults" class="mt-3"></div>
+</div>
+
+<!-- STEP 2: Selected Product + Locations -->
+<div id="step2" style="display:none;">
+  <div class="content-card mb-4">
+    <div class="selected-bar" id="selectedProductBar"></div>
+    <div class="d-flex gap-2 mt-3 flex-wrap">
+      <button class="btn btn-outline-secondary btn-sm" id="changeProductBtn">
+        <i class="bi bi-arrow-left me-1"></i>Change Product
+      </button>
+      <button class="btn btn-primary btn-sm" id="manualOrderBtn">
+        <i class="bi bi-pencil-square me-1"></i>Manual Order (No Location)
+      </button>
+    </div>
+  </div>
+
+  <div class="content-card mb-4">
+    <div class="content-card-header">
+      <i class="bi bi-geo-alt-fill text-amber"></i>
+      <h5 class="mb-0">Select Location</h5>
+      <span class="badge bg-secondary ms-auto" id="locCount">0</span>
+    </div>
+    <div id="locationsContainer">
+      <div class="text-center text-muted py-3">
+        <div class="spinner-border spinner-border-sm me-2"></div>Loading locations...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER ENTRY MODAL -->
+<div class="modal fade order-modal" id="orderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="background:var(--surface);border:1px solid var(--border);">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-cart-plus-fill text-green"></i>
+          <h5 class="modal-title mb-0">Order Entry</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="order-form-grid">
+          <!-- LEFT: Form Fields -->
+          <div class="order-form-left">
+            <div class="selected-bar mb-3" id="modalProductBar"></div>
+            <input type="hidden" id="orderProductId">
+            <input type="hidden" id="orderLocationId">
+            <input type="hidden" id="orderLocNum">
+            <input type="hidden" id="orderDate">
+
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label fw-500">Price (₹)</label>
+                <input type="number" id="orderPrice" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-500">Pcs in One Carton</label>
+                <input type="number" id="orderCarton" class="form-control form-control-lg" min="0" placeholder="0">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-500">CBM</label>
+                <input type="number" id="orderCbm" class="form-control form-control-lg" step="0.0001" min="0" placeholder="0.0000">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-500">Carton Quantity</label>
+                <input type="number" id="orderQty" class="form-control form-control-lg" min="1" value="1" placeholder="1">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-500">Deposit (₹)</label>
+                <input type="number" id="orderDeposit" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="clearAutoBtn">
+                <i class="bi bi-eraser me-1"></i>Clear Auto-Filled
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT: Live Calculations -->
+          <div class="order-form-right">
+            <h6 class="fw-600 mb-3"><i class="bi bi-calculator me-2 text-accent"></i>Calculations</h6>
+            <div class="summary-row">
+              <span class="summary-label">Total CBM</span>
+              <span class="summary-value" id="sumTotalCbm">0.0000</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Total Pieces</span>
+              <span class="summary-value" id="sumTotalPcs">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Payment</span>
+              <span class="summary-value summary-total" id="sumPayment">₹0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Remaining Payment</span>
+              <span class="summary-value summary-remaining" id="sumRemaining">₹0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--border);">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="saveOrderBtn">
+          <i class="bi bi-check-circle-fill me-1"></i>Save Order
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SEARCH_URL = "{% url 'ajax_product_search' %}";
+const LOCATIONS_URL = "{% url 'ajax_order_locations' %}";
+const SAVE_URL = "{% url 'order_save_api' %}";
+const ORDER_LIST_URL = "{% url 'order_list' %}";
+const CSRF = "{{ csrf_token }}";
+
+let selectedProduct = null;
+let selectedLocation = null;
+let searchTimer = null;
+let abortCtrl = null;
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function fmt(n){ return parseFloat(n||0).toFixed(2); }
+function highlight(text,q){
+  if(!q) return esc(text);
+  const e=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return esc(text).replace(new RegExp(`(${e})`,'gi'),'<mark style="background:var(--accent);color:#fff;padding:0 2px;border-radius:3px;">$1</mark>');
+}
+
+// ── STEP 1: Product Search ──
+const searchInput = document.getElementById('productSearchInput');
+const searchResults = document.getElementById('searchResults');
+
+searchInput.addEventListener('input', function(){
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  if(q.length < 1){ searchResults.innerHTML=''; return; }
+  searchTimer = setTimeout(()=>{
+    if(abortCtrl) abortCtrl.abort();
+    abortCtrl = new AbortController();
+    fetch(`${SEARCH_URL}?q=${encodeURIComponent(q)}`,{signal:abortCtrl.signal})
+      .then(r=>r.json())
+      .then(data=>renderSearch(data,q))
+      .catch(e=>{ if(e.name!=='AbortError') console.error(e); });
+  }, 200);
+});
+
+searchInput.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const q=this.value.trim();
+    if(q) document.querySelector('#searchResults .product-search-card')?.click();
+  }
+});
+
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  searchInput.dispatchEvent(new Event('input'));
+});
+
+function renderSearch(data, q){
+  if(!data.results.length){
+    searchResults.innerHTML=`<div class="text-center text-muted py-3"><i class="bi bi-search d-block fs-2 mb-2"></i>No products found for "<strong>${esc(q)}</strong>"</div>`;
+    return;
+  }
+  const cards=data.results.map(p=>`
+    <div class="product-search-card" data-id="${p.id}" data-name="${esc(p.product_name)}" data-code="${esc(p.asin_code)}" data-img="${p.image_url||''}">
+      <div class="product-search-card-img">
+        ${p.has_image?`<img src="${p.image_url}" alt="">`:'<i class="bi bi-image"></i>'}
+      </div>
+      <div class="product-search-card-body">
+        <div class="product-search-card-name">${highlight(p.product_name,q)}</div>
+      </div>
+    </div>`).join('');
+  searchResults.innerHTML=`<div class="d-flex align-items-center gap-2 mb-2"><span class="small text-muted"><strong>${data.results.length}</strong> result${data.results.length>1?'s':''}</span></div><div class="search-grid">${cards}</div>`;
+  searchResults.querySelectorAll('.product-search-card').forEach(c=>{
+    c.addEventListener('click',()=>selectProduct(c.dataset));
+  });
+}
+
+function selectProduct(d){
+  selectedProduct={id:d.id, name:d.name, code:d.code, img:d.img};
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  document.getElementById('step1Badge').className='step-badge done';
+  document.getElementById('step2Badge').className='step-badge active';
+  const bar=`
+    <div class="selected-bar-thumb">${d.img?`<img src="${d.img}" alt="">`:'<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image text-muted"></i></div>'}</div>
+    <div class="selected-bar-info">
+      <div class="selected-bar-name">${esc(d.name)}</div>
+      <div class="selected-bar-code">${esc(d.code)}</div>
+    </div>`;
+  document.getElementById('selectedProductBar').innerHTML=bar;
+  loadLocations(d.id);
+}
+
+document.getElementById('changeProductBtn').addEventListener('click',()=>{
+  document.getElementById('step1').style.display='block';
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step1Badge').className='step-badge active';
+  document.getElementById('step2Badge').className='step-badge';
+  document.getElementById('step3Badge').className='step-badge';
+  selectedProduct=null; selectedLocation=null;
+  searchInput.focus();
+});
+
+function loadLocations(productId){
+  const container=document.getElementById('locationsContainer');
+  container.innerHTML='<div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</div>';
+  fetch(`${LOCATIONS_URL}?product_id=${productId}`)
+    .then(r=>r.json())
+    .then(data=>{
+      document.getElementById('locCount').textContent=data.locations.length;
+      if(!data.locations.length){
+        container.innerHTML='<div class="text-center text-muted py-4"><i class="bi bi-inbox d-block fs-2 mb-2"></i>No locations found.<br><small>Use "Manual Order" to create an order without a location.</small></div>';
+        return;
+      }
+      const cards=data.locations.map(l=>`
+        <div class="loc-card" data-loc='${JSON.stringify(l)}'>
+          <div class="loc-card-header">
+            <span class="loc-badge">${esc(l.location_number)}</span>
+            <span class="text-muted small">${l.created_at}</span>
+          </div>
+          <div class="loc-meta">
+            <div><div class="loc-meta-item">Price</div><div class="loc-meta-value">₹${fmt(l.price)}</div></div>
+            <div><div class="loc-meta-item">CBM</div><div class="loc-meta-value">${l.cbm}</div></div>
+            <div><div class="loc-meta-item">Pcs/Carton</div><div class="loc-meta-value">${l.carton_piece}</div></div>
+            <div><div class="loc-meta-item">Remark</div><div class="loc-meta-value text-truncate" style="max-width:120px">${esc(l.remark||'—')}</div></div>
+          </div>
+        </div>`).join('');
+      container.innerHTML=`<div class="loc-cards">${cards}</div>`;
+      container.querySelectorAll('.loc-card').forEach(c=>{
+        c.addEventListener('click',()=>{
+          container.querySelectorAll('.loc-card').forEach(x=>x.classList.remove('selected'));
+          c.classList.add('selected');
+          openOrderModal(JSON.parse(c.dataset.loc));
+        });
+      });
+    });
+}
+
+document.getElementById('manualOrderBtn').addEventListener('click',()=>{
+  openOrderModal(null);
+});
+
+// ── Open Order Modal ──
+function openOrderModal(loc){
+  selectedLocation=loc;
+  document.getElementById('step2Badge').className='step-badge done';
+  document.getElementById('step3Badge').className='step-badge active';
+
+  const p=selectedProduct;
+  document.getElementById('orderProductId').value=p.id;
+  document.getElementById('modalProductBar').innerHTML=`
+    <div class="selected-bar-thumb">${p.img?`<img src="${p.img}" alt="">`:'<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image text-muted"></i></div>'}</div>
+    <div class="selected-bar-info">
+      <div class="selected-bar-name">${esc(p.name)}</div>
+      <div class="selected-bar-code">${esc(p.code)}</div>
+    </div>`;
+
+  // Auto-set today's date
+  document.getElementById('orderDate').value=new Date().toISOString().split('T')[0];
+
+  if(loc){
+    document.getElementById('orderLocationId').value=loc.id;
+    document.getElementById('orderLocNum').value=loc.location_number||'';
+    document.getElementById('orderPrice').value=loc.price||'';
+    document.getElementById('orderCbm').value=loc.cbm||'';
+    document.getElementById('orderCarton').value=loc.carton_piece||'';
+    document.getElementById('orderDeposit').value='';
+    document.getElementById('orderQty').value='1';
+  } else {
+    document.getElementById('orderLocationId').value='';
+    document.getElementById('orderLocNum').value='';
+    clearForm();
+  }
+  updateSummary();
+  new bootstrap.Modal(document.getElementById('orderModal')).show();
+}
+
+// ── Clear Auto-Filled ──
+document.getElementById('clearAutoBtn').addEventListener('click',()=>{
+  clearForm();
+  updateSummary();
+});
+
+function clearForm(){
+  document.getElementById('orderPrice').value='';
+  document.getElementById('orderDeposit').value='';
+  document.getElementById('orderQty').value='1';
+  document.getElementById('orderCbm').value='';
+  document.getElementById('orderCarton').value='';
+  document.getElementById('orderLocationId').value='';
+}
+
+// ── Live Calculations ──
+['orderPrice','orderDeposit','orderQty','orderCbm','orderCarton'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateSummary);
+});
+
+function updateSummary(){
+  const price    = parseFloat(document.getElementById('orderPrice').value)   || 0;
+  const deposit  = parseFloat(document.getElementById('orderDeposit').value) || 0;
+  const qty      = parseInt(document.getElementById('orderQty').value)       || 1;
+  const cbm      = parseFloat(document.getElementById('orderCbm').value)     || 0;
+  const pcsPerCarton = parseInt(document.getElementById('orderCarton').value) || 0;
+
+  const totalCbm    = qty * cbm;                   // Carton Quantity × CBM
+  const totalPieces = price * pcsPerCarton;          // Price × Pcs in One Carton (one carton price)
+  const payment     = qty * totalPieces;             // Carton Quantity × Total Pieces
+  const remaining   = payment - deposit;             // Payment − Deposit
+
+  document.getElementById('sumTotalCbm').textContent  = totalCbm.toFixed(4);
+  document.getElementById('sumTotalPcs').textContent   = totalPieces;
+  document.getElementById('sumPayment').textContent    = `₹${fmt(payment)}`;
+  document.getElementById('sumRemaining').textContent  = `₹${fmt(remaining)}`;
+}
+
+// ── Save Order ──
+document.getElementById('saveOrderBtn').addEventListener('click',()=>{
+  const btn   = document.getElementById('saveOrderBtn');
+  const price = document.getElementById('orderPrice').value;
+  const qty   = document.getElementById('orderQty').value;
+
+  if(!price || parseFloat(price)<=0){ alert('Please enter a valid price.'); return; }
+  if(!qty || parseInt(qty)<1){ alert('Please enter a valid carton quantity.'); return; }
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+
+  const fd=new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('product_id',      document.getElementById('orderProductId').value);
+  fd.append('location_id',     document.getElementById('orderLocationId').value);
+  fd.append('quantity',         qty);
+  fd.append('price',            price);
+  fd.append('deposit',          document.getElementById('orderDeposit').value || '0');
+  fd.append('cbm',              document.getElementById('orderCbm').value    || '0');
+  fd.append('carton_piece',     document.getElementById('orderCarton').value  || '0');
+  fd.append('location_number',  document.getElementById('orderLocNum').value);
+  fd.append('remark',           '');
+  fd.append('order_date',       document.getElementById('orderDate').value);
+
+  fetch(SAVE_URL,{method:'POST',body:fd})
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.success){
+        bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
+        window.location.href=ORDER_LIST_URL;
+      } else {
+        let msg='Please fix errors:\n';
+        if(data.errors) Object.entries(data.errors).forEach(([k,v])=>msg+=`• ${k}: ${v}\n`);
+        alert(msg);
+      }
+    })
+    .catch(e=>{alert('Network error. Please try again.');console.error(e);})
+    .finally(()=>{
+      btn.disabled=false;
+      btn.innerHTML='<i class="bi bi-check-circle-fill me-1"></i>Save Order';
+    });
+});
+
+// Reset modal state on close
+document.getElementById('orderModal').addEventListener('hidden.bs.modal',()=>{
+  document.getElementById('step3Badge').className='step-badge';
+  document.getElementById('step2Badge').className='step-badge active';
+});
+</script>
+{% endblock %}
