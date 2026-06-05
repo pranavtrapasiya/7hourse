@@ -1,0 +1,108 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+{% load aps_tags %}
+
+{% block content %}
+<!-- ── STAT CARDS ─────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-blue">
+      <div class="stat-icon"><i class="bi bi-boxes"></i></div>
+      <div class="stat-value">{{ total_products }}</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-amber">
+      <div class="stat-icon"><i class="bi bi-tag-fill"></i></div>
+      <div class="stat-value">{{ total_categories }}</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-green">
+      <div class="stat-icon"><i class="bi bi-tags-fill"></i></div>
+      <div class="stat-value">{{ total_subcategories }}</div>
+      <div class="stat-label">Subcategories</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card stat-purple">
+      <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
+      <div class="stat-value">{{ total_inventory }}</div>
+      <div class="stat-label">Inventory Entries</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUICK ACTIONS ──────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <h6 class="section-label">Quick Actions</h6>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'product_add' %}" class="quick-action-card">
+      <i class="bi bi-plus-circle-fill"></i>
+      <span>Add Product</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'product_list' %}" class="quick-action-card">
+      <i class="bi bi-grid-3x3-gap-fill"></i>
+      <span>View Products</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'location' %}" class="quick-action-card">
+      <i class="bi bi-geo-alt-fill"></i>
+      <span>Set Location</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'settings' %}" class="quick-action-card">
+      <i class="bi bi-sliders2"></i>
+      <span>Settings</span>
+    </a>
+  </div>
+</div>
+
+<!-- ── RECENT PRODUCTS ────────────────────────────────── -->
+<div class="mb-2 d-flex align-items-center justify-content-between">
+  <h6 class="section-label mb-0">Recent Products</h6>
+  <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+</div>
+
+{% if recent_products %}
+<div class="row g-3">
+  {% for product in recent_products %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'product_detail' product.pk %}" class="product-card-link">
+      <div class="product-card">
+        <div class="product-card-img">
+          {% if product.primary_image %}
+          <img src="{{ product.primary_image.url }}" alt="{{ product.product_name }}" loading="lazy">
+          {% else %}
+          <div class="no-image"><i class="bi bi-image"></i></div>
+          {% endif %}
+        </div>
+        <div class="product-card-body">
+          <div class="product-card-name">{{ product.product_name }}</div>
+          <div class="product-card-price">{{ product.product_price|currency }}</div>
+          {% if product.category %}
+          <div class="product-card-cat">{{ product.category.name }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-box-seam"></i>
+  <h5>No products yet</h5>
+  <p>Start by adding your first product.</p>
+  <a href="{% url 'product_add' %}" class="btn btn-primary">Add Product</a>
+</div>
+{% endif %}
+{% endblock %}
