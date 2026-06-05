@@ -1,0 +1,224 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+{% load aps_tags %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-700 mb-1">Product Details</h4>
+    <p class="text-muted small mb-0">Manage catalog information and view inventory locations.</p>
+  </div>
+  <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back to List
+  </a>
+</div>
+
+{% if product.is_deleted %}
+<div class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-4" role="alert">
+  <div class="d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0"></i>
+    <div>
+      <h6 class="alert-heading fw-600 mb-0">This product is in Trash (Soft-Deleted)</h6>
+      <span class="small text-muted">It was deleted on {{ product.deleted_at|date:"d M Y, h:i A" }}. Standard users cannot see it.</span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="post" action="{% url 'product_restore' product.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success btn-sm">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
+      </button>
+    </form>
+    <button type="button" class="btn btn-danger btn-sm" onclick="triggerPermDelete()">
+      <i class="bi bi-trash3-fill me-1"></i>Erase Forever
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+  <!-- ── LEFT: IMAGE & ACTIONS ────────────────────── -->
+  <div class="col-12 col-lg-5">
+    <div class="content-card mb-3 text-center">
+      {% if product.main_image %}
+      <img src="{{ product.main_image.url }}"
+           class="w-100 rounded img-fluid"
+           alt="{{ product.product_name }}"
+           style="max-height:360px; object-fit:contain; background:var(--surface-2); padding:10px;">
+      {% else %}
+      <div class="d-flex align-items-center justify-content-center"
+           style="min-height:240px; background:var(--surface-2); border-radius:10px;">
+        <div class="text-center text-muted">
+          <i class="bi bi-image fs-1 d-block mb-2 text-dim"></i>No image uploaded
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if not product.is_deleted %}
+    <div class="d-grid gap-2">
+      <a href="{% url 'product_edit' product.pk %}" class="btn btn-primary">
+        <i class="bi bi-pencil-fill me-2"></i>Edit Catalog Entry
+      </a>
+      <button type="button" class="btn btn-outline-danger" onclick="triggerSoftDelete()">
+        <i class="bi bi-trash3-fill me-2"></i>Move to Trash (Delete)
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── RIGHT: DETAILS ──────────────────────────── -->
+  <div class="col-12 col-lg-7">
+    <div class="content-card mb-3">
+      <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+        <div>
+          <h4 class="fw-700 mb-1">{{ product.product_name }}</h4>
+          <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+            <span class="small text-muted fw-500">ASIN Code:</span>
+            <code class="asin-mono" style="color:var(--green); border-color:rgba(34,197,94,0.3); background:rgba(34,197,94,0.05);">{{ product.asin_code }}</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if product.category %}
+        <span class="badge-cat"><i class="bi bi-tag-fill me-1"></i>{{ product.category.name }}</span>
+        {% endif %}
+        {% if product.subcategory %}
+        <span class="badge-subcat"><i class="bi bi-folder-fill me-1"></i>{{ product.subcategory.name }}</span>
+        {% endif %}
+        {% if product.sh_code %}
+        <span class="badge bg-secondary"><i class="bi bi-box-fill me-1"></i>SH: {{ product.sh_code }}</span>
+        {% endif %}
+      </div>
+
+      <div class="specs-grid mb-4">
+        <div class="spec-item">
+          <span class="spec-label">Added On</span>
+          <span class="spec-value">{{ product.created_at|date:"d M Y" }}</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Locations Found</span>
+          <span class="spec-value">{{ inventory_entries.count }} entry/entries</span>
+        </div>
+      </div>
+
+      {% if product.description %}
+      <div class="pt-3 border-top border-secondary-subtle">
+        <h6 class="fw-600 mb-2">Description / Notes</h6>
+        <p class="text-muted small mb-0" style="white-space: pre-wrap;">{{ product.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if product.tags %}
+      <div class="pt-3 mt-3 border-top border-secondary-subtle">
+        <h6 class="fw-600 mb-2">Tags</h6>
+        <div class="d-flex flex-wrap gap-1">
+          {% for tag in product.tags.split %}
+          <span class="badge bg-secondary small">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Inventory Locations Details -->
+    {% if inventory_entries %}
+    <div class="content-card">
+      <h6 class="fw-700 mb-3"><i class="bi bi-geo-alt-fill text-amber me-1"></i>Inventory & Storage Log</h6>
+      <div class="table-responsive" style="border-radius:10px; border:1px solid var(--border); overflow:hidden;">
+        <table class="table table-hover align-middle mb-0" style="color:var(--text); --bs-table-bg:transparent; --bs-table-border-color:var(--border);">
+          <thead>
+            <tr style="background:var(--surface-3);">
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Location</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Price</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Carton (Qty)</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">CBM</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Recorded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in inventory_entries %}
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:12px 14px;">
+                <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-family:var(--font-mono); letter-spacing:1px;">{{ entry.location_number|default:"—" }}</span>
+              </td>
+              <td style="padding:12px 14px;" class="text-green fw-600">
+                {{ entry.price|currency }}
+              </td>
+              <td style="padding:12px 14px;">
+                {{ entry.carton_piece }} pcs
+              </td>
+              <td style="padding:12px 14px;">
+                {{ entry.cbm|default:"—" }}
+              </td>
+              <td style="padding:12px 14px;" class="text-muted small">
+                {{ entry.created_at|date:"d M Y" }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Soft Delete Confirmation Modal -->
+<div class="modal fade" id="softDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="background:var(--surface); border:1px solid var(--border);">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-trash-fill text-warning d-block fs-1 mb-3"></i>
+        <h6 class="fw-700 mb-1 text-amber">Move to Trash?</h6>
+        <p class="text-muted small mb-3">
+          Are you sure you want to move <strong>{{ product.product_name }}</strong> to the trash? It can be restored later.
+        </p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
+          <form method="post" action="{% url 'product_delete' product.pk %}" style="flex:1;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Move to Trash</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Permanent Delete Confirmation Modal -->
+<div class="modal fade" id="permDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="background:var(--surface); border:1px solid var(--border);">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-exclamation-triangle-fill text-danger d-block fs-1 mb-3"></i>
+        <h6 class="fw-700 mb-1 text-red">Erase Catalog Product?</h6>
+        <p class="text-muted small mb-3">
+          This will permanently delete <strong>{{ product.product_name }}</strong> along with all of its warehouse logs and media files! This is irreversible.
+        </p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
+          <form method="post" action="{% url 'product_permanent_delete' product.pk %}" style="flex:1;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Delete Forever</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function triggerSoftDelete() {
+  const modal = new bootstrap.Modal(document.getElementById('softDeleteModal'));
+  modal.show();
+}
+function triggerPermDelete() {
+  const modal = new bootstrap.Modal(document.getElementById('permDeleteModal'));
+  modal.show();
+}
+</script>
+{% endblock %}
