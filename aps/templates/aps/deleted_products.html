@@ -1,0 +1,138 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-700 mb-1">Trash / Soft-Deleted Products</h4>
+    <p class="text-muted small mb-0">Recover deleted products or permanently erase them from the database.</p>
+  </div>
+  <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back to Products
+  </a>
+</div>
+
+{% if page_obj %}
+<div class="content-card">
+  <div class="table-responsive" style="border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+    <table class="table table-hover align-middle mb-0" style="color:var(--text); --bs-table-bg:transparent; --bs-table-border-color:var(--border);">
+      <thead>
+        <tr style="background:var(--surface-3);">
+          <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:12px 16px;">Product</th>
+          <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:12px 16px;">ASIN / Code</th>
+          <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:12px 16px;">Deleted On</th>
+          <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:12px 16px; text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in page_obj %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:14px 16px;">
+            <div class="d-flex align-items-center gap-3">
+              <div style="width:40px; height:40px; border-radius:6px; overflow:hidden; background:var(--surface-2); flex-shrink:0;">
+                {% if p.main_image %}
+                <img src="{{ p.main_image.url }}" alt="" style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image text-muted"></i></div>
+                {% endif %}
+              </div>
+              <div>
+                <div class="fw-600 fs-6">{{ p.product_name }}</div>
+                <div class="text-muted small">{% if p.category %}{{ p.category.name }}{% else %}No category{% endif %}</div>
+              </div>
+            </div>
+          </td>
+          <td style="padding:14px 16px;">
+            <code style="font-family:var(--font-mono); color:var(--green); font-size:0.82rem; background:var(--surface-2); padding:2px 6px; border-radius:4px; border:1px solid var(--border);">{{ p.asin_code }}</code>
+          </td>
+          <td style="padding:14px 16px;" class="text-muted small">
+            {{ p.deleted_at|date:"d M Y, h:i A"|default:"—" }}
+          </td>
+          <td style="padding:14px 16px; text-align:right;">
+            <div class="d-inline-flex gap-2">
+              <form method="post" action="{% url 'product_restore' p.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
+                  <i class="bi bi-arrow-counterclockwise"></i>Restore
+                </button>
+              </form>
+              <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                      onclick="triggerPermanentDelete('{{ p.pk }}', '{{ p.product_name|escapejs }}')">
+                <i class="bi bi-trash-fill"></i>Erase
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="mt-4">
+    <nav aria-label="Deleted products pagination">
+      <ul class="pagination pagination-sm justify-content-center gap-1">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty-state py-5">
+  <i class="bi bi-trash3 fs-1 text-dim d-block mb-3"></i>
+  <h5>Trash is Empty</h5>
+  <p>No products are currently deleted or in trash.</p>
+  <a href="{% url 'product_list' %}" class="btn btn-primary">View Products</a>
+</div>
+{% endif %}
+
+<!-- Permanent Delete Confirmation Modal -->
+<div class="modal fade" id="permDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="background:var(--surface); border:1px solid var(--border);">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-exclamation-triangle-fill text-danger d-block fs-1 mb-3"></i>
+        <h6 class="fw-700 mb-1 text-red">Permanently Erase Product?</h6>
+        <p class="text-muted small mb-3">
+          Product: <strong id="permDeleteProdName"></strong><br>
+          <span class="text-danger">Warning: This cannot be undone and will permanently remove the catalogue entry and all its files from storage!</span>
+        </p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
+          <form method="post" id="permDeleteForm" style="flex:1;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">
+              <i class="bi bi-trash3-fill me-1"></i>Erase Forever
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function triggerPermanentDelete(id, name) {
+  document.getElementById('permDeleteProdName').textContent = name;
+  document.getElementById('permDeleteForm').action = `/products/${id}/permanent-delete/`;
+  const modal = new bootstrap.Modal(document.getElementById('permDeleteModal'));
+  modal.show();
+}
+</script>
+{% endblock %}
