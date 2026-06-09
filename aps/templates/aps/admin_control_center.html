@@ -1,0 +1,129 @@
+{% extends 'aps/base.html' %}
+{% load aps_tags %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-700 mb-1">Admin Control Center</h4>
+    <p class="text-muted small mb-0">Company-wide metrics, user performance, and audit activity.</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-people me-1"></i>Users</a>
+    <a href="{% url 'admin_audit_logs' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-journal-text me-1"></i>Audit Logs</a>
+    <a href="{% url 'approval_requests' %}" class="btn btn-primary btn-sm"><i class="bi bi-person-check me-1"></i>Approvals{% if pending_users %} ({{ pending_users }}){% endif %}</a>
+  </div>
+</div>
+
+<!-- Company Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-blue"><div class="stat-value">{{ total_products }}</div><div class="stat-label">Products</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-amber"><div class="stat-value">{{ total_orders }}</div><div class="stat-label">Orders</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-green"><div class="stat-value">{{ active_users }}</div><div class="stat-label">Active Users</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-purple"><div class="stat-value">{{ total_inventory }}</div><div class="stat-label">Inventory</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-blue"><div class="stat-value">{{ orders_this_week }}</div><div class="stat-label">Orders/Week</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card stat-amber"><div class="stat-value">{{ total_order_value|currency }}</div><div class="stat-label">Total Value</div></div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- User Performance -->
+  <div class="col-12 col-xl-6">
+    <h6 class="section-label">User Performance</h6>
+    <div class="data-table-wrap">
+      <table class="table table-dark table-hover table-sm mb-0">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Orders</th>
+            <th>Value</th>
+            <th>Products</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for perf in user_performance %}
+          <tr>
+            <td>{{ perf.user.username }}</td>
+            <td>{{ perf.order_count }}</td>
+            <td>{{ perf.total_value|currency }}</td>
+            <td>{{ perf.product_count }}</td>
+            <td><a href="{% url 'admin_user_detail' perf.user.pk %}" class="btn btn-xs btn-outline-secondary btn-sm">View</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-muted">No user activity yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Inventory Analytics -->
+  <div class="col-12 col-xl-6">
+    <h6 class="section-label">Inventory Analytics</h6>
+    <div class="content-card p-3">
+      <div class="row g-3 mb-3">
+        <div class="col-6"><span class="text-muted text-sm">Total Entries</span><div class="fw-600">{{ inventory_analytics.total_entries }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Unique Locations</span><div class="fw-600">{{ inventory_analytics.unique_locations }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">This Week</span><div class="fw-600">{{ inventory_analytics.entries_this_week }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Products w/ Stock</span><div class="fw-600">{{ inventory_analytics.products_with_inventory }}</div></div>
+      </div>
+      {% if inventory_analytics.by_location %}
+      <h6 class="text-sm text-muted mb-2">Top Locations</h6>
+      <ul class="list-unstyled mb-0">
+        {% for loc in inventory_analytics.by_location|slice:":8" %}
+        <li class="d-flex justify-content-between py-1 border-bottom border-secondary">
+          <span>{{ loc.location_number|default:"—" }}</span>
+          <span class="text-muted">{{ loc.count }} entries</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Activity Feed -->
+  <div class="col-12">
+    <h6 class="section-label">Recent Activity Feed</h6>
+    <div class="data-table-wrap">
+      <table class="table table-dark table-hover table-sm mb-0">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Object</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in activity_feed %}
+          <tr>
+            <td class="text-nowrap text-sm">{{ log.created_at|date:"d M Y, H:i" }}</td>
+            <td>{{ log.user.username|default:"—" }}</td>
+            <td><span class="badge bg-secondary">{{ log.get_action_display }}</span></td>
+            <td class="text-sm">{{ log.object_repr|truncatechars:40 }}</td>
+            <td class="text-muted text-sm">{{ log.ip_address|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-muted">No activity recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-2 text-end">
+      <a href="{% url 'admin_audit_logs' %}" class="btn btn-sm btn-outline-secondary">View All Audit Logs</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

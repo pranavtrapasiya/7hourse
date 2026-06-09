@@ -441,12 +441,14 @@
           </td>
           <td class="text-muted small text-nowrap">{{ entry.created_at|date:"d M Y" }}</td>
           <td>
+            {% if can_delete_inventory %}
             <button type="button" class="btn btn-sm btn-outline-danger delete-entry-btn"
                     data-entry-id="{{ entry.pk }}"
                     data-entry-loc="{{ entry.location_number|default:'—' }}"
                     title="Delete entry">
               <i class="bi bi-trash3"></i>
             </button>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

@@ -1,0 +1,347 @@
+{% extends "aps/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+/* ── Approval Page Styles ─────────────────────────── */
+.approval-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.approval-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
+.approval-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
+.approval-stat.active-filter { border-color: var(--accent); background: var(--accent-glow); }
+.approval-stat .stat-num { font-size: 2rem; font-weight: 700; line-height: 1; }
+.approval-stat .stat-lbl { font-size: .75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+.stat-pending .stat-num { color: var(--amber); }
+.stat-approved .stat-num { color: var(--green); }
+.stat-rejected .stat-num { color: var(--red); }
+
+.approval-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
+.approval-toolbar .search-box { flex: 1; min-width: 200px; }
+.approval-toolbar .sort-box { width: 180px; }
+.bulk-bar { display: none; background: var(--surface-2); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 16px; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bulk-bar.visible { display: flex; }
+.bulk-bar .bulk-count { font-weight: 600; color: var(--accent); font-size: .9rem; }
+
+.user-cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media(min-width:640px){ .user-cards { grid-template-columns: repeat(2,1fr); } }
+@media(min-width:1100px){ .user-cards { grid-template-columns: repeat(3,1fr); } }
+
+.user-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: border-color .15s, transform .15s; position: relative; }
+.user-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.user-card .card-check { position: absolute; top: 14px; right: 14px; }
+.user-card .card-check input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.user-card-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: var(--accent); flex-shrink: 0; }
+.user-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.user-card-name { font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.2; }
+.user-card-email { font-size: .8rem; color: var(--text-muted); word-break: break-all; }
+.user-card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.meta-item { background: var(--surface-2); border-radius: var(--radius-sm); padding: 8px 10px; }
+.meta-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-dim); font-weight: 600; }
+.meta-value { font-size: .85rem; font-weight: 500; color: var(--text); }
+.user-card-actions { display: flex; gap: 8px; }
+.user-card-actions .btn { flex: 1; font-size: .85rem; padding: 8px 12px; }
+
+.status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+.status-pending { background: rgba(245,166,35,.15); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+.status-approved { background: rgba(34,197,94,.12); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.status-rejected { background: rgba(239,68,68,.12); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+
+/* History panel */
+.history-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 32px; }
+.history-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.history-header h6 { margin: 0; font-weight: 600; }
+.history-list { max-height: 400px; overflow-y: auto; }
+.history-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.history-item:last-child { border-bottom: none; }
+.history-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .85rem; }
+.history-icon.approved { background: rgba(34,197,94,.15); color: var(--green); }
+.history-icon.rejected { background: rgba(239,68,68,.15); color: var(--red); }
+.history-text { flex: 1; min-width: 0; }
+.history-text strong { font-weight: 600; }
+.history-text .history-time { font-size: .75rem; color: var(--text-dim); }
+.history-text .history-note { font-size: .8rem; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+
+/* Confirm modal */
+.confirm-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.confirm-modal-overlay.show { display: flex; }
+.confirm-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; max-width: 420px; width: 100%; }
+.confirm-modal-box h5 { margin: 0 0 8px; font-weight: 700; }
+.confirm-modal-box p { color: var(--text-muted); margin-bottom: 16px; font-size: .9rem; }
+.confirm-modal-box .note-input { width: 100%; margin-bottom: 16px; }
+.confirm-modal-box .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* Toast */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; }
+.toast-msg { padding: 12px 20px; border-radius: var(--radius-sm); color: #fff; font-size: .9rem; font-weight: 500; animation: toastIn .3s ease; min-width: 280px; display: flex; align-items: center; gap: 8px; }
+.toast-success { background: var(--green); }
+.toast-error { background: var(--red); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+@media(max-width:575px){
+  .approval-stats { grid-template-columns: 1fr; }
+  .approval-stat .stat-num { font-size: 1.5rem; }
+  .approval-toolbar { flex-direction: column; }
+  .approval-toolbar .sort-box { width: 100%; }
+}
+</style>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Confirmation Modal -->
+<div class="confirm-modal-overlay" id="confirmModal">
+  <div class="confirm-modal-box">
+    <h5 id="confirmTitle">Confirm Action</h5>
+    <p id="confirmText">Are you sure?</p>
+    <textarea class="form-control note-input" id="confirmNote" rows="2" placeholder="Optional note / reason..."></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-outline-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn" id="confirmBtn" onclick="executeConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="approval-stats">
+  <a href="?status=pending&q={{ search_query }}&sort={{ sort }}" class="approval-stat stat-pending {% if status_filter == 'pending' %}active-filter{% endif %}" style="text-decoration:none;color:inherit;">
+    <div class="stat-num">{{ pending_count }}</div>
+    <div class="stat-lbl">Pending</div>
+  </a>
+  <a href="?status=approved&q={{ search_query }}&sort={{ sort }}" class="approval-stat stat-approved {% if status_filter == 'approved' %}active-filter{% endif %}" style="text-decoration:none;color:inherit;">
+    <div class="stat-num">{{ approved_count }}</div>
+    <div class="stat-lbl">Approved</div>
+  </a>
+  <a href="?status=rejected&q={{ search_query }}&sort={{ sort }}" class="approval-stat stat-rejected {% if status_filter == 'rejected' %}active-filter{% endif %}" style="text-decoration:none;color:inherit;">
+    <div class="stat-num">{{ rejected_count }}</div>
+    <div class="stat-lbl">Rejected</div>
+  </a>
+</div>
+
+<!-- Toolbar -->
+<div class="approval-toolbar">
+  <form method="get" class="search-box" style="display:flex;gap:8px;">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search username, email..." autocomplete="off">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+  </form>
+  <select class="form-select sort-box" id="sortSelect" onchange="applySort(this.value)">
+    <option value="-date_joined" {% if sort == '-date_joined' %}selected{% endif %}>Newest First</option>
+    <option value="date_joined" {% if sort == 'date_joined' %}selected{% endif %}>Oldest First</option>
+    <option value="username" {% if sort == 'username' %}selected{% endif %}>Username A-Z</option>
+    <option value="-username" {% if sort == '-username' %}selected{% endif %}>Username Z-A</option>
+  </select>
+</div>
+
+<!-- Bulk Action Bar -->
+<div class="bulk-bar" id="bulkBar">
+  <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
+  <button class="btn btn-success btn-sm" onclick="bulkAction('approve')"><i class="bi bi-check-lg me-1"></i>Approve All</button>
+  <button class="btn btn-danger btn-sm" onclick="bulkAction('reject')"><i class="bi bi-x-lg me-1"></i>Reject All</button>
+  <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">Clear</button>
+</div>
+
+<!-- User Cards -->
+{% if users %}
+<div class="user-cards" id="userCards">
+  {% for u in users %}
+  <div class="user-card" id="userCard{{ u.pk }}" data-user-id="{{ u.pk }}">
+    <div class="card-check">
+      <input type="checkbox" class="user-checkbox" value="{{ u.pk }}" onchange="updateBulkBar()">
+    </div>
+    <div class="user-card-header">
+      <div class="user-card-avatar">{{ u.username|first|upper }}</div>
+      <div>
+        <h6 class="user-card-name">{{ u.username }}</h6>
+        <div class="user-card-email">{{ u.email|default:"No email" }}</div>
+      </div>
+    </div>
+    <div class="user-card-meta">
+      <div class="meta-item">
+        <div class="meta-label">Registered</div>
+        <div class="meta-value">{{ u.date_joined|date:"d M Y" }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Status</div>
+        <div class="meta-value">
+          {% if u.is_active %}
+            <span class="status-badge status-approved"><i class="bi bi-check-circle-fill"></i> Active</span>
+          {% else %}
+            <span class="status-badge status-pending"><i class="bi bi-clock-fill"></i> Pending</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Full Name</div>
+        <div class="meta-value">{{ u.first_name|default:"—" }} {{ u.last_name|default:"" }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Last Login</div>
+        <div class="meta-value">{{ u.last_login|date:"d M Y"|default:"Never" }}</div>
+      </div>
+    </div>
+    <div class="user-card-actions">
+      {% if not u.is_active %}
+      <button class="btn btn-success" onclick="confirmAction('approve', {{ u.pk }}, '{{ u.username|escapejs }}')">
+        <i class="bi bi-check-lg me-1"></i>Approve
+      </button>
+      {% endif %}
+      {% if u.is_active %}
+      <button class="btn btn-danger" onclick="confirmAction('reject', {{ u.pk }}, '{{ u.username|escapejs }}')">
+        <i class="bi bi-x-lg me-1"></i>Deactivate
+      </button>
+      {% else %}
+      <button class="btn btn-danger" onclick="confirmAction('reject', {{ u.pk }}, '{{ u.username|escapejs }}')">
+        <i class="bi bi-x-lg me-1"></i>Reject
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-person-check"></i>
+  <h5>No users found</h5>
+  <p>{% if status_filter == 'pending' %}No pending approval requests.{% elif status_filter == 'approved' %}No approved users found.{% elif status_filter == 'rejected' %}No rejected users found.{% else %}No users match your search.{% endif %}</p>
+</div>
+{% endif %}
+
+<!-- Approval History -->
+<div class="history-panel">
+  <div class="history-header">
+    <h6><i class="bi bi-clock-history me-2"></i>Approval History</h6>
+    <span class="text-muted" style="font-size:.8rem;">Recent actions</span>
+  </div>
+  <div class="history-list" id="historyList">
+    {% if recent_logs %}
+      {% for log in recent_logs %}
+      <div class="history-item">
+        <div class="history-icon {{ log.action }}">
+          <i class="bi bi-{% if log.action == 'approved' %}check-lg{% else %}x-lg{% endif %}"></i>
+        </div>
+        <div class="history-text">
+          <div>
+            <strong>{{ log.performed_by.username|default:"System" }}</strong>
+            {{ log.get_action_display|lower }}
+            <strong>{{ log.target_user.username }}</strong>
+          </div>
+          {% if log.note %}<div class="history-note">"{{ log.note }}"</div>{% endif %}
+          <div class="history-time">{{ log.created_at|date:"d M Y, h:i A" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-4 text-muted" style="font-size:.9rem;">
+        <i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+        No approval actions recorded yet.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+let pendingAction = null;
+
+function showToast(msg, type) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast-msg toast-' + type;
+  t.innerHTML = '<i class="bi bi-' + (type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill') + '"></i> ' + msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+function confirmAction(action, userId, username) {
+  pendingAction = { action, userId, username };
+  document.getElementById('confirmTitle').textContent = action === 'approve' ? 'Approve User' : 'Reject User';
+  document.getElementById('confirmText').textContent = action === 'approve'
+    ? `Are you sure you want to approve and activate "${username}"?`
+    : `Are you sure you want to reject "${username}"? They will not be able to log in.`;
+  document.getElementById('confirmBtn').className = 'btn ' + (action === 'approve' ? 'btn-success' : 'btn-danger');
+  document.getElementById('confirmBtn').textContent = action === 'approve' ? 'Approve' : 'Reject';
+  document.getElementById('confirmNote').value = '';
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+  pendingAction = null;
+}
+
+async function executeConfirm() {
+  if (!pendingAction) return;
+  const { action, userId } = pendingAction;
+  const note = document.getElementById('confirmNote').value;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true; btn.textContent = 'Processing...';
+  try {
+    const url = action === 'approve'
+      ? `/approval-requests/approve/${userId}/`
+      : `/approval-requests/reject/${userId}/`;
+    const fd = new FormData();
+    fd.append('note', note);
+    const res = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: fd });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      const card = document.getElementById('userCard' + userId);
+      if (card) { card.style.opacity = '0'; card.style.transform = 'scale(.95)'; card.style.transition = 'all .3s'; setTimeout(() => card.remove(), 300); }
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast(data.error || 'Action failed.', 'error');
+    }
+  } catch (e) {
+    showToast('Network error. Please try again.', 'error');
+  }
+  closeConfirm();
+  btn.disabled = false;
+}
+
+function updateBulkBar() {
+  const checked = document.querySelectorAll('.user-checkbox:checked');
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = checked.length;
+  bar.classList.toggle('visible', checked.length > 0);
+}
+
+function clearSelection() {
+  document.querySelectorAll('.user-checkbox:checked').forEach(cb => cb.checked = false);
+  updateBulkBar();
+}
+
+async function bulkAction(action) {
+  const ids = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => parseInt(cb.value));
+  if (!ids.length) return;
+  if (!confirm(`Are you sure you want to ${action} ${ids.length} user(s)?`)) return;
+  try {
+    const url = action === 'approve' ? '/approval-requests/bulk-approve/' : '/approval-requests/bulk-reject/';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_ids: ids })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast(data.error || 'Bulk action failed.', 'error');
+    }
+  } catch (e) {
+    showToast('Network error.', 'error');
+  }
+}
+
+function applySort(val) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('sort', val);
+  window.location.search = params.toString();
+}
+
+// Close modal on backdrop click
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+</script>
+{% endblock %}

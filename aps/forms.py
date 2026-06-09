@@ -1,5 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import (
     Category, SubCategory, Product,
     WarehouseInventory, CartonImage, InventoryProductImage, InventoryVideo,
@@ -243,3 +245,58 @@ class OrderForm(forms.ModelForm):
                 'id': 'id_order_date',
             }),
         }
+
+
+# ── User Registration & Login Forms ──────────────────────────────────────────
+
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'Enter email address',
+            'autocomplete': 'email',
+        })
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            placeholder_text = (field.label or field_name).lower()
+            field.widget.attrs.update({
+                'class': 'form-control form-control-lg',
+                'placeholder': f'Enter {placeholder_text}',
+                'autocomplete': 'off'
+            })
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        if not email:
+            raise ValidationError("Email is required.")
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("A user with this email address already exists.")
+        return email
+
+
+class ApprovedUserLoginForm(AuthenticationForm):
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username and password:
+            try:
+                user = User.objects.get(username=username)
+                if not user.is_active:
+                    raise ValidationError(
+                        "Your account is pending admin approval. Please contact the administrator.",
+                        code='pending_approval',
+                    )
+            except User.DoesNotExist:
+                # Let parent handle non-existent user or wrong password authentication
+                pass
+
+        return super().clean()

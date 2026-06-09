@@ -1,0 +1,121 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+{% load aps_tags %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="mb-0 fw-700 text-white">My Wishlist</h4>
+    <span class="text-muted small">
+      Keep track of the products you are interested in.
+    </span>
+  </div>
+  <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+    <i class="bi bi-arrow-left"></i>Back to Products
+  </a>
+</div>
+
+<!-- Product Grid -->
+{% if products %}
+<div class="row g-3 mb-4" id="wishlistGrid">
+  {% for product in products %}
+  <div class="col-6 col-md-4 col-lg-5th product-card-col" id="product-card-{{ product.pk }}">
+    <div class="product-card-link" style="position: relative; display: block; height: 100%;">
+      <!-- Heart Wishlist Toggle Button (Absolute Positioned over Image) -->
+      <button class="wishlist-btn" data-product-id="{{ product.pk }}" title="Remove from Wishlist"
+              style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.2s; z-index: 10; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);">
+        <i class="bi bi-heart-fill text-danger fs-5"></i>
+      </button>
+
+      <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none">
+        <div class="product-card h-100">
+          <div class="product-card-img">
+            {% if product.primary_image %}
+            <img src="{{ product.primary_image.url }}" alt="{{ product.product_name }}" loading="lazy">
+            {% else %}
+            <div class="no-image"><i class="bi bi-image"></i></div>
+            {% endif %}
+            <div class="product-card-asin">{{ product.asin_code }}</div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-name">{{ product.product_name }}</div>
+
+            <div class="d-flex gap-1 flex-wrap mt-2">
+              {% if product.category %}
+              <span class="badge-cat">{{ product.category.name }}</span>
+              {% endif %}
+              {% if product.subcategory %}
+              <span class="badge-subcat">{{ product.subcategory.name }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-heartbreak text-danger"></i>
+  <h5>Your wishlist is empty</h5>
+  <p>Explore the catalog and click the heart icon on any product to save it here.</p>
+  <a href="{% url 'product_list' %}" class="btn btn-primary">
+    <i class="bi bi-search me-1"></i>Explore Products
+  </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.wishlist-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const productId = this.dataset.productId;
+    const cardCol = document.getElementById(`product-card-${productId}`);
+    
+    // Disable button during toggle
+    this.disabled = true;
+    
+    fetch(`/wishlist/toggle/${productId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'x-requested-with': 'XMLHttpRequest'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && !data.wished) {
+        // Smooth scaling/fade out animation
+        if (cardCol) {
+          cardCol.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+          cardCol.style.opacity = '0';
+          cardCol.style.transform = 'scale(0.85) translateY(10px)';
+          setTimeout(() => {
+            cardCol.remove();
+            
+            // If no products left, reload to render the empty state
+            const remaining = document.querySelectorAll('.product-card-col');
+            if (remaining.length === 0) {
+              location.reload();
+            }
+          }, 350);
+        }
+      } else {
+        this.disabled = false;
+      }
+    })
+    .catch(err => {
+      console.error('Wishlist error:', err);
+      this.disabled = false;
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'aps/base.html' %}
+{% load aps_tags %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-700 mb-1">{{ target_user.username }}</h4>
+    <p class="text-muted small mb-0">{{ target_user.email|default:"No email" }} · Joined {{ target_user.date_joined|date:"d M Y" }}</p>
+  </div>
+  <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>All Users</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-4">
+    <div class="content-card p-3 mb-3">
+      <h6 class="section-label">Account Status</h6>
+      <p class="mb-2">
+        {% if target_user.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-warning text-dark">Inactive</span>{% endif %}
+        {% if target_user.is_staff %}<span class="badge bg-primary ms-1">Administrator</span>{% endif %}
+      </p>
+      <form method="post" class="d-grid gap-2">
+        {% csrf_token %}
+        <button type="submit" name="action" value="toggle_active" class="btn btn-sm {% if target_user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+          {% if target_user.is_active %}Deactivate User{% else %}Activate User{% endif %}
+        </button>
+        <button type="submit" name="action" value="toggle_staff" class="btn btn-sm btn-outline-primary">
+          {% if target_user.is_staff %}Remove Admin Role{% else %}Grant Admin Role{% endif %}
+        </button>
+      </form>
+    </div>
+
+    {% if user_perf %}
+    <div class="content-card p-3">
+      <h6 class="section-label">Performance</h6>
+      <div class="row g-2">
+        <div class="col-6"><span class="text-muted text-sm">Orders</span><div class="fw-600">{{ user_perf.order_count }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Order Value</span><div class="fw-600">{{ user_perf.total_value|currency }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Products Added</span><div class="fw-600">{{ user_perf.product_count }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Inventory Added</span><div class="fw-600">{{ user_perf.inventory_count }}</div></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <div class="content-card p-3 mb-3">
+      <h6 class="section-label">Granular Permissions</h6>
+      <p class="text-muted text-sm">Administrators have full access. These grants apply to non-admin staff only.</p>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_permissions">
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="can_export" id="can_export" {% if profile.can_export %}checked{% endif %}><label class="form-check-label" for="can_export">Can Export Data</label></div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="can_manage_all_orders" id="can_manage_all_orders" {% if profile.can_manage_all_orders %}checked{% endif %}><label class="form-check-label" for="can_manage_all_orders">Manage All Orders</label></div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="can_manage_settings" id="can_manage_settings" {% if profile.can_manage_settings %}checked{% endif %}><label class="form-check-label" for="can_manage_settings">Manage Settings</label></div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="can_delete_products" id="can_delete_products" {% if profile.can_delete_products %}checked{% endif %}><label class="form-check-label" for="can_delete_products">Delete Products</label></div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="form-check"><input class="form-check-input" type="checkbox" name="can_delete_inventory" id="can_delete_inventory" {% if profile.can_delete_inventory %}checked{% endif %}><label class="form-check-label" for="can_delete_inventory">Delete Inventory</label></div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm mt-3">Save Permissions</button>
+      </form>
+    </div>
+
+    <h6 class="section-label">Recent Activity</h6>
+    <div class="data-table-wrap">
+      <table class="table table-dark table-sm mb-0">
+        <thead><tr><th>Time</th><th>Action</th><th>Object</th></tr></thead>
+        <tbody>
+          {% for log in activity %}
+          <tr>
+            <td class="text-sm text-muted">{{ log.created_at|date:"d M, H:i" }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td class="text-sm">{{ log.object_repr|truncatechars:35 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-muted">No activity recorded.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

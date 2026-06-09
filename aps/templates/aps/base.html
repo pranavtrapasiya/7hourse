@@ -55,7 +55,7 @@
           <div class="user-avatar">{{ user.username|first|upper }}</div>
           <div class="user-info">
             <span class="user-name">{{ user.username }}</span>
-            <span class="user-role">{% if user.is_superuser %}Super Admin{% elif user.is_staff %}Staff{% else %}User{% endif %}</span>
+            <span class="user-role">{% if user.is_superuser %}Administrator{% elif user.is_staff %}Administrator{% else %}Staff Member{% endif %}</span>
           </div>
         </div>
       </div>

@@ -90,3 +90,327 @@ WARNING 2026-06-05 08:41:30,647 log Not Found: /favicon.ico
 WARNING 2026-06-05 08:41:30,650 basehttp "GET /favicon.ico HTTP/1.1" 404 7370
 WARNING 2026-06-05 08:47:18,950 log Not Found: /favicon.ico
 WARNING 2026-06-05 08:47:18,951 basehttp "GET /favicon.ico HTTP/1.1" 404 7414
+ERROR 2026-06-07 22:57:43,448 log Internal Server Error: /register/
+Traceback (most recent call last):
+  File "C:\Users\SIS\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\SIS\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\products\Aps\app\aps\views.py", line 784, in register_view
+    form = UserRegistrationForm(request.POST)
+  File "E:\products\Aps\app\aps\forms.py", line 271, in __init__
+    'placeholder': f'Enter {field.label.lower()}',
+                            ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'lower'
+WARNING 2026-06-07 22:59:52,743 log Not Found: /favicon.ico
+WARNING 2026-06-07 22:59:52,745 basehttp "GET /favicon.ico HTTP/1.1" 404 7543
+WARNING 2026-06-07 23:13:58,193 log Not Found: /favicon.ico
+WARNING 2026-06-07 23:13:58,206 basehttp "GET /favicon.ico HTTP/1.1" 404 7543
+WARNING 2026-06-08 23:53:07,458 log Not Found: /favicon.ico
+WARNING 2026-06-08 23:53:07,459 basehttp "GET /favicon.ico HTTP/1.1" 404 7543
+WARNING 2026-06-08 23:54:46,073 log Not Found: /favicon.ico
+WARNING 2026-06-08 23:54:46,073 basehttp "GET /favicon.ico HTTP/1.1" 404 7543
+WARNING 2026-06-09 00:30:32,313 log Not Found: /favicon.ico
+WARNING 2026-06-09 00:30:32,315 basehttp "GET /favicon.ico HTTP/1.1" 404 7931
+ERROR 2026-06-09 00:33:03,150 log Internal Server Error: /admin/aps/pendingapprovaluser/5/change/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\admin\options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\utils\decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\views\decorators\cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\admin\sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\admin\options.py", line 1889, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\utils\decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\utils\decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\admin\options.py", line 1747, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\admin\options.py", line 1792, in _changeform_view
+    form_validated = form.is_valid()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\forms\forms.py", line 201, in is_valid
+    return self.is_bound and not self.errors
+                                 ^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\forms\forms.py", line 196, in errors
+    self.full_clean()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\forms\forms.py", line 435, in full_clean
+    self._post_clean()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\forms\models.py", line 486, in _post_clean
+    self.instance.full_clean(exclude=exclude, validate_unique=False)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\base.py", line 1477, in full_clean
+    self.clean()
+    ~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\models.py", line 387, in clean
+    self.email = self.__class__.objects.normalize_email(self.email)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PendingApprovalUserManager' object has no attribute 'normalize_email'
+ERROR 2026-06-09 00:33:03,182 basehttp "POST /admin/aps/pendingapprovaluser/5/change/ HTTP/1.1" 500 139181
+WARNING 2026-06-09 00:36:57,878 log Forbidden (CSRF token from POST incorrect.): /login/
+WARNING 2026-06-09 00:36:57,879 basehttp "POST /login/ HTTP/1.1" 403 2518
+WARNING 2026-06-09 00:37:46,565 log Forbidden (CSRF token from POST incorrect.): /login/
+WARNING 2026-06-09 00:37:46,567 basehttp "POST /login/ HTTP/1.1" 403 2518
+WARNING 2026-06-09 00:38:02,212 log Forbidden (CSRF token from POST incorrect.): /login/
+WARNING 2026-06-09 00:38:02,213 basehttp "POST /login/ HTTP/1.1" 403 2518
+WARNING 2026-06-09 00:38:04,230 log Forbidden (CSRF token from POST incorrect.): /login/
+WARNING 2026-06-09 00:38:04,232 basehttp "POST /login/ HTTP/1.1" 403 2518
+WARNING 2026-06-10 00:54:04,576 log Not Found: /favicon.ico
+WARNING 2026-06-10 00:54:04,577 basehttp "GET /favicon.ico HTTP/1.1" 404 7931
+WARNING 2026-06-10 01:08:09,353 log Not Found: /favicon.ico
+WARNING 2026-06-10 01:08:09,355 basehttp "GET /favicon.ico HTTP/1.1" 404 9162
+WARNING 2026-06-10 01:11:18,018 log Not Found: /admin/aps/pendingapprovaluser/
+WARNING 2026-06-10 01:11:18,018 basehttp "GET /admin/aps/pendingapprovaluser/ HTTP/1.1" 404 5900
+WARNING 2026-06-10 01:16:56,844 log Not Found: /favicon.ico
+WARNING 2026-06-10 01:16:56,845 basehttp "GET /favicon.ico HTTP/1.1" 404 9162
+ERROR 2026-06-10 01:47:37,234 log Internal Server Error: /approval-requests/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\approvals.py", line 57, in approval_requests
+    return render(request, 'aps/approval_requests.html', {
+        'page_title': 'User Approval Requests',
+    ...<8 lines>...
+        'recent_logs': recent_logs,
+    })
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+ERROR 2026-06-10 01:47:49,599 log Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\dashboard.py", line 32, in dashboard
+    return render(request, 'aps/dashboard.html', context)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+ERROR 2026-06-10 01:47:50,025 log Internal Server Error: /login/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+ERROR 2026-06-10 01:47:52,080 log Internal Server Error: /login/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+ERROR 2026-06-10 01:47:52,866 log Internal Server Error: /wishlist/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\wishlist.py", line 16, in wishlist_list
+    return render(request, 'aps/wishlist.html', {
+        'page_title': 'My Wishlist',
+        'active_menu': 'wishlist',
+        'products': products,
+    })
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+ERROR 2026-06-10 01:49:06,733 log Internal Server Error: /orders/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\orders.py", line 56, in order_list
+    return render(request, 'aps/order_list.html', {
+        'page_title': 'Orders',
+    ...<6 lines>...
+        'total_orders': qs.count(),
+    })
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\utils.py", line 111, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\dispatch\dispatcher.py", line 177, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\test\client.py", line 267, in store_rendered_templates
+    store["context"].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "C:\Python314\Lib\copy.py", line 82, in copy
+    return copier(x)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 158, in __copy__
+    duplicate = super().__copy__()
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+WARNING 2026-06-10 01:49:09,847 log Forbidden: /orders/1/
+WARNING 2026-06-10 02:31:54,110 log Forbidden (CSRF token from POST incorrect.): /login/
+WARNING 2026-06-10 02:31:54,112 basehttp "POST /login/ HTTP/1.1" 403 2518

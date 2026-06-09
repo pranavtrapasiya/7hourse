@@ -63,12 +63,16 @@
     {% if search_query %} for "<strong>{{ search_query }}</strong>"{% endif %}
   </span>
   <div class="d-inline-flex align-items-center gap-2">
+    {% if can_export %}
     <a href="{% url 'export_products_csv' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
       <i class="bi bi-file-earmark-spreadsheet-fill text-green"></i>Export CSV
     </a>
+    {% endif %}
+    {% if can_delete_products %}
     <a href="{% url 'deleted_products' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
       <i class="bi bi-trash-fill text-muted"></i>Trash
     </a>
+    {% endif %}
     <a href="{% url 'product_add' %}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
       <i class="bi bi-plus-lg"></i>Add Product
     </a>
@@ -80,30 +84,38 @@
 <div class="row g-3 mb-4" id="productGrid">
   {% for product in page_obj %}
   <div class="col-6 col-md-4 col-lg-5th">
-    <a href="{% url 'product_detail' product.pk %}" class="product-card-link">
-      <div class="product-card">
-        <div class="product-card-img">
-          {% if product.primary_image %}
-          <img src="{{ product.primary_image.url }}" alt="{{ product.product_name }}" loading="lazy">
-          {% else %}
-          <div class="no-image"><i class="bi bi-image"></i></div>
-          {% endif %}
-          <div class="product-card-asin">{{ product.asin_code }}</div>
-        </div>
-        <div class="product-card-body">
-          <div class="product-card-name">{{ product.product_name }}</div>
+    <div class="product-card-link" style="position: relative; display: block; height: 100%;">
+      <!-- Wishlist Toggle Button (Absolute Positioned over Image) -->
+      <button class="wishlist-toggle-btn" data-product-id="{{ product.pk }}" title="Toggle Wishlist"
+              style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.2s; z-index: 10; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);">
+        <i class="bi {% if product.pk in wishlist_product_ids %}bi-heart-fill text-danger{% else %}bi-heart text-white{% endif %}"></i>
+      </button>
 
-          <div class="d-flex gap-1 flex-wrap mt-1">
-            {% if product.category %}
-            <span class="badge-cat">{{ product.category.name }}</span>
+      <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none">
+        <div class="product-card h-100">
+          <div class="product-card-img">
+            {% if product.primary_image %}
+            <img src="{{ product.primary_image.url }}" alt="{{ product.product_name }}" loading="lazy">
+            {% else %}
+            <div class="no-image"><i class="bi bi-image"></i></div>
             {% endif %}
-            {% if product.subcategory %}
-            <span class="badge-subcat">{{ product.subcategory.name }}</span>
-            {% endif %}
+            <div class="product-card-asin">{{ product.asin_code }}</div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-name">{{ product.product_name }}</div>
+
+            <div class="d-flex gap-1 flex-wrap mt-1">
+              {% if product.category %}
+              <span class="badge-cat">{{ product.category.name }}</span>
+              {% endif %}
+              {% if product.subcategory %}
+              <span class="badge-subcat">{{ product.subcategory.name }}</span>
+              {% endif %}
+            </div>
           </div>
         </div>
-      </div>
-    </a>
+      </a>
+    </div>
   </div>
   {% endfor %}
 </div>
@@ -244,23 +256,31 @@ function performRealtimeSearch(query) {
         if (data.results && data.results.length > 0) {
           productGrid.innerHTML = data.results.map(p => `
             <div class="col-6 col-md-4 col-lg-5th">
-              <a href="/products/${p.id}/" class="product-card-link">
-                <div class="product-card">
-                  <div class="product-card-img">
-                    ${p.has_image 
-                      ? `<img src="${p.image_url}" alt="${p.product_name}" loading="lazy">` 
-                      : `<div class="no-image"><i class="bi bi-image"></i></div>`}
-                    <div class="product-card-asin">${p.asin_code}</div>
-                  </div>
-                  <div class="product-card-body">
-                    <div class="product-card-name">${highlightMatch(p.product_name, query)}</div>
-                    <div class="d-flex gap-1 flex-wrap mt-1">
-                      ${p.category ? `<span class="badge-cat">${p.category}</span>` : ''}
-                      ${p.subcategory ? `<span class="badge-subcat">${p.subcategory}</span>` : ''}
+              <div class="product-card-link" style="position: relative; display: block; height: 100%;">
+                <!-- Wishlist Toggle Button -->
+                <button class="wishlist-toggle-btn" data-product-id="${p.id}" title="Toggle Wishlist"
+                        style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.2s; z-index: 10; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);">
+                  <i class="bi ${p.wished ? 'bi-heart-fill text-danger' : 'bi-heart text-white'}"></i>
+                </button>
+
+                <a href="/products/${p.id}/" class="text-decoration-none">
+                  <div class="product-card h-100">
+                    <div class="product-card-img">
+                      ${p.has_image 
+                        ? `<img src="${p.image_url}" alt="${p.product_name}" loading="lazy">` 
+                        : `<div class="no-image"><i class="bi bi-image"></i></div>`}
+                      <div class="product-card-asin">${p.asin_code}</div>
+                    </div>
+                    <div class="product-card-body">
+                      <div class="product-card-name">${highlightMatch(p.product_name, query)}</div>
+                      <div class="d-flex gap-1 flex-wrap mt-1">
+                        ${p.category ? `<span class="badge-cat">${p.category}</span>` : ''}
+                        ${p.subcategory ? `<span class="badge-subcat">${p.subcategory}</span>` : ''}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
+                </a>
+              </div>
             </div>
           `).join('');
         } else {
@@ -396,6 +416,55 @@ document.getElementById('filterCategory').addEventListener('change', function() 
           subcatSel.appendChild(opt);
         });
       });
+  }
+});
+
+// Event delegation for wishlist toggle clicks
+document.addEventListener('click', function(e) {
+  const toggleBtn = e.target.closest('.wishlist-toggle-btn');
+  if (toggleBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const productId = toggleBtn.dataset.productId;
+    const icon = toggleBtn.querySelector('i');
+    
+    toggleBtn.disabled = true;
+    
+    fetch(`/wishlist/toggle/${productId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'x-requested-with': 'XMLHttpRequest'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        if (data.wished) {
+          icon.className = 'bi bi-heart-fill text-danger';
+        } else {
+          icon.className = 'bi bi-heart text-white';
+        }
+        
+        // Update sidebar count badge
+        const badge = document.getElementById('sidebarWishlistCount');
+        if (badge) {
+          if (data.wishlist_count > 0) {
+            badge.textContent = data.wishlist_count;
+            badge.style.display = '';
+          } else {
+            badge.style.display = 'none';
+          }
+        } else if (data.wishlist_count > 0) {
+          location.reload();
+        }
+      }
+    })
+    .catch(err => console.error('Wishlist toggle error:', err))
+    .finally(() => {
+      toggleBtn.disabled = false;
+    });
   }
 });
 </script>

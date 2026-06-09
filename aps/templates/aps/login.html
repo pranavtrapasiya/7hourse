@@ -20,10 +20,27 @@
         <p class="login-sub">Warehouse Management System</p>
       </div>
 
+      {% if messages %}
+      <div class="messages-container mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} d-flex align-items-center gap-2" role="alert">
+          <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'info' %}info-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          <span>{{ message.message }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       {% if form.errors %}
-      <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span>Invalid username or password. Please try again.</span>
+      <div class="alert alert-danger d-flex flex-column gap-2" role="alert">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+            <span>{{ error }}</span>
+          </div>
+          {% endfor %}
+        {% endfor %}
       </div>
       {% endif %}
 
@@ -58,6 +75,11 @@
           <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
         </button>
       </form>
+
+      <div class="text-center mt-3">
+        <span class="text-muted small">Need account access?</span>
+        <a href="{% url 'register' %}" class="small fw-600 ms-1 text-decoration-none" style="color: var(--accent);">Request Access</a>
+      </div>
 
       <p class="login-footer-note">Access restricted to authorized staff only.</p>
     </div>

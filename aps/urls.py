@@ -29,4 +29,20 @@ urlpatterns = [
     path('ajax/order/locations/', views.ajax_order_locations, name='ajax_order_locations'),
     path('settings/migrate-codes/', views.migrate_product_codes, name='migrate_product_codes'),
     path('api/products/search/', views.api_product_search, name='api_product_search'),
+    path('wishlist/', views.wishlist_list, name='wishlist_list'),
+    path('wishlist/toggle/<int:product_id>/', views.wishlist_toggle, name='wishlist_toggle'),
+    path('register/', views.register_view, name='register'),
+    # ── User Approval Management (Admin Only) ──
+    path('approval-requests/', views.approval_requests, name='approval_requests'),
+    path('approval-requests/approve/<int:user_id>/', views.approve_user_api, name='approve_user_api'),
+    path('approval-requests/reject/<int:user_id>/', views.reject_user_api, name='reject_user_api'),
+    path('approval-requests/bulk-approve/', views.bulk_approve_api, name='bulk_approve_api'),
+    path('approval-requests/bulk-reject/', views.bulk_reject_api, name='bulk_reject_api'),
+    path('approval-requests/history/', views.approval_history_api, name='approval_history_api'),
+    # ── Admin Control Center ──
+    path('admin-control/', views.admin_control_center, name='admin_control'),
+    path('admin-control/users/', views.admin_users, name='admin_users'),
+    path('admin-control/users/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
+    path('admin-control/audit-logs/', views.admin_audit_logs, name='admin_audit_logs'),
+    path('admin-control/users/<int:user_id>/activity/', views.admin_user_activity_api, name='admin_user_activity_api'),
 ]

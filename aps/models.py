@@ -1,6 +1,7 @@
 import uuid
 import datetime
 from django.db import models, transaction
+from django.contrib.auth.models import User
 from django.db.models import F
 from .validators import (
     validate_image_extension,
@@ -137,6 +138,19 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated tags")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='products_created',
+    )
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='products_updated',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
 
     # ── Soft Delete ──
     is_deleted = models.BooleanField(default=False, db_index=True)
@@ -224,8 +238,31 @@ class ActiveProductManager(models.Manager):
         return super().get_queryset().filter(is_deleted=False)
 
 
+# ── Ownership-Aware Managers ────────────────────────────────────────────────
+
+class OwnershipQuerySet(models.QuerySet):
+    """Base queryset with ownership filtering capabilities."""
+    def for_user(self, user):
+        """Filter records owned by the user, or all records for administrators."""
+        from aps.permissions import is_administrator
+        if is_administrator(user):
+            return self
+        return self.filter(created_by=user)
+
+
+class OwnershipManager(models.Manager):
+    """Manager that provides ownership-aware querysets."""
+    def get_queryset(self):
+        return OwnershipQuerySet(self.model, using=self._db)
+
+    def for_user(self, user):
+        """Return records owned by the user, or all records for administrators."""
+        return self.get_queryset().for_user(user)
+
+
 # Add the active manager to Product without replacing default
 Product.add_to_class('active_objects', ActiveProductManager())
+Product.add_to_class('owned_objects', OwnershipManager())
 
 
 # ── Warehouse Inventory Entry ────────────────────────────────────────────────
@@ -247,6 +284,18 @@ class WarehouseInventory(models.Model):
     remark = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='inventory_created',
+    )
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='inventory_updated',
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -265,6 +314,10 @@ class WarehouseInventory(models.Model):
         return self.product_images.count()
 
 
+# Add ownership manager to WarehouseInventory
+WarehouseInventory.add_to_class('owned_objects', OwnershipManager())
+
+
 class CartonImage(models.Model):
     """Up to 2 carton images per inventory entry."""
     inventory = models.ForeignKey(
@@ -277,6 +330,12 @@ class CartonImage(models.Model):
         validators=[validate_image_extension, validate_image_size]
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='carton_images_uploaded',
+    )
 
     class Meta:
         ordering = ['uploaded_at']
@@ -297,6 +356,12 @@ class InventoryProductImage(models.Model):
         validators=[validate_image_extension, validate_image_size]
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='product_images_uploaded',
+    )
 
     class Meta:
         ordering = ['uploaded_at']
@@ -317,6 +382,12 @@ class InventoryVideo(models.Model):
         validators=[validate_video_extension, validate_video_size]
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='videos_uploaded',
+    )
 
     def __str__(self):
         return f'Video for {self.inventory}'
@@ -359,10 +430,16 @@ class Order(models.Model):
     # ── Metadata ──
     order_date = models.DateField()
     created_by = models.ForeignKey(
-        'auth.User',
+        User,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='orders'
+    )
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='orders_updated',
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -382,3 +459,221 @@ class Order(models.Model):
         self.total_amount = self.quantity * self.total_pieces              # Carton Qty × Total Pieces (Payment)
         self.remaining_to_pay = self.total_amount - self.deposit           # Payment − Deposit
         super().save(*args, **kwargs)
+
+
+# Add ownership manager to Order
+Order.add_to_class('owned_objects', OwnershipManager())
+
+
+# ── Proxy Model for Pending Approvals ─────────────────────────────────────────
+
+class PendingApprovalUserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=False, is_superuser=False)
+
+
+class PendingApprovalUser(User):
+    objects = PendingApprovalUserManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Pending Approval'
+        verbose_name_plural = 'Pending Approvals'
+
+
+# ── Approval Audit Log ───────────────────────────────────────────────────────
+
+class ApprovalLog(models.Model):
+    """
+    Immutable audit log for user approval/rejection actions.
+    Records cannot be edited or deleted from the application.
+    """
+    ACTION_CHOICES = [
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    target_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='approval_logs',
+        help_text='The user being approved or rejected',
+    )
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    performed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='approval_actions_performed',
+        help_text='The admin who performed the action',
+    )
+    note = models.TextField(blank=True, help_text='Optional reason for the action')
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Approval Log'
+        verbose_name_plural = 'Approval Logs'
+
+    def __str__(self):
+        return f'{self.get_action_display()} — {self.target_user.username} by {self.performed_by}'
+
+
+# ── Wishlist Model ───────────────────────────────────────────────────────────
+
+class WishlistItem(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wishlist_items'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='wished_by'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('user', 'product')
+        verbose_name = 'Wishlist Item'
+        verbose_name_plural = 'Wishlist Items'
+
+    def __str__(self):
+        return f'{self.user.username} wished {self.product.product_name}'
+
+
+# ── User Profile & Granular Permissions ─────────────────────────────────────
+
+class UserProfile(models.Model):
+    """
+    Extended profile for company staff with optional permission grants.
+    Administrators (is_staff/is_superuser) have unrestricted access regardless.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile',
+    )
+    can_export = models.BooleanField(
+        default=False,
+        help_text='Allow exporting company-wide data.',
+    )
+    can_manage_all_orders = models.BooleanField(
+        default=False,
+        help_text='View and manage orders created by other users.',
+    )
+    can_manage_settings = models.BooleanField(
+        default=False,
+        help_text='Access system settings and product code configuration.',
+    )
+    can_delete_products = models.BooleanField(
+        default=False,
+        help_text='Soft-delete, restore, and permanently delete products.',
+    )
+    can_delete_inventory = models.BooleanField(
+        default=False,
+        help_text='Delete warehouse inventory entries.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
+
+    def __str__(self):
+        return f'Profile: {self.user.username}'
+
+
+# ── Immutable Audit Log ───────────────────────────────────────────────────────
+
+class AuditLog(models.Model):
+    """
+    Immutable audit trail for all critical business events.
+    Records cannot be edited or deleted from the application UI.
+    """
+    ACTION_LOGIN = 'login'
+    ACTION_LOGOUT = 'logout'
+    ACTION_USER_APPROVED = 'user_approved'
+    ACTION_USER_REJECTED = 'user_rejected'
+    ACTION_USER_DEACTIVATED = 'user_deactivated'
+    ACTION_USER_ACTIVATED = 'user_activated'
+    ACTION_PRODUCT_CREATED = 'product_created'
+    ACTION_PRODUCT_UPDATED = 'product_updated'
+    ACTION_PRODUCT_DELETED = 'product_deleted'
+    ACTION_PRODUCT_RESTORED = 'product_restored'
+    ACTION_PRODUCT_PERMANENT_DELETE = 'product_permanent_delete'
+    ACTION_INVENTORY_CREATED = 'inventory_created'
+    ACTION_INVENTORY_UPDATED = 'inventory_updated'
+    ACTION_INVENTORY_DELETED = 'inventory_deleted'
+    ACTION_LOCATION_CHANGED = 'location_changed'
+    ACTION_ORDER_CREATED = 'order_created'
+    ACTION_ORDER_UPDATED = 'order_updated'
+    ACTION_ORDER_DELETED = 'order_deleted'
+    ACTION_EXPORT = 'export'
+    ACTION_SETTINGS_CHANGED = 'settings_changed'
+    ACTION_CATEGORY_CREATED = 'category_created'
+    ACTION_SUBCATEGORY_CREATED = 'subcategory_created'
+    ACTION_WISHLIST_ADD = 'wishlist_add'
+    ACTION_WISHLIST_REMOVE = 'wishlist_remove'
+    ACTION_PERMISSION_CHANGED = 'permission_changed'
+
+    ACTION_CHOICES = [
+        (ACTION_LOGIN, 'Login'),
+        (ACTION_LOGOUT, 'Logout'),
+        (ACTION_USER_APPROVED, 'User Approved'),
+        (ACTION_USER_REJECTED, 'User Rejected'),
+        (ACTION_USER_DEACTIVATED, 'User Deactivated'),
+        (ACTION_USER_ACTIVATED, 'User Activated'),
+        (ACTION_PRODUCT_CREATED, 'Product Created'),
+        (ACTION_PRODUCT_UPDATED, 'Product Updated'),
+        (ACTION_PRODUCT_DELETED, 'Product Deleted'),
+        (ACTION_PRODUCT_RESTORED, 'Product Restored'),
+        (ACTION_PRODUCT_PERMANENT_DELETE, 'Product Permanently Deleted'),
+        (ACTION_INVENTORY_CREATED, 'Inventory Created'),
+        (ACTION_INVENTORY_UPDATED, 'Inventory Updated'),
+        (ACTION_INVENTORY_DELETED, 'Inventory Deleted'),
+        (ACTION_LOCATION_CHANGED, 'Location Changed'),
+        (ACTION_ORDER_CREATED, 'Order Created'),
+        (ACTION_ORDER_UPDATED, 'Order Updated'),
+        (ACTION_ORDER_DELETED, 'Order Deleted'),
+        (ACTION_EXPORT, 'Data Export'),
+        (ACTION_SETTINGS_CHANGED, 'Settings Changed'),
+        (ACTION_CATEGORY_CREATED, 'Category Created'),
+        (ACTION_SUBCATEGORY_CREATED, 'Subcategory Created'),
+        (ACTION_WISHLIST_ADD, 'Wishlist Add'),
+        (ACTION_WISHLIST_REMOVE, 'Wishlist Remove'),
+        (ACTION_PERMISSION_CHANGED, 'Permission Changed'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='audit_logs',
+        help_text='User who performed the action.',
+    )
+    action = models.CharField(max_length=40, choices=ACTION_CHOICES, db_index=True)
+    object_type = models.CharField(max_length=50, blank=True, db_index=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    object_repr = models.CharField(max_length=255, blank=True)
+    details = models.TextField(blank=True, help_text='JSON or text details of the change.')
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Audit Log'
+        verbose_name_plural = 'Audit Logs'
+        indexes = [
+            models.Index(fields=['action', '-created_at'], name='idx_audit_action_date'),
+            models.Index(fields=['user', '-created_at'], name='idx_audit_user_date'),
+            models.Index(fields=['object_type', 'object_id'], name='idx_audit_object'),
+        ]
+
+    def __str__(self):
+        who = self.user.username if self.user else 'System'
+        return f'{self.get_action_display()} by {who} at {self.created_at}'

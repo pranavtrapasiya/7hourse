@@ -58,12 +58,18 @@
 
     {% if not product.is_deleted %}
     <div class="d-grid gap-2">
+      <button type="button" class="btn {% if product.pk in wishlist_product_ids %}btn-danger{% else %}btn-outline-primary{% endif %} w-100" id="detailWishlistBtn" data-product-id="{{ product.pk }}">
+        <i class="bi {% if product.pk in wishlist_product_ids %}bi-heart-fill{% else %}bi-heart{% endif %} me-2"></i>
+        <span id="detailWishlistText">{% if product.pk in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}</span>
+      </button>
       <a href="{% url 'product_edit' product.pk %}" class="btn btn-primary">
         <i class="bi bi-pencil-fill me-2"></i>Edit Catalog Entry
       </a>
+      {% if can_delete_products %}
       <button type="button" class="btn btn-outline-danger" onclick="triggerSoftDelete()">
         <i class="bi bi-trash3-fill me-2"></i>Move to Trash (Delete)
       </button>
+      {% endif %}
     </div>
     {% endif %}
   </div>
@@ -220,5 +226,52 @@ function triggerPermDelete() {
   const modal = new bootstrap.Modal(document.getElementById('permDeleteModal'));
   modal.show();
 }
+
+document.getElementById('detailWishlistBtn')?.addEventListener('click', function() {
+  const btn = this;
+  const productId = btn.dataset.productId;
+  const icon = btn.querySelector('i');
+  const text = btn.querySelector('#detailWishlistText');
+  
+  btn.disabled = true;
+  fetch(`/wishlist/toggle/${productId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'x-requested-with': 'XMLHttpRequest'
+    }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (data.wished) {
+        btn.className = 'btn btn-danger w-100';
+        icon.className = 'bi bi-heart-fill me-2';
+        text.textContent = 'Remove from Wishlist';
+      } else {
+        btn.className = 'btn btn-outline-primary w-100';
+        icon.className = 'bi bi-heart me-2';
+        text.textContent = 'Add to Wishlist';
+      }
+      
+      // Update sidebar count badge
+      const badge = document.getElementById('sidebarWishlistCount');
+      if (badge) {
+        if (data.wishlist_count > 0) {
+          badge.textContent = data.wishlist_count;
+          badge.style.display = '';
+        } else {
+          badge.style.display = 'none';
+        }
+      } else if (data.wishlist_count > 0) {
+        location.reload();
+      }
+    }
+  })
+  .catch(err => console.error('Wishlist error:', err))
+  .finally(() => {
+    btn.disabled = false;
+  });
+});
 </script>
 {% endblock %}

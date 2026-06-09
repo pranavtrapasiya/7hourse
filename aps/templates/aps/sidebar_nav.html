@@ -41,14 +41,52 @@
         <span>Product List</span>
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{% url 'wishlist_list' %}" class="nav-link {% active_class request 'wishlist_list' %} d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-heart-fill text-danger me-2"></i>
+          <span>Wishlist</span>
+        </div>
+        {% if wishlist_count > 0 %}
+        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.7rem; min-width: 1.5rem; text-align: center;" id="sidebarWishlistCount">
+          {{ wishlist_count }}
+        </span>
+        {% endif %}
+      </a>
+    </li>
     <li class="nav-divider"></li>
     <li class="nav-label">System</li>
+    {% if can_manage_settings %}
     <li class="nav-item">
       <a href="{% url 'settings' %}" class="nav-link {% active_class request 'settings' %}">
         <i class="bi bi-sliders2"></i>
         <span>Settings</span>
       </a>
     </li>
+    {% endif %}
+    {% if is_administrator %}
+    <li class="nav-item">
+      <a href="{% url 'admin_control' %}" class="nav-link {% active_class request 'admin_control' %}">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>Admin Center</span>
+      </a>
+    </li>
+    {% endif %}
+    {% if is_administrator %}
+    <li class="nav-item">
+      <a href="{% url 'approval_requests' %}" class="nav-link {% active_class request 'approval_requests' %} d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-person-check-fill me-2"></i>
+          <span>User Approvals</span>
+        </div>
+        {% if pending_approvals_count > 0 %}
+        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem; min-width: 1.5rem; text-align: center;">
+          {{ pending_approvals_count }}
+        </span>
+        {% endif %}
+      </a>
+    </li>
+    {% endif %}
     <li class="nav-item">
       <a href="{% url 'logout' %}" class="nav-link nav-link-danger">
         <i class="bi bi-box-arrow-right"></i>

@@ -9,11 +9,16 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from aps import views
 
+from aps.forms import ApprovedUserLoginForm
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path(
         "login/",
-        auth_views.LoginView.as_view(template_name="aps/login.html"),
+        auth_views.LoginView.as_view(
+            template_name="aps/login.html",
+            authentication_form=ApprovedUserLoginForm
+        ),
         name="login",
     ),
     path("logout/", views.logout_view, name="logout"),
@@ -30,3 +35,5 @@ urlpatterns += [
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler403 = 'aps.permissions.permission_denied_view'

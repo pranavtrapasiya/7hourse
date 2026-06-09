@@ -52,6 +52,16 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: #7ab8fb; }
 
+.data-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.data-table-wrap .table { margin-bottom: 0; }
+.product-card-sm { min-height: auto; }
+
 .fw-500 { font-weight: 500; }
 .fw-600 { font-weight: 600; }
 .text-sm { font-size: 0.85rem; }

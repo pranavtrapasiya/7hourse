@@ -1,0 +1,77 @@
+{% extends 'aps/base.html' %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-700 mb-1">User Management</h4>
+    <p class="text-muted small mb-0">Manage company staff accounts and permissions.</p>
+  </div>
+  <a href="{% url 'admin_control' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Admin Center</a>
+</div>
+
+<form method="get" class="row g-2 mb-4">
+  <div class="col-12 col-sm-5">
+    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search users...">
+  </div>
+  <div class="col-6 col-sm-3">
+    <select name="status" class="form-select">
+      <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Users</option>
+      <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+      <option value="staff" {% if status_filter == 'staff' %}selected{% endif %}>Administrators</option>
+    </select>
+  </div>
+  <div class="col-6 col-sm-2">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+
+<div class="data-table-wrap">
+  <table class="table table-dark table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Role</th>
+        <th>Joined</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in page_obj %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td class="text-sm">{{ u.email|default:"—" }}</td>
+        <td>
+          {% if u.is_active %}
+          <span class="badge bg-success">Active</span>
+          {% else %}
+          <span class="badge bg-warning text-dark">Inactive</span>
+          {% endif %}
+        </td>
+        <td>{% if u.is_staff or u.is_superuser %}Administrator{% else %}Staff{% endif %}</td>
+        <td class="text-sm text-muted">{{ u.date_joined|date:"d M Y" }}</td>
+        <td><a href="{% url 'admin_user_detail' u.pk %}" class="btn btn-sm btn-outline-primary">Manage</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted">No users found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+  <ul class="pagination pagination-sm justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&status={{ status_filter }}">Prev</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&status={{ status_filter }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
