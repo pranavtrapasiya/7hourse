@@ -12,16 +12,16 @@ from aps.forms import ProductForm
 from aps.models import AuditLog, Category, Product, SubCategory
 from aps.permissions import (
     can_delete_products, can_export, permission_required,
-    filter_products_for_user, get_product_for_user,
+    filter_products_own, get_product_for_user,
 )
 from aps.services.audit import AuditService
 
 
 @login_required
 def product_add(request):
-    form = ProductForm()
+    form = ProductForm(user=request.user)
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ProductForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             product = form.save(commit=False)
             product.created_by = request.user
@@ -50,10 +50,10 @@ def product_edit(request, pk):
     if product.is_deleted:
         from django.core.exceptions import PermissionDenied
         raise PermissionDenied('This product has been deleted.')
-    form = ProductForm(instance=product)
+    form = ProductForm(instance=product, user=request.user)
 
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product, user=request.user)
         if form.is_valid():
             product = form.save(commit=False)
             product.updated_by = request.user
@@ -132,7 +132,7 @@ def product_permanent_delete(request, pk):
 
 @permission_required(can_delete_products, 'Only administrators can view deleted products.')
 def deleted_products(request):
-    qs = filter_products_for_user(request.user).filter(is_deleted=True).select_related(
+    qs = filter_products_own(request.user).filter(is_deleted=True).select_related(
         'category', 'subcategory', 'created_by'
     ).order_by('-deleted_at')
     page_obj = Paginator(qs, 25).get_page(request.GET.get('page'))
@@ -145,7 +145,7 @@ def deleted_products(request):
 
 @login_required
 def product_list(request):
-    qs = filter_products_for_user(request.user).filter(is_deleted=False).select_related(
+    qs = filter_products_own(request.user).filter(is_deleted=False).select_related(
         'category', 'subcategory', 'created_by'
     )
     search_query = request.GET.get('q', '').strip()
@@ -175,10 +175,10 @@ def product_list(request):
         'category_id': category_id,
         'subcategory_id': subcategory_id,
         'sort': sort,
-        'categories': Category.objects.all(),
+        'categories': Category.objects.filter(created_by=request.user),
         'subcategories': (
-            SubCategory.objects.filter(category_id=category_id)
-            if category_id else SubCategory.objects.all()
+            SubCategory.objects.filter(category_id=category_id, category__created_by=request.user)
+            if category_id else SubCategory.objects.filter(category__created_by=request.user)
         ),
     })
 
@@ -214,7 +214,7 @@ def export_products_csv(request):
         'Created By', 'Created At',
     ])
 
-    products = filter_products_for_user(request.user).filter(is_deleted=False).select_related(
+    products = filter_products_own(request.user).filter(is_deleted=False).select_related(
         'category', 'subcategory', 'created_by'
     ).order_by('created_at').iterator(chunk_size=500)
 
