@@ -56,19 +56,25 @@
     </li>
     <li class="nav-divider"></li>
     <li class="nav-label">System</li>
-    {% if can_manage_settings %}
     <li class="nav-item">
       <a href="{% url 'settings' %}" class="nav-link {% active_class request 'settings' %}">
         <i class="bi bi-sliders2"></i>
         <span>Settings</span>
       </a>
     </li>
-    {% endif %}
     {% if is_administrator %}
     <li class="nav-item">
       <a href="{% url 'admin_control' %}" class="nav-link {% active_class request 'admin_control' %}">
         <i class="bi bi-shield-lock-fill"></i>
         <span>Admin Center</span>
+      </a>
+    </li>
+    {% endif %}
+    {% if is_administrator %}
+    <li class="nav-item">
+      <a href="{% url 'users_list' %}" class="nav-link {% active_class request 'users_list' 'user_details' 'user_products' 'user_locations' 'user_orders' 'user_activity' %}">
+        <i class="bi bi-people-fill"></i>
+        <span>Users</span>
       </a>
     </li>
     {% endif %}
