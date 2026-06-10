@@ -6,7 +6,7 @@ from django.db.models import Q, Case, When, Value, IntegerField
 from django.http import JsonResponse
 
 from aps.models import Product, SubCategory, WarehouseInventory
-from aps.permissions import filter_products_for_user, filter_inventory_for_user
+from aps.permissions import filter_products_own, filter_inventory_own
 
 
 @login_required
@@ -15,7 +15,9 @@ def ajax_subcategories(request):
     subcategories = []
     if category_id:
         subcategories = list(
-            SubCategory.objects.filter(category_id=category_id).values('id', 'name')
+            SubCategory.objects.filter(
+                category_id=category_id, category__created_by=request.user
+            ).values('id', 'name')
         )
     return JsonResponse({'subcategories': subcategories})
 
@@ -25,7 +27,7 @@ def ajax_product_search(request):
     q = request.GET.get('q', '').strip()
     results = []
     if len(q) >= 1:
-        qs = filter_products_for_user(request.user).filter(is_deleted=False).select_related(
+        qs = filter_products_own(request.user).filter(is_deleted=False).select_related(
             'category', 'subcategory'
         ).filter(product_name__icontains=q).annotate(
             search_priority=Case(
@@ -69,7 +71,7 @@ def ajax_order_locations(request):
     if not product_id:
         return JsonResponse({'locations': []})
 
-    entries = filter_inventory_for_user(request.user).filter(product_id=product_id).order_by('-created_at')
+    entries = filter_inventory_own(request.user).filter(product_id=product_id).order_by('-created_at')
     locations = [{
         'id': e.pk,
         'location_number': e.location_number or '—',
@@ -90,7 +92,7 @@ def api_product_search(request):
     if not q:
         return JsonResponse({'suggestions': [], 'results': [], 'total': 0})
 
-    qs = filter_products_for_user(request.user).filter(is_deleted=False).select_related(
+    qs = filter_products_own(request.user).filter(is_deleted=False).select_related(
         'category', 'subcategory'
     ).filter(
         Q(product_name__icontains=q) |
