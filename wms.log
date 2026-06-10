@@ -414,3 +414,1110 @@ AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for sett
 WARNING 2026-06-10 01:49:09,847 log Forbidden: /orders/1/
 WARNING 2026-06-10 02:31:54,110 log Forbidden (CSRF token from POST incorrect.): /login/
 WARNING 2026-06-10 02:31:54,112 basehttp "POST /login/ HTTP/1.1" 403 2518
+ERROR 2026-06-10 03:31:40,453 log Internal Server Error: /orders/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 350, in parse_bits
+    unhandled_params.pop(0)
+    ~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: pop from empty list
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\orders.py", line 56, in order_list
+    return render(request, 'aps/order_list.html', {
+        'page_title': 'Orders',
+    ...<6 lines>...
+        'total_orders': qs.count(),
+    })
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 321, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 197, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 206, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 130, in compile_func
+    args, kwargs = parse_bits(
+                   ~~~~~~~~~~^
+        parser,
+        ^^^^^^^
+    ...<8 lines>...
+        function_name,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 353, in parse_bits
+    raise TemplateSyntaxError(
+        "'%s' received too many positional arguments" % name
+    )
+django.template.exceptions.TemplateSyntaxError: 'active_class' received too many positional arguments
+ERROR 2026-06-10 03:31:40,573 basehttp "GET /orders/ HTTP/1.1" 500 270074
+ERROR 2026-06-10 03:31:55,610 log Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 350, in parse_bits
+    unhandled_params.pop(0)
+    ~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: pop from empty list
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\dashboard.py", line 32, in dashboard
+    return render(request, 'aps/dashboard.html', context)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 321, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 197, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 206, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 130, in compile_func
+    args, kwargs = parse_bits(
+                   ~~~~~~~~~~^
+        parser,
+        ^^^^^^^
+    ...<8 lines>...
+        function_name,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 353, in parse_bits
+    raise TemplateSyntaxError(
+        "'%s' received too many positional arguments" % name
+    )
+django.template.exceptions.TemplateSyntaxError: 'active_class' received too many positional arguments
+ERROR 2026-06-10 03:31:55,622 basehttp "GET / HTTP/1.1" 500 304620
+ERROR 2026-06-10 03:31:58,573 log Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 350, in parse_bits
+    unhandled_params.pop(0)
+    ~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: pop from empty list
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\dashboard.py", line 32, in dashboard
+    return render(request, 'aps/dashboard.html', context)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 321, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 197, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 206, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 130, in compile_func
+    args, kwargs = parse_bits(
+                   ~~~~~~~~~~^
+        parser,
+        ^^^^^^^
+    ...<8 lines>...
+        function_name,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 353, in parse_bits
+    raise TemplateSyntaxError(
+        "'%s' received too many positional arguments" % name
+    )
+django.template.exceptions.TemplateSyntaxError: 'active_class' received too many positional arguments
+ERROR 2026-06-10 03:31:58,602 basehttp "GET / HTTP/1.1" 500 304757
+ERROR 2026-06-10 03:32:45,620 log Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 350, in parse_bits
+    unhandled_params.pop(0)
+    ~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: pop from empty list
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\dashboard.py", line 32, in dashboard
+    return render(request, 'aps/dashboard.html', context)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 321, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 197, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 206, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 130, in compile_func
+    args, kwargs = parse_bits(
+                   ~~~~~~~~~~^
+        parser,
+        ^^^^^^^
+    ...<8 lines>...
+        function_name,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 353, in parse_bits
+    raise TemplateSyntaxError(
+        "'%s' received too many positional arguments" % name
+    )
+django.template.exceptions.TemplateSyntaxError: 'active_class' received too many positional arguments
+ERROR 2026-06-10 03:32:45,649 basehttp "GET / HTTP/1.1" 500 304757
+ERROR 2026-06-10 03:33:23,813 log Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 350, in parse_bits
+    unhandled_params.pop(0)
+    ~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: pop from empty list
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\dashboard.py", line 32, in dashboard
+    return render(request, 'aps/dashboard.html', context)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 321, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loader_tags.py", line 197, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 206, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 130, in compile_func
+    args, kwargs = parse_bits(
+                   ~~~~~~~~~~^
+        parser,
+        ^^^^^^^
+    ...<8 lines>...
+        function_name,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\template\library.py", line 353, in parse_bits
+    raise TemplateSyntaxError(
+        "'%s' received too many positional arguments" % name
+    )
+django.template.exceptions.TemplateSyntaxError: 'active_class' received too many positional arguments
+ERROR 2026-06-10 03:33:23,843 basehttp "GET / HTTP/1.1" 500 304885
+WARNING 2026-06-10 03:33:24,217 log Not Found: /favicon.ico
+WARNING 2026-06-10 03:33:24,220 basehttp "GET /favicon.ico HTTP/1.1" 404 11350
+ERROR 2026-06-10 11:02:15,406 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:02:15,423 basehttp "GET /users/ HTTP/1.1" 500 130142
+ERROR 2026-06-10 11:02:20,713 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:02:20,722 basehttp "GET /users/ HTTP/1.1" 500 130279
+ERROR 2026-06-10 11:02:21,798 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:02:21,807 basehttp "GET /users/ HTTP/1.1" 500 130279
+ERROR 2026-06-10 11:28:53,835 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:28:53,841 basehttp "GET /users/ HTTP/1.1" 500 130279
+ERROR 2026-06-10 11:28:55,095 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:28:55,100 basehttp "GET /users/ HTTP/1.1" 500 130279
+ERROR 2026-06-10 11:32:14,680 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:32:14,690 basehttp "GET /users/ HTTP/1.1" 500 130142
+ERROR 2026-06-10 11:32:16,463 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 44, in users_list
+    users_qs = users_qs.annotate(
+        total_products=Count('products_created', distinct=True),
+        total_inventory=Count('inventory_created', distinct=True),
+        total_orders=Count('orders_created', distinct=True),
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1638, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1133, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\aggregates.py", line 64, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 950, in resolve_expression
+    c.source_expressions[pos] = arg.resolve_expression(
+                                ~~~~~~~~~~~~~~~~~~~~~~^
+        query, allow_joins, reuse, summarize, for_save
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\expressions.py", line 829, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1977, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1824, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\query.py", line 1725, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'orders_created' into field. Choices are: approval_actions_performed, approval_logs, audit_logs, carton_images_uploaded, date_joined, email, first_name, groups, id, inventory_created, inventory_updated, is_active, is_staff, is_superuser, last_login, last_name, logentry, orders, orders_updated, password, product_images_uploaded, products_created, products_updated, profile, total_inventory, total_products, user_permissions, username, videos_uploaded, wishlist_items
+ERROR 2026-06-10 11:32:16,469 basehttp "GET /users/ HTTP/1.1" 500 130279
+ERROR 2026-06-10 11:35:33,616 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 52, in users_list
+    for user in users_qs:
+                ^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 398, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 279, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 1367, in get_related_selections
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'userprofile'. Choices are: profile
+ERROR 2026-06-10 11:35:33,623 basehttp "GET /users/ HTTP/1.1" 500 128420
+ERROR 2026-06-10 11:38:56,376 log Internal Server Error: /users/
+Traceback (most recent call last):
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "D:\downloads\Aps (3)\Aps\app\aps\views\users.py", line 52, in users_list
+    for user in users_qs:
+                ^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 398, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 279, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "C:\Users\Drashti\AppData\Roaming\Python\Python314\site-packages\django\db\models\sql\compiler.py", line 1367, in get_related_selections
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'userprofile'. Choices are: profile
+ERROR 2026-06-10 11:38:56,383 basehttp "GET /users/ HTTP/1.1" 500 128548
+WARNING 2026-06-10 11:38:56,588 log Not Found: /favicon.ico
+WARNING 2026-06-10 11:38:56,588 basehttp "GET /favicon.ico HTTP/1.1" 404 11350
+WARNING 2026-06-10 11:43:34,307 log Not Found: /favicon.ico
+WARNING 2026-06-10 11:43:34,308 basehttp "GET /favicon.ico HTTP/1.1" 404 11350
+WARNING 2026-06-10 12:16:55,087 log Not Found: /favicon.ico
+WARNING 2026-06-10 12:16:55,089 basehttp "GET /favicon.ico HTTP/1.1" 404 11350
