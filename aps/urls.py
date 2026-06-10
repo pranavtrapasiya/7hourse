@@ -22,6 +22,13 @@ urlpatterns = [
     path('orders/<int:pk>/', views.order_detail_api, name='order_detail_api'),
     path('orders/<int:pk>/edit/', views.order_edit, name='order_edit'),
     path('orders/<int:pk>/delete/', views.order_delete, name='order_delete'),
+    # ── Users (Admin Only) ──
+    path('users/', views.users_list, name='users_list'),
+    path('users/<int:user_id>/', views.user_details, name='user_details'),
+    path('users/<int:user_id>/products/', views.user_products, name='user_products'),
+    path('users/<int:user_id>/locations/', views.user_locations, name='user_locations'),
+    path('users/<int:user_id>/orders/', views.user_orders, name='user_orders'),
+    path('users/<int:user_id>/activity/', views.user_activity, name='user_activity'),
     # AJAX endpoints
     path('ajax/subcategories/', views.ajax_subcategories, name='ajax_subcategories'),
     path('ajax/products/search/', views.ajax_product_search, name='ajax_product_search'),
