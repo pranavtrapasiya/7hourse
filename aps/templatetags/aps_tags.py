@@ -10,11 +10,11 @@ register = template.Library()
 
 
 @register.simple_tag
-def active_class(request, url_name):
-    """Return 'active' if the current URL matches the given named URL."""
+def active_class(request, *url_names):
+    """Return 'active' if the current URL matches any of the given named URLs."""
     try:
         match = resolve(request.path)
-        if match.url_name == url_name:
+        if match.url_name in url_names:
             return "active"
     except Resolver404:
         pass
