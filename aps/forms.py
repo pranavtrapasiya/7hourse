@@ -26,10 +26,17 @@ class CategoryForm(forms.ModelForm):
             })
         }
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = user
+
     def clean_name(self):
         name = self.cleaned_data.get('name', '').strip()
         if not name:
             raise ValidationError('Category name cannot be blank.')
+        # Check uniqueness per user
+        if self._user and Category.objects.filter(name=name, created_by=self._user).exists():
+            raise ValidationError('You already have a category with this name.')
         return name
 
 
@@ -46,9 +53,11 @@ class SubCategoryForm(forms.ModelForm):
             })
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].empty_label = '— Select Category —'
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(created_by=user)
 
     def clean_name(self):
         name = self.cleaned_data.get('name', '').strip()
@@ -97,11 +106,16 @@ class ProductForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self._user = user
         self.fields['category'].empty_label = '— Select Category —'
         self.fields['subcategory'].empty_label = '— Select Subcategory —'
         self.fields['subcategory'].queryset = SubCategory.objects.none()
+
+        # Scope categories to user
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(created_by=user)
 
         if 'category' in self.data:
             try:
