@@ -27,6 +27,10 @@ from .admin_control import (
     admin_control_center, admin_users, admin_user_detail,
     admin_audit_logs, admin_user_activity_api,
 )
+from .users import (
+    users_list, user_details, user_products, user_locations,
+    user_orders, user_activity,
+)
 
 __all__ = [
     'dashboard',
@@ -45,4 +49,6 @@ __all__ = [
     'bulk_approve_api', 'bulk_reject_api', 'approval_history_api',
     'admin_control_center', 'admin_users', 'admin_user_detail',
     'admin_audit_logs', 'admin_user_activity_api',
+    'users_list', 'user_details', 'user_products', 'user_locations',
+    'user_orders', 'user_activity',
 ]
