@@ -14,24 +14,31 @@ from aps.services.audit import AuditService
 
 @admin_required
 def approval_requests(request):
-    pending_users = User.objects.filter(is_active=False, is_superuser=False)
+    # IDs of users whose most recent approval action was a rejection
+    rejected_user_ids = set(
+        ApprovalLog.objects.filter(action='rejected')
+        .values_list('target_user_id', flat=True).distinct()
+    ) - set(
+        # Exclude users who were later approved (re-approved after rejection)
+        ApprovalLog.objects.filter(action='approved')
+        .values_list('target_user_id', flat=True).distinct()
+    )
+
+    pending_users = User.objects.filter(
+        is_active=False, is_superuser=False
+    ).exclude(id__in=rejected_user_ids)
     approved_users = User.objects.filter(is_active=True, is_superuser=False)
-    total_rejected = ApprovalLog.objects.filter(
-        action='rejected'
-    ).values('target_user').distinct().count()
+    total_rejected = len(rejected_user_ids)
 
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', 'pending')
     sort = request.GET.get('sort', '-date_joined')
 
     if status_filter == 'pending':
-        qs = User.objects.filter(is_active=False, is_superuser=False)
+        qs = User.objects.filter(is_active=False, is_superuser=False).exclude(id__in=rejected_user_ids)
     elif status_filter == 'approved':
         qs = User.objects.filter(is_active=True, is_superuser=False)
     elif status_filter == 'rejected':
-        rejected_user_ids = ApprovalLog.objects.filter(
-            action='rejected'
-        ).values_list('target_user_id', flat=True).distinct()
         qs = User.objects.filter(id__in=rejected_user_ids, is_active=False, is_superuser=False)
     else:
         qs = User.objects.filter(is_superuser=False)
