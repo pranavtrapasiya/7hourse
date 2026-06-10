@@ -7,23 +7,24 @@ from django.views.decorators.http import require_POST
 
 from aps.forms import CategoryForm, SubCategoryForm, ProductCodeSettingsForm
 from aps.models import AuditLog, Category, Product, ProductCodeSettings
-from aps.permissions import can_manage_settings, permission_required
 from aps.services.audit import AuditService
 
 
-@permission_required(can_manage_settings, 'Only administrators can access system settings.')
+@login_required
 def settings_view(request):
-    cat_form = CategoryForm()
-    subcat_form = SubCategoryForm()
-    code_settings = ProductCodeSettings.load()
+    cat_form = CategoryForm(user=request.user)
+    subcat_form = SubCategoryForm(user=request.user)
+    code_settings = ProductCodeSettings.load(user=request.user)
     code_form = ProductCodeSettingsForm(instance=code_settings)
 
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
         if form_type == 'category':
-            cat_form = CategoryForm(request.POST)
+            cat_form = CategoryForm(request.POST, user=request.user)
             if cat_form.is_valid():
-                category = cat_form.save()
+                category = cat_form.save(commit=False)
+                category.created_by = request.user
+                category.save()
                 AuditService.log(
                     request.user, AuditLog.ACTION_CATEGORY_CREATED,
                     object_type='category', object_id=category.pk,
@@ -33,7 +34,7 @@ def settings_view(request):
                 return redirect('settings')
             messages.error(request, 'Fix the errors below.')
         elif form_type == 'subcategory':
-            subcat_form = SubCategoryForm(request.POST)
+            subcat_form = SubCategoryForm(request.POST, user=request.user)
             if subcat_form.is_valid():
                 subcat = subcat_form.save()
                 AuditService.log(
@@ -50,7 +51,7 @@ def settings_view(request):
                 code_form.save()
                 AuditService.log(
                     request.user, AuditLog.ACTION_SETTINGS_CHANGED,
-                    object_type='product_code_settings', object_id=1,
+                    object_type='product_code_settings', object_id=code_settings.pk,
                     object_repr='Product Code Settings', request=request,
                 )
                 messages.success(request, 'Product code settings saved.')
@@ -63,10 +64,14 @@ def settings_view(request):
     preview_code = preview_code.replace('{MONTH}', now.strftime('%b').upper())
     preview_code = preview_code.replace('{SEQ}', preview_seq)
     products_without_code = Product.objects.filter(
-        asin_code__isnull=True, is_deleted=False
+        asin_code__isnull=True, is_deleted=False, created_by=request.user
     ).count()
 
-    categories = Category.objects.prefetch_related('subcategories').order_by('name')
+    # Show only this user's categories
+    categories = Category.objects.filter(
+        created_by=request.user
+    ).prefetch_related('subcategories').order_by('name')
+
     return render(request, 'aps/settings.html', {
         'page_title': 'Settings',
         'active_menu': 'settings',
@@ -80,15 +85,15 @@ def settings_view(request):
     })
 
 
-@permission_required(can_manage_settings, 'Only administrators can migrate product codes.')
+@login_required
 @require_POST
 def migrate_product_codes(request):
     products = Product.objects.filter(
-        asin_code__isnull=True, is_deleted=False
+        asin_code__isnull=True, is_deleted=False, created_by=request.user
     ).order_by('created_at')
     count = 0
     for p in products:
-        p.asin_code = Product._generate_asin_code()
+        p.asin_code = Product._generate_asin_code(user=request.user)
         p.save(update_fields=['asin_code'])
         count += 1
     AuditService.log(
