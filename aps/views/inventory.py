@@ -9,7 +9,8 @@ from aps.models import (
 )
 from aps.permissions import (
     can_delete_inventory, permission_required,
-    filter_products_for_user, filter_inventory_for_user,
+    filter_products_own,
+    filter_inventory_own,
 )
 from aps.services.audit import AuditService
 
@@ -28,23 +29,23 @@ def location_view(request):
 
     if search_query:
         search_results = list(
-            filter_products_for_user(request.user).filter(
+            filter_products_own(request.user).filter(
                 product_name__icontains=search_query, is_deleted=False,
             ).select_related('category', 'subcategory')[:20]
         )
 
     if selected_product_id:
         selected_product = get_object_or_404(
-            filter_products_for_user(request.user).select_related('category', 'subcategory'),
+            filter_products_own(request.user).select_related('category', 'subcategory'),
             pk=selected_product_id, is_deleted=False,
         )
-        existing_entries = filter_inventory_for_user(request.user, selected_product.inventory_entries).select_related(
+        existing_entries = filter_inventory_own(request.user, selected_product.inventory_entries).select_related(
             'created_by'
         ).prefetch_related('carton_images', 'product_images').order_by('-created_at')
 
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
-        selected_product = get_object_or_404(filter_products_for_user(request.user), pk=product_id, is_deleted=False)
+        selected_product = get_object_or_404(filter_products_own(request.user), pk=product_id, is_deleted=False)
         inv_form = WarehouseInventoryForm(request.POST)
 
         if inv_form.is_valid():
@@ -75,7 +76,7 @@ def location_view(request):
             messages.success(request, f'Inventory entry saved for "{selected_product.product_name}".')
             return redirect(f'{request.path}?product_id={selected_product.pk}')
         messages.error(request, 'Please fix the form errors.')
-        existing_entries = filter_inventory_for_user(request.user, selected_product.inventory_entries).prefetch_related(
+        existing_entries = filter_inventory_own(request.user, selected_product.inventory_entries).prefetch_related(
             'carton_images', 'product_images'
         ).order_by('-created_at')
 
