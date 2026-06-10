@@ -93,6 +93,13 @@ def filter_orders_for_user(user, queryset=None):
     return queryset.filter(created_by=user)
 
 
+def filter_orders_own(user, queryset=None):
+    """Return only orders created by this user (regardless of admin status)."""
+    if queryset is None:
+        queryset = Order.objects.all()
+    return queryset.filter(created_by=user)
+
+
 def get_order_for_user(user, pk):
     """Fetch an order with ownership enforcement."""
     order = Order.objects.select_related('product', 'location', 'created_by').get(pk=pk)
@@ -131,6 +138,13 @@ def filter_products_for_user(user, queryset=None):
     return queryset.filter(created_by=user)
 
 
+def filter_products_own(user, queryset=None):
+    """Return only products created by this user (regardless of admin status)."""
+    if queryset is None:
+        queryset = Product.objects.all()
+    return queryset.filter(created_by=user)
+
+
 def get_product_for_user(user, pk):
     """Fetch a product with ownership enforcement."""
     product = Product.objects.select_related('category', 'subcategory', 'created_by', 'updated_by').get(pk=pk)
@@ -166,6 +180,13 @@ def filter_inventory_for_user(user, queryset=None):
         queryset = WarehouseInventory.objects.all()
     if is_administrator(user):
         return queryset
+    return queryset.filter(created_by=user)
+
+
+def filter_inventory_own(user, queryset=None):
+    """Return only inventory entries created by this user (regardless of admin status)."""
+    if queryset is None:
+        queryset = WarehouseInventory.objects.all()
     return queryset.filter(created_by=user)
 
 
