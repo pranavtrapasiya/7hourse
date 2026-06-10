@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from aps.forms import OrderForm
 from aps.models import AuditLog, Order, Product, WarehouseInventory
 from aps.permissions import (
-    can_edit_order, can_delete_order, filter_orders_for_user, get_order_for_user,
+    can_edit_order, can_delete_order, filter_orders_own, get_order_for_user,
 )
 from aps.services.audit import AuditService
 
@@ -24,7 +24,7 @@ def order_create(request):
 
 @login_required
 def order_list(request):
-    qs = filter_orders_for_user(
+    qs = filter_orders_own(
         request.user,
         Order.objects.select_related('product', 'location', 'created_by'),
     )
