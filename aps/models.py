@@ -36,12 +36,19 @@ def inv_video_path(instance, filename):
 # ── Core Classification Models ───────────────────────────────────────────────
 
 class Category(models.Model):
-    name = models.CharField(max_length=150, unique=True)
+    name = models.CharField(max_length=150)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='categories_created',
+    )
 
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         ordering = ['name']
+        unique_together = ('name', 'created_by')
 
     def __str__(self):
         return self.name
@@ -64,10 +71,16 @@ class SubCategory(models.Model):
     def __str__(self):
         return f'{self.category.name} > {self.name}'
 
-# ── Product Code Settings (Singleton) ────────────────────────────────────────
+# ── Product Code Settings (Per-User) ─────────────────────────────────────────
 
 class ProductCodeSettings(models.Model):
-    """Singleton settings for auto product code generation."""
+    """Per-user settings for auto product code generation."""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='product_code_settings',
+        null=True, blank=True,
+    )
     enabled = models.BooleanField(default=True, verbose_name='Enable Auto Product Code')
     prefix_format = models.CharField(
         max_length=100, default='{YEAR}{MONTH}{SEQ}',
@@ -81,30 +94,35 @@ class ProductCodeSettings(models.Model):
         verbose_name_plural = 'Product Code Settings'
 
     def __str__(self):
-        return 'Product Code Settings'
-
-    def save(self, *args, **kwargs):
-        self.pk = 1  # singleton
-        super().save(*args, **kwargs)
+        username = self.user.username if self.user else 'Global'
+        return f'Product Code Settings ({username})'
 
     @classmethod
-    def load(cls):
-        obj, _ = cls.objects.get_or_create(pk=1)
+    def load(cls, user=None):
+        """Load or create settings for a specific user."""
+        obj, _ = cls.objects.get_or_create(user=user)
         return obj
 
 
 class ProductCodeSequence(models.Model):
-    """Tracks auto-increment sequence counters per year/month."""
+    """Tracks auto-increment sequence counters per user/year/month."""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='product_code_sequences',
+    )
     year = models.PositiveIntegerField()
     month = models.CharField(max_length=3)  # JAN, FEB, ...
     last_sequence = models.PositiveIntegerField(default=0)
 
     class Meta:
-        unique_together = ('year', 'month')
+        unique_together = ('user', 'year', 'month')
         verbose_name = 'Product Code Sequence'
 
     def __str__(self):
-        return f'{self.year} {self.month} — seq {self.last_sequence}'
+        username = self.user.username if self.user else 'Global'
+        return f'{username} — {self.year} {self.month} — seq {self.last_sequence}'
 
 
 # ── Master Product (Catalogue) ───────────────────────────────────────────────
@@ -116,7 +134,7 @@ class Product(models.Model):
     Supports soft-delete for data protection.
     """
     product_name = models.CharField(max_length=255, db_index=True)
-    asin_code = models.CharField(max_length=100, unique=True, blank=True, null=True, db_index=True)
+    asin_code = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     sh_code = models.CharField(max_length=100, blank=True, db_index=True)
     category = models.ForeignKey(
         Category,
@@ -158,6 +176,7 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ('asin_code', 'created_by')
         indexes = [
             models.Index(fields=['product_name', 'is_deleted'], name='idx_product_name_active'),
             models.Index(fields=['category', 'is_deleted'], name='idx_product_cat_active'),
@@ -168,8 +187,8 @@ class Product(models.Model):
         return self.product_name
 
     def save(self, *args, **kwargs):
-        if not self.asin_code:
-            self.asin_code = self._generate_asin_code()
+        if not self.asin_code and self.created_by:
+            self.asin_code = self._generate_asin_code(self.created_by)
         super().save(*args, **kwargs)
 
     def soft_delete(self):
@@ -186,13 +205,13 @@ class Product(models.Model):
         self.save(update_fields=['is_deleted', 'deleted_at'])
 
     @staticmethod
-    def _generate_asin_code():
+    def _generate_asin_code(user=None):
         """
-        Generate the next product code using ProductCodeSettings.
+        Generate the next product code using per-user ProductCodeSettings.
         Uses select_for_update() for atomic, collision-proof generation.
         Thread-safe and concurrency-safe.
         """
-        settings = ProductCodeSettings.load()
+        settings = ProductCodeSettings.load(user=user)
         if not settings.enabled:
             return None
 
@@ -203,11 +222,11 @@ class Product(models.Model):
         with transaction.atomic():
             if settings.reset_monthly:
                 seq_obj, created = ProductCodeSequence.objects.select_for_update().get_or_create(
-                    year=year, month=month, defaults={'last_sequence': 0}
+                    user=user, year=year, month=month, defaults={'last_sequence': 0}
                 )
             else:
                 seq_obj, created = ProductCodeSequence.objects.select_for_update().get_or_create(
-                    year=year, month='ALL', defaults={'last_sequence': 0}
+                    user=user, year=year, month='ALL', defaults={'last_sequence': 0}
                 )
 
             seq_obj.last_sequence = F('last_sequence') + 1
@@ -455,9 +474,9 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         # Auto-calculate derived fields
         self.total_cbm = self.quantity * self.cbm                          # Carton Qty × CBM
-        self.total_pieces = self.price * self.carton_piece                 # Price × Pcs in One Carton
-        self.total_amount = self.quantity * self.total_pieces              # Carton Qty × Total Pieces (Payment)
-        self.remaining_to_pay = self.total_amount - self.deposit           # Payment − Deposit
+        self.total_pieces = self.quantity * self.carton_piece              # Quantity × Pcs in One Carton
+        self.total_amount = self.price                                     # Base price (from location)
+        self.remaining_to_pay = self.price - self.deposit                  # Price − Deposit
         super().save(*args, **kwargs)
 
 
