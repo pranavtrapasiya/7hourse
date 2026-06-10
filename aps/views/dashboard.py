@@ -8,7 +8,7 @@ from aps.services.dashboard import DashboardService
 @login_required
 def dashboard(request):
     if is_administrator(request.user):
-        stats = DashboardService.company_stats()
+        stats = DashboardService.company_stats(request.user)
         user_stats = DashboardService.user_stats(request.user)
         context = {
             'page_title': 'Dashboard',
