@@ -1,0 +1,175 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Search and Filter -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <form method="get" class="row g-3">
+            <div class="col-md-6">
+              <input type="text" name="q" class="form-control bg-dark text-white border-secondary" placeholder="Search users..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+              <select name="status" class="form-select bg-dark text-white border-secondary">
+                <option value="">All Status</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search me-2"></i>Search
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Grid -->
+  <div class="row">
+    {% for user_data in page_obj %}
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-start mb-3">
+            <div class="user-avatar-lg me-3">
+              {{ user_data.user.username|first|upper }}
+            </div>
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-1">{{ user_data.user.username }}</h5>
+              <p class="card-text text-muted mb-1">{{ user_data.user.get_full_name|default:"—" }}</p>
+              <p class="card-text text-muted small mb-0">{{ user_data.user.email }}</p>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="stat-box">
+                <div class="stat-value">{{ user_data.total_products }}</div>
+                <div class="stat-label">Products</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-box">
+                <div class="stat-value">{{ user_data.total_inventory }}</div>
+                <div class="stat-label">Locations</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-box">
+                <div class="stat-value">{{ user_data.total_orders }}</div>
+                <div class="stat-label">Orders</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-box">
+                <div class="stat-value {% if user_data.user.is_active %}text-success{% else %}text-danger{% endif %}">
+                  {% if user_data.user.is_active %}Active{% else %}Inactive{% endif %}
+                </div>
+                <div class="stat-label">Status</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-muted small mb-3">
+            <div><i class="bi bi-calendar3 me-2"></i>Joined: {{ user_data.user.date_joined|date:"M d, Y" }}</div>
+            {% if user_data.last_login %}
+            <div><i class="bi bi-clock-history me-2"></i>Last Login: {{ user_data.last_login|date:"M d, Y H:i" }}</div>
+            {% else %}
+            <div><i class="bi bi-clock-history me-2"></i>Last Login: Never</div>
+            {% endif %}
+          </div>
+
+          <a href="{% url 'user_details' user_data.user.id %}" class="btn btn-outline-primary w-100">
+            <i class="bi bi-person-lines-fill me-2"></i>View Details
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>No users found.
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-white border-secondary" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+          <i class="bi bi-chevron-double-left"></i>
+        </a>
+      </li>
+      <li class="page-item">
+        <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      </li>
+      {% endif %}
+
+      <li class="page-item active">
+        <span class="page-link bg-primary text-white border-primary">{{ page_obj.number }}</span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+      <li class="page-item">
+        <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+          <i class="bi bi-chevron-double-right"></i>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+
+<style>
+.user-avatar-lg {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+</style>
+{% endblock %}

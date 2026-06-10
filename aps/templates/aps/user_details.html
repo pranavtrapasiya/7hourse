@@ -1,0 +1,459 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- User Profile Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center flex-wrap gap-4">
+            <div class="user-avatar-xl">
+              {{ target_user.username|first|upper }}
+            </div>
+            <div class="flex-grow-1">
+              <h4 class="mb-1">{{ target_user.username }}</h4>
+              <p class="text-muted mb-1">{{ target_user.get_full_name|default:"—" }}</p>
+              <p class="text-muted small mb-2">{{ target_user.email }}</p>
+              <div class="d-flex flex-wrap gap-3">
+                <span class="badge {% if target_user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                  {% if target_user.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                <span class="text-muted small">
+                  <i class="bi bi-calendar3 me-1"></i>Joined: {{ target_user.date_joined|date:"M d, Y" }}
+                </span>
+                {% if last_login %}
+                <span class="text-muted small">
+                  <i class="bi bi-clock-history me-1"></i>Last Login: {{ last_login|date:"M d, Y H:i" }}
+                </span>
+                {% else %}
+                <span class="text-muted small">
+                  <i class="bi bi-clock-history me-1"></i>Last Login: Never
+                </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row mb-4">
+    <div class="col-6 col-md-3 mb-3">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body text-center">
+          <div class="stat-value-lg">{{ stats.total_products }}</div>
+          <div class="stat-label">Products</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body text-center">
+          <div class="stat-value-lg">{{ stats.total_inventory }}</div>
+          <div class="stat-label">Locations</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body text-center">
+          <div class="stat-value-lg">{{ stats.total_orders }}</div>
+          <div class="stat-label">Orders</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body text-center">
+          <div class="stat-value-lg">${{ stats.total_order_value|floatformat:2 }}</div>
+          <div class="stat-label">Order Value</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <ul class="nav nav-tabs border-secondary mb-4" id="userTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+        <i class="bi bi-box-seam-fill me-2"></i>Products
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="locations-tab" data-bs-toggle="tab" data-bs-target="#locations" type="button" role="tab">
+        <i class="bi bi-geo-alt-fill me-2"></i>Locations
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
+        <i class="bi bi-receipt me-2"></i>Orders
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+        <i class="bi bi-clock-history me-2"></i>Activity
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+        <i class="bi bi-sliders2 me-2"></i>Settings
+      </button>
+    </li>
+  </ul>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="userTabsContent">
+    <!-- Products Tab -->
+    <div class="tab-pane fade show active" id="products" role="tabpanel">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Products Created by {{ target_user.username }}</h5>
+            <a href="{% url 'user_products' target_user.id %}" class="btn btn-sm btn-outline-primary">
+              View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Product Code</th>
+                  <th>Category</th>
+                  <th>Created</th>
+                  <th>Updated</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product in target_user.products_created.all|slice:":10" %}
+                <tr>
+                  <td>
+                    <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                      {{ product.product_name }}
+                    </a>
+                  </td>
+                  <td>{{ product.asin_code|default:"—" }}</td>
+                  <td>{{ product.category.name|default:"—" }}</td>
+                  <td>{{ product.created_at|date:"M d, Y" }}</td>
+                  <td>{{ product.updated_at|date:"M d, Y" }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-secondary me-1" title="View">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{% url 'product_edit' product.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted">No products found</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locations Tab -->
+    <div class="tab-pane fade" id="locations" role="tabpanel">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Locations Created by {{ target_user.username }}</h5>
+            <a href="{% url 'user_locations' target_user.id %}" class="btn btn-sm btn-outline-primary">
+              View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Location</th>
+                  <th>Quantity</th>
+                  <th>CBM</th>
+                  <th>Cartons</th>
+                  <th>Price</th>
+                  <th>Deposit</th>
+                  <th>Created</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for location in target_user.inventory_created.all|slice:":10" %}
+                <tr>
+                  <td>{{ location.product.product_name }}</td>
+                  <td>{{ location.location_number|default:"—" }}</td>
+                  <td>{{ location.quantity }}</td>
+                  <td>{{ location.cbm }}</td>
+                  <td>{{ location.carton_piece }}</td>
+                  <td>${{ location.price }}</td>
+                  <td>${{ location.deposit }}</td>
+                  <td>{{ location.created_at|date:"M d, Y" }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'location' %}?product_id={{ location.product.id }}" class="btn btn-sm btn-outline-secondary me-1" title="View">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center text-muted">No locations found</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div class="tab-pane fade" id="orders" role="tabpanel">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Orders Created by {{ target_user.username }}</h5>
+            <a href="{% url 'user_orders' target_user.id %}" class="btn btn-sm btn-outline-primary">
+              View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Total Price</th>
+                  <th>Deposit</th>
+                  <th>Remaining</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in target_user.orders.all|slice:":10" %}
+                <tr>
+                  <td>#{{ order.id }}</td>
+                  <td>{{ order.product.product_name }}</td>
+                  <td>{{ order.quantity }}</td>
+                  <td>${{ order.total_amount }}</td>
+                  <td>${{ order.deposit }}</td>
+                  <td>${{ order.remaining_to_pay }}</td>
+                  <td>
+                    {% if order.remaining_to_pay > 0 %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    {% else %}
+                    <span class="badge bg-success">Paid</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ order.created_at|date:"M d, Y" }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'order_detail_api' order.id %}" class="btn btn-sm btn-outline-secondary me-1" title="View">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{% url 'order_edit' order.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center text-muted">No orders found</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div class="tab-pane fade" id="activity" role="tabpanel">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Activity History for {{ target_user.username }}</h5>
+            <a href="{% url 'user_activity' target_user.id %}" class="btn btn-sm btn-outline-primary">
+              View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Object</th>
+                  <th>Timestamp</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in target_user.audit_logs.all|slice:":20" %}
+                <tr>
+                  <td>
+                    <span class="badge bg-secondary">{{ log.get_action_display }}</span>
+                  </td>
+                  <td>{{ log.object_repr|default:"—" }}</td>
+                  <td>{{ log.created_at|date:"M d, Y H:i:s" }}</td>
+                  <td>{{ log.ip_address|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No activity found</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-pane fade" id="settings" role="tabpanel">
+      <div class="row g-4">
+        <!-- Product Code Settings -->
+        <div class="col-12 col-xl-4">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-4"><i class="bi bi-upc-scan text-green me-2"></i>Product Code Settings</h5>
+              <div class="d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary">
+                  <span class="text-muted">Status</span>
+                  {% if user_code_settings.enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Disabled</span>
+                  {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary">
+                  <span class="text-muted">Format</span>
+                  <span class="fw-bold">{{ user_code_settings.prefix_format }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary">
+                  <span class="text-muted">Sequence Length</span>
+                  <span class="fw-bold">{{ user_code_settings.sequence_length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Reset Monthly</span>
+                  {% if user_code_settings.reset_monthly %}
+                    <span class="badge bg-success">Yes</span>
+                  {% else %}
+                    <span class="badge bg-secondary">No</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="col-12 col-xl-8">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-4"><i class="bi bi-tags-fill text-blue me-2"></i>Categories & Subcategories</h5>
+              <div class="row g-3">
+                {% for cat in user_categories %}
+                <div class="col-12 col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-tag-fill text-amber"></i>
+                      <h6 class="mb-0 fw-600">{{ cat.name }}</h6>
+                      <span class="badge bg-secondary ms-auto">{{ cat.subcategories.count }}</span>
+                    </div>
+                    {% if cat.subcategories.all %}
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                      {% for sub in cat.subcategories.all %}
+                      <span class="badge-subcat">{{ sub.name }}</span>
+                      {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0 mt-1">No subcategories</p>
+                    {% endif %}
+                  </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                  <p class="text-center text-muted mb-0 py-3">No categories created yet.</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.user-avatar-xl {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-value-lg {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.nav-tabs .nav-link {
+  color: #6c757d;
+  border-color: #343a40;
+  border-bottom-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #fff;
+  border-color: #343a40;
+  border-bottom-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: #fff;
+  background-color: #212529;
+  border-color: #343a40;
+  border-bottom-color: #212529;
+}
+
+.table-dark {
+  --bs-table-bg: #212529;
+  --bs-table-border-color: #343a40;
+}
+
+.table-dark th {
+  border-color: #343a40;
+}
+
+.table-dark td {
+  border-color: #343a40;
+}
+</style>
+{% endblock %}

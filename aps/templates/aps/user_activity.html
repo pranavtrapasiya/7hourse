@@ -1,0 +1,98 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h4 class="mb-1">Activity - {{ target_user.username }}</h4>
+          <p class="text-muted mb-0">Complete audit trail for this user</p>
+        </div>
+        <a href="{% url 'user_details' target_user.id %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Back to User Details
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Object Type</th>
+                  <th>Object</th>
+                  <th>Timestamp</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in page_obj %}
+                <tr>
+                  <td>
+                    <span class="badge bg-secondary">{{ log.get_action_display }}</span>
+                  </td>
+                  <td>{{ log.object_type|default:"—" }}</td>
+                  <td>{{ log.object_repr|default:"—" }}</td>
+                  <td>{{ log.created_at|date:"M d, Y H:i:s" }}</td>
+                  <td>{{ log.ip_address|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">No activity found for this user</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          {% if page_obj.has_other_pages %}
+          <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-white border-secondary" href="?page=1">
+                  <i class="bi bi-chevron-double-left"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.previous_page_number }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+
+              <li class="page-item active">
+                <span class="page-link bg-primary text-white border-primary">{{ page_obj.number }}</span>
+              </li>
+
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.next_page_number }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.paginator.num_pages }}">
+                  <i class="bi bi-chevron-double-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
