@@ -48,34 +48,30 @@ def _reject_user(target_user, performed_by, note='', request=None):
 
 @admin_required
 def approval_requests(request):
-    # IDs of users whose most recent approval action was a rejection
-    rejected_user_ids = set(
-        ApprovalLog.objects.filter(action='rejected')
-        .values_list('target_user_id', flat=True).distinct()
-    ) - set(
-        # Exclude users who were later approved (re-approved after rejection)
-        ApprovalLog.objects.filter(action='approved')
-        .values_list('target_user_id', flat=True).distinct()
+    from django.db.models import OuterRef, Subquery, Value
+    from django.db.models.functions import Coalesce
+    latest_log = ApprovalLog.objects.filter(target_user=OuterRef('pk')).order_by('-created_at')
+
+    base_qs = User.objects.filter(is_superuser=False).annotate(
+        latest_action=Coalesce(Subquery(latest_log.values('action')[:1]), Value(''))
     )
 
-    pending_users = User.objects.filter(
-        is_active=False, is_superuser=False
-    ).exclude(id__in=rejected_user_ids)
-    approved_users = User.objects.filter(is_active=True, is_superuser=False)
-    total_rejected = len(rejected_user_ids)
+    pending_users = base_qs.filter(is_active=False).exclude(latest_action='rejected')
+    approved_users = base_qs.filter(is_active=True)
+    rejected_users = base_qs.filter(is_active=False, latest_action='rejected')
 
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', 'pending')
     sort = request.GET.get('sort', '-date_joined')
 
     if status_filter == 'pending':
-        qs = User.objects.filter(is_active=False, is_superuser=False).exclude(id__in=rejected_user_ids)
+        qs = pending_users
     elif status_filter == 'approved':
-        qs = User.objects.filter(is_active=True, is_superuser=False)
+        qs = approved_users
     elif status_filter == 'rejected':
-        qs = User.objects.filter(id__in=rejected_user_ids, is_active=False, is_superuser=False)
+        qs = rejected_users
     else:
-        qs = User.objects.filter(is_superuser=False)
+        qs = base_qs
 
     if search_query:
         qs = qs.filter(
@@ -104,7 +100,7 @@ def approval_requests(request):
         'sort': sort,
         'pending_count': pending_users.count(),
         'approved_count': approved_users.count(),
-        'rejected_count': total_rejected,
+        'rejected_count': rejected_users.count(),
         'recent_logs': recent_logs,
     })
 

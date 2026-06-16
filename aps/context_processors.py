@@ -12,16 +12,12 @@ def sidebar_context(request):
         pending_count = 0
         if is_administrator(request.user):
             # Exclude rejected users from pending count
-            rejected_user_ids = set(
-                ApprovalLog.objects.filter(action='rejected')
-                .values_list('target_user_id', flat=True).distinct()
-            ) - set(
-                ApprovalLog.objects.filter(action='approved')
-                .values_list('target_user_id', flat=True).distinct()
-            )
-            pending_count = User.objects.filter(
-                is_active=False, is_superuser=False
-            ).exclude(id__in=rejected_user_ids).count()
+            from django.db.models import OuterRef, Subquery, Value
+            from django.db.models.functions import Coalesce
+            latest_log = ApprovalLog.objects.filter(target_user=OuterRef('pk')).order_by('-created_at')
+            pending_count = User.objects.filter(is_active=False, is_superuser=False).annotate(
+                latest_action=Coalesce(Subquery(latest_log.values('action')[:1]), Value(''))
+            ).exclude(latest_action='rejected').count()
 
         wishlist_product_ids = set(request.user.wishlist_items.values_list('product_id', flat=True))
         return {
