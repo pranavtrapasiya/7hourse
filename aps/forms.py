@@ -137,6 +137,11 @@ class WarehouseInventoryForm(forms.ModelForm):
     class Meta:
         model = WarehouseInventory
         fields = ['location_number', 'price', 'carton_piece', 'cbm', 'remark']
+        labels = {
+            'location_number': 'Shop Number',
+            'price': 'RMB',
+            'cbm': '1 Carton CBM',
+        }
         widgets = {
             'location_number': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -204,15 +209,41 @@ class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
-            'quantity', 'price', 'deposit', 'cbm', 'carton_piece',
-            'location_number', 'remark', 'order_date',
+            'quantity', 'rmb', 'exchange_value', 'rupees', 'price', 'deposit',
+            'cbm', 'carton_piece', 'location_number', 'remark', 'order_date',
         ]
+        labels = {
+            'location_number': 'Shop',
+            'cbm': '1 Carton CBM',
+            'price': 'Rupees',
+        }
         widgets = {
             'quantity': forms.NumberInput(attrs={
                 'class': 'form-control form-control-lg',
                 'placeholder': '1',
                 'min': '1',
                 'id': 'id_quantity',
+            }),
+            'rmb': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0',
+                'id': 'id_rmb',
+            }),
+            'exchange_value': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0',
+                'id': 'id_exchange_value',
+            }),
+            'rupees': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0',
+                'id': 'id_rupees',
             }),
             'price': forms.NumberInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -263,13 +294,53 @@ class OrderForm(forms.ModelForm):
 
 # ── User Registration & Login Forms ──────────────────────────────────────────
 
+COUNTRY_CODE_CHOICES = [
+    ('+91', 'India (+91)'),
+    ('+1', 'USA (+1)'),
+    ('+44', 'UK (+44)'),
+    ('+971', 'UAE (+971)'),
+    ('+86', 'China (+86)'),
+    ('+65', 'Singapore (+65)'),
+]
+
+
 class UserRegistrationForm(UserCreationForm):
+    full_name = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter full name',
+            'autocomplete': 'name',
+        }),
+    )
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
             'placeholder': 'Enter email address',
             'autocomplete': 'email',
-        })
+        }),
+    )
+    country_code = forms.ChoiceField(
+        choices=COUNTRY_CODE_CHOICES,
+        initial='+91',
+        widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+    )
+    mobile_number = forms.CharField(
+        max_length=15,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': '10-digit mobile number',
+            'autocomplete': 'tel',
+            'inputmode': 'numeric',
+        }),
+    )
+    city = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter city',
+            'autocomplete': 'address-level2',
+        }),
     )
 
     class Meta(UserCreationForm.Meta):
@@ -278,22 +349,50 @@ class UserRegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field_name in self.fields:
-            field = self.fields[field_name]
-            placeholder_text = (field.label or field_name).lower()
-            field.widget.attrs.update({
-                'class': 'form-control form-control-lg',
-                'placeholder': f'Enter {placeholder_text}',
-                'autocomplete': 'off'
-            })
+        for field_name in ('username', 'password1', 'password2', 'full_name', 'email',
+                           'mobile_number', 'city'):
+            if field_name in self.fields:
+                field = self.fields[field_name]
+                if not isinstance(field.widget, forms.Select):
+                    field.widget.attrs.setdefault('class', 'form-control form-control-lg')
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip()
         if not email:
-            raise ValidationError("Email is required.")
+            raise ValidationError('Email is required.')
         if User.objects.filter(email=email).exists():
-            raise ValidationError("A user with this email address already exists.")
+            raise ValidationError('A user with this email address already exists.')
         return email
+
+    def clean_mobile_number(self):
+        from .models import UserProfile
+        from .validators import validate_mobile_number
+        country_code = self.cleaned_data.get('country_code', '+91')
+        mobile = validate_mobile_number(
+            self.cleaned_data.get('mobile_number', ''), country_code=country_code,
+        )
+        if UserProfile.objects.filter(mobile_number=mobile).exists():
+            raise ValidationError('This mobile number is already registered.')
+        return mobile
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        full_name = self.cleaned_data.get('full_name', '').strip()
+        parts = full_name.split(None, 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ''
+        if commit:
+            user.save()
+            from .models import UserProfile
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'mobile_number': self.cleaned_data['mobile_number'],
+                    'country_code': self.cleaned_data['country_code'],
+                    'city': self.cleaned_data['city'],
+                },
+            )
+        return user
 
 
 class ApprovedUserLoginForm(AuthenticationForm):

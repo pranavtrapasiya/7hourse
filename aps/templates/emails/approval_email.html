@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #2563eb;">Account Approved</h2>
+  <p>Hello <strong>{{ username }}</strong>,</p>
+  <p>Your warehouse management account has been approved by an administrator. You can now sign in and start using the system.</p>
+  <p><strong>Username:</strong> {{ username }}</p>
+  <p style="margin: 24px 0;">
+    <a href="{{ login_url }}" style="background: #2563eb; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Sign In</a>
+  </p>
+  <p style="color: #666; font-size: 14px;">If you did not register for this account, please contact your administrator.</p>
+</body>
+</html>

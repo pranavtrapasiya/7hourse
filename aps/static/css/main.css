@@ -62,6 +62,20 @@ a:hover { color: #7ab8fb; }
 .data-table-wrap .table { margin-bottom: 0; }
 .product-card-sm { min-height: auto; }
 
+.product-thumb-wrap { position: relative; width: 48px; height: 48px; }
+.product-thumb {
+  width: 48px; height: 48px; object-fit: cover; border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-thumb-empty {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); color: var(--text-dim); font-size: 1.2rem;
+}
+.product-list-table tr:hover .product-thumb {
+  transform: scale(2.2); z-index: 20; position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+
 .fw-500 { font-weight: 500; }
 .fw-600 { font-weight: 600; }
 .text-sm { font-size: 0.85rem; }

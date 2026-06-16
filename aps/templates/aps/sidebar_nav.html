@@ -7,10 +7,48 @@
         <span>Dashboard</span>
       </a>
     </li>
+
+    {% if is_administrator %}
+    {# ── Administrator: system management only ── #}
+    <li class="nav-divider"></li>
+    <li class="nav-label">Administration</li>
+    <li class="nav-item">
+      <a href="{% url 'approval_requests' %}" class="nav-link {% active_class request 'approval_requests' %} d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-person-check-fill me-2"></i>
+          <span>Approval Requests</span>
+        </div>
+        {% if pending_approvals_count > 0 %}
+        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem; min-width: 1.5rem; text-align: center;">
+          {{ pending_approvals_count }}
+        </span>
+        {% endif %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'users_list' %}" class="nav-link {% active_class request 'users_list' 'user_details' 'user_products' 'user_locations' 'user_orders' 'user_activity' %}">
+        <i class="bi bi-people-fill"></i>
+        <span>Users</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'admin_control' %}" class="nav-link {% active_class request 'admin_control' 'admin_users' 'admin_user_detail' 'admin_audit_logs' %}">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>Admin Center</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'admin_audit_logs' %}" class="nav-link {% active_class request 'admin_audit_logs' %}">
+        <i class="bi bi-journal-text"></i>
+        <span>Audit Logs</span>
+      </a>
+    </li>
+    {% else %}
+    {# ── Regular user: private business workspace ── #}
     <li class="nav-item">
       <a href="{% url 'location' %}" class="nav-link {% active_class request 'location' %}">
-        <i class="bi bi-geo-alt-fill"></i>
-        <span>Location</span>
+        <i class="bi bi-shop"></i>
+        <span>Add Shop</span>
       </a>
     </li>
     <li class="nav-divider"></li>
@@ -62,37 +100,8 @@
         <span>Settings</span>
       </a>
     </li>
-    {% if is_administrator %}
-    <li class="nav-item">
-      <a href="{% url 'admin_control' %}" class="nav-link {% active_class request 'admin_control' %}">
-        <i class="bi bi-shield-lock-fill"></i>
-        <span>Admin Center</span>
-      </a>
-    </li>
     {% endif %}
-    {% if is_administrator %}
-    <li class="nav-item">
-      <a href="{% url 'users_list' %}" class="nav-link {% active_class request 'users_list' 'user_details' 'user_products' 'user_locations' 'user_orders' 'user_activity' %}">
-        <i class="bi bi-people-fill"></i>
-        <span>Users</span>
-      </a>
-    </li>
-    {% endif %}
-    {% if is_administrator %}
-    <li class="nav-item">
-      <a href="{% url 'approval_requests' %}" class="nav-link {% active_class request 'approval_requests' %} d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-person-check-fill me-2"></i>
-          <span>User Approvals</span>
-        </div>
-        {% if pending_approvals_count > 0 %}
-        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem; min-width: 1.5rem; text-align: center;">
-          {{ pending_approvals_count }}
-        </span>
-        {% endif %}
-      </a>
-    </li>
-    {% endif %}
+
     <li class="nav-item">
       <a href="{% url 'logout' %}" class="nav-link nav-link-danger">
         <i class="bi bi-box-arrow-right"></i>

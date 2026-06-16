@@ -66,7 +66,7 @@
 <!-- Step Indicators -->
 <div class="step-indicator">
   <span class="step-badge active" id="step1Badge"><i class="bi bi-1-circle-fill"></i> Search Product</span>
-  <span class="step-badge" id="step2Badge"><i class="bi bi-2-circle-fill"></i> Select Location</span>
+  <span class="step-badge" id="step2Badge"><i class="bi bi-2-circle-fill"></i> Select Shop</span>
   <span class="step-badge" id="step3Badge"><i class="bi bi-3-circle-fill"></i> Create Order</span>
 </div>
 
@@ -104,7 +104,7 @@
   <div class="content-card mb-4">
     <div class="content-card-header">
       <i class="bi bi-geo-alt-fill text-amber"></i>
-      <h5 class="mb-0">Select Location</h5>
+      <h5 class="mb-0">Select Shop</h5>
       <span class="badge bg-secondary ms-auto" id="locCount">0</span>
     </div>
     <div id="locationsContainer">
@@ -137,16 +137,24 @@
             <input type="hidden" id="orderDate">
 
             <div class="row g-3">
-              <div class="col-6">
-                <label class="form-label fw-500">Price (₹)</label>
-                <input type="number" id="orderPrice" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
+              <div class="col-4">
+                <label class="form-label fw-500">RMB</label>
+                <input type="number" id="orderRmb" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
+              </div>
+              <div class="col-4">
+                <label class="form-label fw-500">Value</label>
+                <input type="number" id="orderValue" class="form-control form-control-lg" step="0.0001" min="0" value="85" placeholder="85">
+              </div>
+              <div class="col-4">
+                <label class="form-label fw-500">Rupees</label>
+                <input type="number" id="orderRupees" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00" readonly>
               </div>
               <div class="col-6">
                 <label class="form-label fw-500">Pcs in One Carton</label>
                 <input type="number" id="orderCarton" class="form-control form-control-lg" min="0" placeholder="0">
               </div>
               <div class="col-6">
-                <label class="form-label fw-500">CBM</label>
+                <label class="form-label fw-500">1 Carton CBM</label>
                 <input type="number" id="orderCbm" class="form-control form-control-lg" step="0.0001" min="0" placeholder="0.0000">
               </div>
               <div class="col-6">
@@ -158,6 +166,7 @@
                 <input type="number" id="orderDeposit" class="form-control form-control-lg" step="0.01" min="0" placeholder="0.00">
               </div>
             </div>
+            <input type="hidden" id="orderPrice">
 
             <div class="d-flex gap-2 mt-3">
               <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="clearAutoBtn">
@@ -168,22 +177,38 @@
 
           <!-- RIGHT: Live Calculations -->
           <div class="order-form-right">
-            <h6 class="fw-600 mb-3"><i class="bi bi-calculator me-2 text-accent"></i>Calculations</h6>
+            <h6 class="fw-600 mb-3"><i class="bi bi-calculator me-2 text-accent"></i>Order Summary</h6>
             <div class="summary-row">
-              <span class="summary-label">Total CBM</span>
+              <span class="summary-label">Total 1 Carton CBM</span>
               <span class="summary-value" id="sumTotalCbm">0.0000</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Total Pieces</span>
-              <span class="summary-value" id="sumTotalPcs">0</span>
+              <span class="summary-label">Total RMB</span>
+              <span class="summary-value" id="sumTotalRmb">0.00</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Payment</span>
-              <span class="summary-value summary-total" id="sumPayment">₹0.00</span>
+              <span class="summary-label">Total Rupees</span>
+              <span class="summary-value summary-total" id="sumTotalRupees">₹0.00</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Remaining Payment</span>
+              <span class="summary-label">Total Cartons</span>
+              <span class="summary-value" id="sumTotalCartons">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Carton Pieces</span>
+              <span class="summary-value" id="sumCartonPieces">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Deposit</span>
+              <span class="summary-value" id="sumDeposit">₹0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Remaining RMB</span>
               <span class="summary-value summary-remaining" id="sumRemaining">₹0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Total Quantity</span>
+              <span class="summary-value" id="sumTotalQty">0</span>
             </div>
           </div>
         </div>
@@ -314,8 +339,8 @@ function loadLocations(productId){
             <span class="text-muted small">${l.created_at}</span>
           </div>
           <div class="loc-meta">
-            <div><div class="loc-meta-item">Price</div><div class="loc-meta-value">₹${fmt(l.price)}</div></div>
-            <div><div class="loc-meta-item">CBM</div><div class="loc-meta-value">${l.cbm}</div></div>
+            <div><div class="loc-meta-item">RMB</div><div class="loc-meta-value">${fmt(l.price)}</div></div>
+            <div><div class="loc-meta-item">1 Carton CBM</div><div class="loc-meta-value">${l.cbm}</div></div>
             <div><div class="loc-meta-item">Pcs/Carton</div><div class="loc-meta-value">${l.carton_piece}</div></div>
             <div><div class="loc-meta-item">Remark</div><div class="loc-meta-value text-truncate" style="max-width:120px">${esc(l.remark||'—')}</div></div>
           </div>
@@ -356,11 +381,12 @@ function openOrderModal(loc){
   if(loc){
     document.getElementById('orderLocationId').value=loc.id;
     document.getElementById('orderLocNum').value=loc.location_number||'';
-    document.getElementById('orderPrice').value=loc.price||'';
+    document.getElementById('orderRmb').value=loc.price||'';
     document.getElementById('orderCbm').value=loc.cbm||'';
     document.getElementById('orderCarton').value=loc.carton_piece||'';
     document.getElementById('orderDeposit').value='';
     document.getElementById('orderQty').value='1';
+    if(!document.getElementById('orderValue').value) document.getElementById('orderValue').value='85';
   } else {
     document.getElementById('orderLocationId').value='';
     document.getElementById('orderLocNum').value='';
@@ -377,6 +403,8 @@ document.getElementById('clearAutoBtn').addEventListener('click',()=>{
 });
 
 function clearForm(){
+  document.getElementById('orderRmb').value='';
+  document.getElementById('orderRupees').value='';
   document.getElementById('orderPrice').value='';
   document.getElementById('orderDeposit').value='';
   document.getElementById('orderQty').value='1';
@@ -385,36 +413,45 @@ function clearForm(){
   document.getElementById('orderLocationId').value='';
 }
 
-// ── Live Calculations ──
-['orderPrice','orderDeposit','orderQty','orderCbm','orderCarton'].forEach(id=>{
+['orderRmb','orderValue','orderDeposit','orderQty','orderCbm','orderCarton'].forEach(id=>{
   document.getElementById(id).addEventListener('input', updateSummary);
 });
 
 function updateSummary(){
-  const price    = parseFloat(document.getElementById('orderPrice').value)   || 0;
+  const rmb      = parseFloat(document.getElementById('orderRmb').value)     || 0;
+  const value    = parseFloat(document.getElementById('orderValue').value)   || 0;
   const deposit  = parseFloat(document.getElementById('orderDeposit').value) || 0;
   const qty      = parseInt(document.getElementById('orderQty').value)       || 1;
   const cbm      = parseFloat(document.getElementById('orderCbm').value)     || 0;
   const pcsPerCarton = parseInt(document.getElementById('orderCarton').value) || 0;
 
-  const totalCbm    = qty * cbm;                   // Carton Quantity × CBM
-  const totalPieces = price * pcsPerCarton;          // Price × Pcs in One Carton (one carton price)
-  const payment     = qty * totalPieces;             // Carton Quantity × Total Pieces
-  const remaining   = payment - deposit;             // Payment − Deposit
+  const rupees = rmb * value;
+  document.getElementById('orderRupees').value = rupees ? rupees.toFixed(2) : '';
+  document.getElementById('orderPrice').value = rupees ? rupees.toFixed(2) : '';
 
-  document.getElementById('sumTotalCbm').textContent  = totalCbm.toFixed(4);
-  document.getElementById('sumTotalPcs').textContent   = totalPieces;
-  document.getElementById('sumPayment').textContent    = `₹${fmt(payment)}`;
-  document.getElementById('sumRemaining').textContent  = `₹${fmt(remaining)}`;
+  const totalCbm    = qty * cbm;
+  const totalPieces = pcsPerCarton > 0 ? (qty * pcsPerCarton) : 0;
+  const totalRmb    = pcsPerCarton > 0 ? (totalPieces * rmb) : (qty * rmb);
+  const totalRupees = pcsPerCarton > 0 ? (totalPieces * rupees) : (qty * rupees);
+  const remaining   = totalRupees - deposit;
+
+  document.getElementById('sumTotalCbm').textContent    = totalCbm.toFixed(4);
+  document.getElementById('sumTotalRmb').textContent    = totalRmb.toFixed(2);
+  document.getElementById('sumTotalRupees').textContent = `₹${fmt(totalRupees)}`;
+  document.getElementById('sumTotalCartons').textContent = qty;
+  document.getElementById('sumCartonPieces').textContent = totalPieces;
+  document.getElementById('sumDeposit').textContent     = `₹${fmt(deposit)}`;
+  document.getElementById('sumRemaining').textContent   = `₹${fmt(remaining)}`;
+  document.getElementById('sumTotalQty').textContent    = qty;
 }
 
 // ── Save Order ──
 document.getElementById('saveOrderBtn').addEventListener('click',()=>{
   const btn   = document.getElementById('saveOrderBtn');
-  const price = document.getElementById('orderPrice').value;
+  const rmb = document.getElementById('orderRmb').value;
   const qty   = document.getElementById('orderQty').value;
 
-  if(!price || parseFloat(price)<=0){ alert('Please enter a valid price.'); return; }
+  if(!rmb || parseFloat(rmb)<=0){ alert('Please enter a valid RMB amount.'); return; }
   if(!qty || parseInt(qty)<1){ alert('Please enter a valid carton quantity.'); return; }
 
   btn.disabled=true;
@@ -425,7 +462,10 @@ document.getElementById('saveOrderBtn').addEventListener('click',()=>{
   fd.append('product_id',      document.getElementById('orderProductId').value);
   fd.append('location_id',     document.getElementById('orderLocationId').value);
   fd.append('quantity',         qty);
-  fd.append('price',            price);
+  fd.append('rmb',              rmb);
+  fd.append('exchange_value',   document.getElementById('orderValue').value || '1');
+  fd.append('rupees',           document.getElementById('orderRupees').value || '0');
+  fd.append('price',            document.getElementById('orderRupees').value || '0');
   fd.append('deposit',          document.getElementById('orderDeposit').value || '0');
   fd.append('cbm',              document.getElementById('orderCbm').value    || '0');
   fd.append('carton_piece',     document.getElementById('orderCarton').value  || '0');

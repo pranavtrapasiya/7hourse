@@ -1,12 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from aps.models import AuditLog, Product, WishlistItem
+from aps.permissions import business_user_required, get_product_for_user
 from aps.services.audit import AuditService
 
 
-@login_required
+@business_user_required
 def wishlist_list(request):
     wishlist_items = request.user.wishlist_items.select_related(
         'product__category', 'product__subcategory'
@@ -20,9 +20,12 @@ def wishlist_list(request):
     })
 
 
-@login_required
+@business_user_required
 def wishlist_toggle(request, product_id):
-    product = get_object_or_404(Product, pk=product_id, is_deleted=False)
+    try:
+        product = get_product_for_user(request.user, product_id)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Product not found.'}, status=404)
     wishlist_item = WishlistItem.objects.filter(user=request.user, product=product)
 
     if wishlist_item.exists():

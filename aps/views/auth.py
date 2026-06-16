@@ -17,6 +17,15 @@ def register_view(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
+            from aps.models import UserProfile
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'mobile_number': form.cleaned_data['mobile_number'],
+                    'country_code': form.cleaned_data['country_code'],
+                    'city': form.cleaned_data['city'],
+                },
+            )
             messages.success(
                 request,
                 'Your account registration request has been submitted. '

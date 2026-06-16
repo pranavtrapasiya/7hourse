@@ -70,9 +70,11 @@
         </button>
         <div class="topnav-title">{{ page_title|default:"Dashboard" }}</div>
         <div class="topnav-actions">
+          {% if not is_administrator %}
           <a href="{% url 'product_add' %}" class="btn btn-primary btn-sm d-none d-sm-inline-flex gap-1 align-items-center">
             <i class="bi bi-plus-lg"></i><span>Add Product</span>
           </a>
+          {% endif %}
           <a href="{% url 'logout' %}" class="btn btn-icon btn-outline-secondary btn-sm" title="Logout">
             <i class="bi bi-box-arrow-right"></i>
           </a>

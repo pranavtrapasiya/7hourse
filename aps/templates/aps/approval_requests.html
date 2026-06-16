@@ -171,8 +171,16 @@
         </div>
       </div>
       <div class="meta-item">
+        <div class="meta-label">Mobile</div>
+        <div class="meta-value">{% if u.profile.country_code %}{{ u.profile.country_code }} {% endif %}{{ u.profile.mobile_number|default:"—" }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">City</div>
+        <div class="meta-value">{{ u.profile.city|default:"—" }}</div>
+      </div>
+      <div class="meta-item">
         <div class="meta-label">Full Name</div>
-        <div class="meta-value">{{ u.first_name|default:"—" }} {{ u.last_name|default:"" }}</div>
+        <div class="meta-value">{{ u.get_full_name|default:"—" }}</div>
       </div>
       <div class="meta-item">
         <div class="meta-label">Last Login</div>

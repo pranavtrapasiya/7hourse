@@ -4,6 +4,10 @@ Django settings for app project.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from a .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -172,6 +176,20 @@ else:
 
 # Session engine — database-backed for reliability
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# ── Email (SMTP) ─────────────────────────────────────────────────────────────
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER or "noreply@wms.local",
+)
 
 # Logging
 LOGGING = {

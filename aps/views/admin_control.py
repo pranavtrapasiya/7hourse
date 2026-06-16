@@ -15,7 +15,7 @@ from aps.services.dashboard import DashboardService
 
 @admin_required
 def admin_control_center(request):
-    stats = DashboardService.company_stats()
+    stats = DashboardService.company_stats(request.user)
     user_performance = AnalyticsService.user_performance()
     order_analytics = AnalyticsService.order_analytics()
     inventory_analytics = AnalyticsService.inventory_analytics()

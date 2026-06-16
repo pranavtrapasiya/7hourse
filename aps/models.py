@@ -433,6 +433,11 @@ class Order(models.Model):
 
     # ── Core fields ──
     quantity = models.PositiveIntegerField(default=1)
+    rmb = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='RMB')
+    exchange_value = models.DecimalField(
+        max_digits=12, decimal_places=4, default=1, verbose_name='Value',
+    )
+    rupees = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name='Rupees')
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     deposit = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cbm = models.DecimalField(max_digits=10, decimal_places=4, default=0)
@@ -472,11 +477,23 @@ class Order(models.Model):
         return f'Order #{self.pk} — {self.product.product_name}'
 
     def save(self, *args, **kwargs):
-        # Auto-calculate derived fields
-        self.total_cbm = self.quantity * self.cbm                          # Carton Qty × CBM
-        self.total_pieces = self.quantity * self.carton_piece              # Quantity × Pcs in One Carton
-        self.total_amount = self.price                                     # Base price (from location)
-        self.remaining_to_pay = self.price - self.deposit                  # Price − Deposit
+        from decimal import Decimal
+        rmb = Decimal(str(self.rmb or 0))
+        value = Decimal(str(self.exchange_value or 1))
+        if rmb > 0 and value > 0:
+            self.rupees = rmb * value
+        elif not self.rupees and self.price:
+            self.rupees = self.price
+        self.price = self.rupees
+        self.total_cbm = self.quantity * self.cbm
+        self.total_pieces = self.quantity * (self.carton_piece or 0)
+        
+        if self.carton_piece and self.carton_piece > 0:
+            self.total_amount = Decimal(str(self.total_pieces)) * self.rupees
+        else:
+            self.total_amount = Decimal(str(self.quantity)) * self.rupees
+            
+        self.remaining_to_pay = self.total_amount - self.deposit
         super().save(*args, **kwargs)
 
 
@@ -595,6 +612,10 @@ class UserProfile(models.Model):
         default=False,
         help_text='Delete warehouse inventory entries.',
     )
+    mobile_number = models.CharField(max_length=15, blank=True, db_index=True)
+    country_code = models.CharField(max_length=5, default='+91')
+    city = models.CharField(max_length=100, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -638,6 +659,8 @@ class AuditLog(models.Model):
     ACTION_WISHLIST_ADD = 'wishlist_add'
     ACTION_WISHLIST_REMOVE = 'wishlist_remove'
     ACTION_PERMISSION_CHANGED = 'permission_changed'
+    ACTION_EMAIL_SENT = 'email_sent'
+    ACTION_EMAIL_FAILED = 'email_failed'
 
     ACTION_CHOICES = [
         (ACTION_LOGIN, 'Login'),
@@ -665,6 +688,8 @@ class AuditLog(models.Model):
         (ACTION_WISHLIST_ADD, 'Wishlist Add'),
         (ACTION_WISHLIST_REMOVE, 'Wishlist Remove'),
         (ACTION_PERMISSION_CHANGED, 'Permission Changed'),
+        (ACTION_EMAIL_SENT, 'Email Sent'),
+        (ACTION_EMAIL_FAILED, 'Email Failed'),
     ]
 
     user = models.ForeignKey(

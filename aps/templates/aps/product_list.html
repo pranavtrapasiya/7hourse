@@ -79,9 +79,45 @@
   </div>
 </div>
 
-<!-- ── PRODUCT GRID ───────────────────────────────────── -->
+<!-- ── PRODUCT TABLE (desktop) ────────────────────────── -->
 {% if page_obj %}
-<div class="row g-3 mb-4" id="productGrid">
+<div class="data-table-wrap d-none d-md-block mb-4">
+  <table class="table table-dark table-hover align-middle mb-0 product-list-table">
+    <thead>
+      <tr>
+        <th style="width:72px">Image</th>
+        <th>Product</th>
+        <th>Code</th>
+        <th>Category</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in page_obj %}
+      <tr onclick="window.location='{% url 'product_detail' product.pk %}'" style="cursor:pointer">
+        <td>
+          <div class="product-thumb-wrap">
+            {% if product.primary_image %}
+            <img src="{{ product.primary_image.url }}" alt="" class="product-thumb" data-full="{{ product.primary_image.url }}">
+            {% else %}
+            <div class="product-thumb product-thumb-empty"><i class="bi bi-image"></i></div>
+            {% endif %}
+          </div>
+        </td>
+        <td class="fw-500">{{ product.product_name }}</td>
+        <td class="text-muted font-mono text-sm">{{ product.asin_code|default:"—" }}</td>
+        <td>{{ product.category.name|default:"—" }}</td>
+        <td class="text-muted text-sm">{{ product.created_at|date:"d M Y" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- ── PRODUCT GRID (mobile) ───────────────────────────── -->
+{% if page_obj %}
+<div class="row g-3 mb-4 d-md-none" id="productGrid">
   {% for product in page_obj %}
   <div class="col-6 col-md-4 col-lg-5th">
     <div class="product-card-link" style="position: relative; display: block; height: 100%;">

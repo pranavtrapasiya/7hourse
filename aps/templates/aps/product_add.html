@@ -110,7 +110,7 @@
         <div class="mt-3 p-3 rounded-3" style="background:var(--surface-2);border:1px solid var(--border);">
           <div class="d-flex align-items-center gap-2 text-muted small">
             <i class="bi bi-info-circle"></i>
-            Location, pricing, carton details and media are added via
+            Shop, RMB pricing, carton details and media are added via
             <strong class="text-accent ms-1">Warehouse Inventory</strong>.
           </div>
         </div>
@@ -145,28 +145,28 @@
           Whichever is selected last wins (Django reads the last value).
         -->
         <div class="upload-btns">
-          <label for="galleryInput" class="btn-upload">
+          <label for="galleryInput" class="btn-upload mb-0">
             <i class="bi bi-image"></i>
             <span>From Gallery</span>
           </label>
-          <label for="cameraInput" class="btn-upload">
+          <button type="button" class="btn-upload mb-0 w-100" id="openCameraBtn" style="border: 1.5px dashed var(--border); background: var(--surface-2); color: var(--text-muted);">
             <i class="bi bi-camera"></i>
             <span>Take Photo</span>
-          </label>
+          </button>
         </div>
 
         <!-- Gallery file input (no capture) -->
         <input type="file"
                id="galleryInput"
                name="main_image"
-               accept="image/jpeg,image/png,image/webp"
+               accept="image/*"
                style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;">
 
         <!-- Camera file input (capture opens camera directly on mobile) -->
         <input type="file"
                id="cameraInput"
                name="main_image"
-               accept="image/jpeg,image/png,image/webp"
+               accept="image/*"
                capture="environment"
                style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;">
 
@@ -195,9 +195,30 @@
       </a>
       {% endif %}
     </div>
-
   </div>
 </form>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title"><i class="bi bi-camera me-2"></i>Take Photo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="cameraError" class="alert alert-danger d-none small mb-2"></div>
+        <video id="cameraVideo" autoplay playsinline style="width: 100%; max-width: 100%; border-radius: 8px; background: #000; display: none;"></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+      </div>
+      <div class="modal-footer border-secondary justify-content-center">
+        <button type="button" class="btn btn-primary" id="captureBtn" style="display: none;">
+          <i class="bi bi-circle-fill text-danger me-2"></i>Capture Photo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -252,6 +273,65 @@ document.getElementById('cameraInput').addEventListener('change', function() {
     document.getElementById('galleryInput').value = '';
     showPreview(this.files[0]);
   }
+});
+
+// ── WebRTC Camera Capture for Laptops/Desktops ──
+const openCameraBtn = document.getElementById('openCameraBtn');
+const cameraModalEl = document.getElementById('cameraModal');
+let cameraModal;
+if (typeof bootstrap !== 'undefined') {
+  cameraModal = new bootstrap.Modal(cameraModalEl);
+}
+const cameraVideo = document.getElementById('cameraVideo');
+const cameraCanvas = document.getElementById('cameraCanvas');
+const captureBtn = document.getElementById('captureBtn');
+const cameraError = document.getElementById('cameraError');
+let stream = null;
+
+openCameraBtn.addEventListener('click', async () => {
+  if (cameraModal) cameraModal.show();
+  cameraError.classList.add('d-none');
+  cameraVideo.style.display = 'block';
+  captureBtn.style.display = 'inline-block';
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    cameraVideo.srcObject = stream;
+  } catch (err) {
+    console.error(err);
+    cameraError.textContent = 'Unable to access camera. Please ensure permissions are granted.';
+    cameraError.classList.remove('d-none');
+    cameraVideo.style.display = 'none';
+    captureBtn.style.display = 'none';
+  }
+});
+
+cameraModalEl.addEventListener('hidden.bs.modal', () => {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  cameraVideo.srcObject = null;
+});
+
+captureBtn.addEventListener('click', () => {
+  if (!stream) return;
+  cameraCanvas.width = cameraVideo.videoWidth;
+  cameraCanvas.height = cameraVideo.videoHeight;
+  const ctx = cameraCanvas.getContext('2d');
+  ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+  
+  cameraCanvas.toBlob(blob => {
+    const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+    
+    // Assign the captured file to the hidden cameraInput using DataTransfer
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('cameraInput').files = dt.files;
+    document.getElementById('galleryInput').value = ''; // clear gallery
+    
+    showPreview(file);
+    if (cameraModal) cameraModal.hide();
+  }, 'image/jpeg', 0.9);
 });
 
 discardBtn.addEventListener('click', () => {

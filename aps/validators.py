@@ -67,3 +67,15 @@ def validate_video_size(value):
     limit = MAX_VIDEO_SIZE_MB * 1024 * 1024
     if value.size > limit:
         raise ValidationError(f'Video must be under {MAX_VIDEO_SIZE_MB}MB.')
+
+
+def validate_mobile_number(value, country_code='+91'):
+    """Validate mobile number: digits only; 10 digits for India (+91)."""
+    digits = ''.join(c for c in str(value).strip() if c.isdigit())
+    if not digits:
+        raise ValidationError('Mobile number is required.')
+    if country_code == '+91' and len(digits) != 10:
+        raise ValidationError('Indian mobile numbers must be exactly 10 digits.')
+    if len(digits) < 6 or len(digits) > 15:
+        raise ValidationError('Mobile number must be between 6 and 15 digits.')
+    return digits

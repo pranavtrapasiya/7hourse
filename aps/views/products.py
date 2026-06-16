@@ -11,13 +11,13 @@ from django.views.decorators.http import require_POST
 from aps.forms import ProductForm
 from aps.models import AuditLog, Category, Product, SubCategory
 from aps.permissions import (
-    can_delete_products, can_export, permission_required,
+    business_user_required, can_delete_products, can_export, permission_required,
     filter_products_own, get_product_for_user,
 )
 from aps.services.audit import AuditService
 
 
-@login_required
+@business_user_required
 def product_add(request):
     form = ProductForm(user=request.user)
     if request.method == 'POST':
@@ -44,7 +44,7 @@ def product_add(request):
     })
 
 
-@login_required
+@business_user_required
 def product_edit(request, pk):
     product = get_product_for_user(request.user, pk)
     if product.is_deleted:
@@ -74,7 +74,8 @@ def product_edit(request, pk):
     })
 
 
-@permission_required(can_delete_products, 'Only administrators can delete products.')
+@business_user_required
+@permission_required(can_delete_products, 'You do not have permission to delete products.')
 def product_delete(request, pk):
     product = get_product_for_user(request.user, pk)
     if product.is_deleted:
@@ -92,7 +93,8 @@ def product_delete(request, pk):
     return redirect('product_detail', pk=pk)
 
 
-@permission_required(can_delete_products, 'Only administrators can restore products.')
+@business_user_required
+@permission_required(can_delete_products, 'You do not have permission to restore products.')
 def product_restore(request, pk):
     product = get_product_for_user(request.user, pk)
     if not product.is_deleted:
@@ -108,7 +110,8 @@ def product_restore(request, pk):
     return redirect('deleted_products')
 
 
-@permission_required(can_delete_products, 'Only administrators can permanently delete products.')
+@business_user_required
+@permission_required(can_delete_products, 'You do not have permission to permanently delete products.')
 def product_permanent_delete(request, pk):
     product = get_product_for_user(request.user, pk)
     if not product.is_deleted:
@@ -130,7 +133,8 @@ def product_permanent_delete(request, pk):
     return redirect('deleted_products')
 
 
-@permission_required(can_delete_products, 'Only administrators can view deleted products.')
+@business_user_required
+@permission_required(can_delete_products, 'You do not have permission to view deleted products.')
 def deleted_products(request):
     qs = filter_products_own(request.user).filter(is_deleted=True).select_related(
         'category', 'subcategory', 'created_by'
@@ -143,7 +147,7 @@ def deleted_products(request):
     })
 
 
-@login_required
+@business_user_required
 def product_list(request):
     qs = filter_products_own(request.user).filter(is_deleted=False).select_related(
         'category', 'subcategory', 'created_by'
@@ -183,7 +187,7 @@ def product_list(request):
     })
 
 
-@login_required
+@business_user_required
 def product_detail(request, pk):
     product = get_product_for_user(request.user, pk)
     inventory_entries = product.inventory_entries.select_related(
@@ -199,7 +203,8 @@ def product_detail(request, pk):
     })
 
 
-@permission_required(can_export, 'Only administrators can export company data.')
+@business_user_required
+@permission_required(can_export, 'You do not have permission to export data.')
 def export_products_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = (

@@ -60,13 +60,14 @@
     <div class="stat-card stat-purple">
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-value">{{ pending_payment_orders }}</div>
-      <div class="stat-label">Pending Payment</div>
+      <div class="stat-label">Remaining RMB</div>
     </div>
   </div>
   {% endif %}
 </div>
 
-<!-- ── SHARED COMPANY STATS ───────────────────────────── -->
+<!-- ── SYSTEM / WORKSPACE STATS ───────────────────────── -->
+{% if not is_admin_dashboard %}
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
     <div class="stat-card stat-blue">
@@ -93,16 +94,43 @@
     <div class="stat-card stat-purple">
       <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
       <div class="stat-value">{{ total_inventory }}</div>
-      <div class="stat-label">Inventory Entries</div>
+      <div class="stat-label">Shops</div>
     </div>
   </div>
 </div>
+{% endif %}
 
 <!-- ── QUICK ACTIONS ──────────────────────────────────── -->
 <div class="row g-3 mb-4">
   <div class="col-12">
     <h6 class="section-label">Quick Actions</h6>
   </div>
+  {% if is_admin_dashboard %}
+  <div class="col-6 col-md-3">
+    <a href="{% url 'approval_requests' %}" class="quick-action-card">
+      <i class="bi bi-person-check-fill"></i>
+      <span>Approvals</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'users_list' %}" class="quick-action-card">
+      <i class="bi bi-people-fill"></i>
+      <span>Users</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'admin_control' %}" class="quick-action-card">
+      <i class="bi bi-shield-lock-fill"></i>
+      <span>Admin Center</span>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'admin_audit_logs' %}" class="quick-action-card">
+      <i class="bi bi-journal-text"></i>
+      <span>Audit Logs</span>
+    </a>
+  </div>
+  {% else %}
   <div class="col-6 col-md-3">
     <a href="{% url 'product_add' %}" class="quick-action-card">
       <i class="bi bi-plus-circle-fill"></i>
@@ -117,23 +145,14 @@
   </div>
   <div class="col-6 col-md-3">
     <a href="{% url 'location' %}" class="quick-action-card">
-      <i class="bi bi-geo-alt-fill"></i>
-      <span>Set Location</span>
+      <i class="bi bi-shop"></i>
+      <span>Add Shop</span>
     </a>
   </div>
-  {% if can_manage_settings %}
   <div class="col-6 col-md-3">
     <a href="{% url 'settings' %}" class="quick-action-card">
       <i class="bi bi-sliders2"></i>
       <span>Settings</span>
-    </a>
-  </div>
-  {% endif %}
-  {% if is_administrator %}
-  <div class="col-6 col-md-3">
-    <a href="{% url 'admin_control' %}" class="quick-action-card">
-      <i class="bi bi-shield-lock-fill"></i>
-      <span>Admin Center</span>
     </a>
   </div>
   {% endif %}
@@ -144,7 +163,7 @@
   <div class="col-12 col-lg-6">
     <div class="mb-2 d-flex align-items-center justify-content-between">
       <h6 class="section-label mb-0">{% if is_admin_dashboard %}Recent Activity{% else %}My Recent Orders{% endif %}</h6>
-      <a href="{% url 'order_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+      <a href="{% if is_admin_dashboard %}{% url 'admin_audit_logs' %}{% else %}{% url 'order_list' %}{% endif %}" class="btn btn-sm btn-outline-secondary">View All</a>
     </div>
     {% if is_admin_dashboard and recent_activity %}
     <div class="data-table-wrap">
@@ -183,7 +202,8 @@
     {% endif %}
   </div>
 
-  <!-- Recent Products -->
+  {% if not is_admin_dashboard %}
+  <!-- Recent Products (user workspace only) -->
   <div class="col-12 col-lg-6">
     <div class="mb-2 d-flex align-items-center justify-content-between">
       <h6 class="section-label mb-0">Recent Products</h6>
@@ -212,5 +232,6 @@
     </div>
     {% endif %}
   </div>
+  {% endif %}
 </div>
 {% endblock %}

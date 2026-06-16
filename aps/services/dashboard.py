@@ -19,18 +19,18 @@ from aps.permissions import (
 class DashboardService:
 
     @staticmethod
-    def company_stats(user):
-        """Metrics for administrators."""
+    def company_stats(user=None):
+        """System-wide metrics for administrator dashboard (not user business data)."""
         now = timezone.now()
         week_ago = now - timedelta(days=7)
         month_ago = now - timedelta(days=30)
 
-        orders = filter_orders_own(user)
+        orders = Order.objects.all()
         return {
-            'total_products': filter_products_own(user).filter(is_deleted=False).count(),
-            'total_categories': Category.objects.filter(created_by=user).count(),
-            'total_subcategories': SubCategory.objects.filter(category__created_by=user).count(),
-            'total_inventory': filter_inventory_own(user).count(),
+            'total_products': Product.objects.filter(is_deleted=False).count(),
+            'total_categories': Category.objects.count(),
+            'total_subcategories': SubCategory.objects.count(),
+            'total_inventory': WarehouseInventory.objects.count(),
             'total_orders': orders.count(),
             'total_users': User.objects.filter(is_superuser=False).count(),
             'active_users': User.objects.filter(is_active=True, is_superuser=False).count(),
@@ -38,10 +38,7 @@ class DashboardService:
             'orders_this_week': orders.filter(created_at__gte=week_ago).count(),
             'orders_this_month': orders.filter(created_at__gte=month_ago).count(),
             'total_order_value': orders.aggregate(total=Sum('total_amount'))['total'] or 0,
-            'recent_products': filter_products_own(user).filter(is_deleted=False).select_related(
-                'category', 'subcategory'
-            )[:10],
-            'recent_activity': AuditLog.objects.filter(user=user).select_related('user')[:15],
+            'recent_activity': AuditLog.objects.select_related('user')[:15],
         }
 
     @staticmethod

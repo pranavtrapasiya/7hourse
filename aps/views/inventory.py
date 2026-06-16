@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -8,9 +7,8 @@ from aps.models import (
     Product, WarehouseInventory,
 )
 from aps.permissions import (
-    can_delete_inventory, permission_required,
-    filter_products_own,
-    filter_inventory_own,
+    business_user_required, can_delete_inventory, permission_required,
+    filter_products_own, filter_inventory_own, get_product_for_user,
 )
 from aps.services.audit import AuditService
 
@@ -18,7 +16,7 @@ MAX_CARTON_IMAGES = 2
 MAX_PRODUCT_IMAGES = 5
 
 
-@login_required
+@business_user_required
 def location_view(request):
     search_query = request.GET.get('q', '').strip()
     selected_product_id = request.GET.get('product_id', '').strip()

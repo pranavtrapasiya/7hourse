@@ -4,36 +4,162 @@
 
 {% block extra_css %}
 <style>
-/* ── Order Cards (Mobile-First) ── */
-.order-cards{display:flex;flex-direction:column;gap:12px}
-.order-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .2s}
-.order-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(79,156,249,.1)}
-.order-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
-.order-card-product{font-weight:600;font-size:.92rem;flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.order-card-id{font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);flex-shrink:0}
-.order-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
-.order-card-field{font-size:.78rem}
-.order-card-field .field-label{color:var(--text-muted);display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.3px}
-.order-card-field .field-value{font-weight:600;color:var(--text)}
-.order-card-actions{display:flex;gap:6px;flex-wrap:wrap}
-.order-card-total{font-size:1.05rem;font-weight:700;color:var(--green)}
+  /* ── Order Cards (Mobile-First) ── */
+  .order-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+  }
 
-/* ── Desktop Table (hidden on mobile) ── */
-.order-table-wrap{display:none}
-@media(min-width:768px){.order-table-wrap{display:block}.order-cards-mobile{display:none}}
-.ord-table{width:100%;border-collapse:separate;border-spacing:0}
-.ord-table thead th{background:var(--surface-3);color:var(--text-muted);font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
-.ord-table tbody td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:middle}
-.ord-table tbody tr:last-child td{border-bottom:none}
-.ord-table tbody tr:hover{background:var(--surface-2)}
+  .order-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    transition: all .2s
+  }
 
-/* ── Filter Bar ── */
-.order-filter{display:flex;flex-direction:column;gap:8px}
-@media(min-width:768px){.order-filter{flex-direction:row;align-items:flex-end}}
+  .order-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(79, 156, 249, .1)
+  }
 
-/* ── Detail Modal ── */
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(min-width:576px){.detail-grid{grid-template-columns:repeat(3,1fr)}}
+  .order-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px
+  }
+
+  .order-card-product {
+    font-weight: 600;
+    font-size: .92rem;
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden
+  }
+
+  .order-card-id {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--text-muted);
+    flex-shrink: 0
+  }
+
+  .order-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 10px
+  }
+
+  .order-card-field {
+    font-size: .78rem
+  }
+
+  .order-card-field .field-label {
+    color: var(--text-muted);
+    display: block;
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .3px
+  }
+
+  .order-card-field .field-value {
+    font-weight: 600;
+    color: var(--text)
+  }
+
+  .order-card-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap
+  }
+
+  .order-card-total {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--green)
+  }
+
+  /* ── Desktop Table (hidden on mobile) ── */
+  .order-table-wrap {
+    display: none
+  }
+
+  @media(min-width:768px) {
+    .order-table-wrap {
+      display: block
+    }
+
+    .order-cards-mobile {
+      display: none
+    }
+  }
+
+  .ord-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0
+  }
+
+  .ord-table thead th {
+    background: var(--surface-3);
+    color: var(--text-muted);
+    font-size: .73rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap
+  }
+
+  .ord-table tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: .86rem;
+    vertical-align: middle
+  }
+
+  .ord-table tbody tr:last-child td {
+    border-bottom: none
+  }
+
+  .ord-table tbody tr:hover {
+    background: var(--surface-2)
+  }
+
+  /* ── Filter Bar ── */
+  .order-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+  }
+
+  @media(min-width:768px) {
+    .order-filter {
+      flex-direction: row;
+      align-items: flex-end
+    }
+  }
+
+  /* ── Detail Modal ── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px
+  }
+
+  @media(min-width:576px) {
+    .detail-grid {
+      grid-template-columns: repeat(3, 1fr)
+    }
+  }
 </style>
 {% endblock %}
 
@@ -49,19 +175,29 @@
   </a>
 </div>
 
-<!-- Filters -->
 <div class="content-card mb-4">
   <div class="order-filter">
     <div class="flex-fill">
       <form method="get" class="input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="text" name="q" class="form-control" placeholder="Search orders..." value="{{ search_query }}" autocomplete="off">
+        <input type="text" name="q" class="form-control" placeholder="Search orders..." value="{{ search_query }}"
+          autocomplete="off">
         {% if date_from %}<input type="hidden" name="date_from" value="{{ date_from }}">{% endif %}
         {% if date_to %}<input type="hidden" name="date_to" value="{{ date_to }}">{% endif %}
+        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
         <button class="btn btn-primary" type="submit">Search</button>
       </form>
     </div>
     <div class="row g-2 mt-2 mt-md-0 align-items-end w-100 w-md-auto">
+      <div class="col-12 col-sm-auto col-md-auto">
+        <label class="form-label small mb-1">Sort By</label>
+        <select class="form-select form-select-sm" id="filterSort" style="height:31px; min-width: 140px;">
+          <option value="-created_at" {% if sort == '-created_at' or not sort %}selected{% endif %}>Newer</option>
+          <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Older</option>
+          <option value="total_amount" {% if sort == 'total_amount' %}selected{% endif %}>Price: Low to High</option>
+          <option value="-total_amount" {% if sort == '-total_amount' %}selected{% endif %}>Price: High to Low</option>
+        </select>
+      </div>
       <div class="col-5 col-md-auto">
         <label class="form-label small mb-1">From</label>
         <input type="date" class="form-control form-control-sm" id="filterDateFrom" value="{{ date_from }}">
@@ -90,16 +226,20 @@
     </div>
     <div class="order-card-grid">
       <div class="order-card-field">
-        <span class="field-label">Location</span>
+        <span class="field-label">Shop</span>
         <span class="field-value">{{ order.location_number|default:"—" }}</span>
       </div>
       <div class="order-card-field">
-        <span class="field-label">Quantity</span>
-        <span class="field-value">{{ order.quantity }}</span>
+        <span class="field-label">RMB</span>
+        <span class="field-value">{{ order.rmb }}</span>
       </div>
       <div class="order-card-field">
-        <span class="field-label">Price</span>
-        <span class="field-value">₹{{ order.price }}</span>
+        <span class="field-label">Value</span>
+        <span class="field-value">{{ order.exchange_value }}</span>
+      </div>
+      <div class="order-card-field">
+        <span class="field-label">Rupees</span>
+        <span class="field-value">₹{{ order.rupees }}</span>
       </div>
       <div class="order-card-field">
         <span class="field-label">Total</span>
@@ -121,7 +261,8 @@
       <button class="btn btn-sm btn-outline-secondary edit-order-btn" data-id="{{ order.pk }}">
         <i class="bi bi-pencil"></i>
       </button>
-      <button class="btn btn-sm btn-outline-danger delete-order-btn" data-id="{{ order.pk }}" data-name="{{ order.product.product_name }}">
+      <button class="btn btn-sm btn-outline-danger delete-order-btn" data-id="{{ order.pk }}"
+        data-name="{{ order.product.product_name }}">
         <i class="bi bi-trash3"></i>
       </button>
     </div>
@@ -137,9 +278,11 @@
         <tr>
           <th>#</th>
           <th>Product</th>
-          <th>Location</th>
+          <th>Shop</th>
           <th>Qty</th>
-          <th>Price</th>
+          <th>RMB</th>
+          <th>Value</th>
+          <th>Rupees</th>
           <th>Deposit</th>
           <th>Remaining</th>
           <th>Total</th>
@@ -154,18 +297,24 @@
           <td class="fw-600" style="max-width:180px;">
             <div class="text-truncate">{{ order.product.product_name }}</div>
           </td>
-          <td><span class="loc-badge" style="background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;font-size:.82rem;">{{ order.location_number|default:"—" }}</span></td>
+          <td><span class="loc-badge"
+              style="background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;font-size:.82rem;">{{ order.location_number|default:"—" }}</span></td>
           <td>{{ order.quantity }}</td>
-          <td class="fw-600">₹{{ order.price }}</td>
+          <td>{{ order.rmb }}</td>
+          <td>{{ order.exchange_value }}</td>
+          <td class="fw-600">₹{{ order.rupees }}</td>
           <td>₹{{ order.deposit }}</td>
           <td style="color:var(--amber);">₹{{ order.remaining_to_pay }}</td>
           <td class="fw-600" style="color:var(--green);">₹{{ order.total_amount }}</td>
           <td class="text-muted small text-nowrap">{{ order.order_date|date:"d M Y" }}</td>
           <td>
             <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-outline-primary view-order-btn" data-id="{{ order.pk }}" title="View"><i class="bi bi-eye"></i></button>
-              <button class="btn btn-sm btn-outline-secondary edit-order-btn" data-id="{{ order.pk }}" title="Edit"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger delete-order-btn" data-id="{{ order.pk }}" data-name="{{ order.product.product_name }}" title="Delete"><i class="bi bi-trash3"></i></button>
+              <button class="btn btn-sm btn-outline-primary view-order-btn" data-id="{{ order.pk }}" title="View"><i
+                  class="bi bi-eye"></i></button>
+              <button class="btn btn-sm btn-outline-secondary edit-order-btn" data-id="{{ order.pk }}" title="Edit"><i
+                  class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger delete-order-btn" data-id="{{ order.pk }}"
+                data-name="{{ order.product.product_name }}" title="Delete"><i class="bi bi-trash3"></i></button>
             </div>
           </td>
         </tr>
@@ -180,15 +329,20 @@
 <nav class="mt-4 d-flex justify-content-center">
   <ul class="pagination pagination-sm mb-0">
     {% if page_obj.has_previous %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">&laquo;</a></li>
+    <li class="page-item"><a class="page-link"
+        href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">&laquo;</a>
+    </li>
     {% endif %}
     {% for num in page_obj.paginator.page_range %}
     <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-      <a class="page-link" href="?page={{ num }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">{{ num }}</a>
+      <a class="page-link"
+        href="?page={{ num }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">{{ num }}</a>
     </li>
     {% endfor %}
     {% if page_obj.has_next %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">&raquo;</a></li>
+    <li class="page-item"><a class="page-link"
+        href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&date_from={{ date_from }}&date_to={{ date_to }}">&raquo;</a>
+    </li>
     {% endif %}
   </ul>
 </nav>
@@ -198,7 +352,8 @@
 <div class="empty-state">
   <i class="bi bi-receipt"></i>
   <h5>No Orders Found</h5>
-  <p>{% if search_query %}No orders match your search. Try different keywords.{% else %}Create your first order to get started.{% endif %}</p>
+  <p>{% if search_query %}No orders match your search. Try different keywords.{% else %}Create your first order to get
+    started.{% endif %}</p>
   <a href="{% url 'order_create' %}" class="btn btn-primary">
     <i class="bi bi-plus-lg me-1"></i>New Order
   </a>
@@ -217,7 +372,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="viewOrderBody">
-        <div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>
+        <div class="text-center py-3">
+          <div class="spinner-border spinner-border-sm"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -237,14 +394,27 @@
       <div class="modal-body">
         <input type="hidden" id="editOrderPk">
         <div class="row g-3">
-          <div class="col-6"><label class="form-label fw-500">Quantity</label><input type="number" id="editQty" class="form-control form-control-lg" min="1"></div>
-          <div class="col-6"><label class="form-label fw-500">Price (₹)</label><input type="number" id="editPrice" class="form-control form-control-lg" step="0.01" min="0"></div>
-          <div class="col-6"><label class="form-label fw-500">Deposit (₹)</label><input type="number" id="editDeposit" class="form-control form-control-lg" step="0.01" min="0"></div>
-          <div class="col-6"><label class="form-label fw-500">CBM</label><input type="number" id="editCbm" class="form-control form-control-lg" step="0.0001" min="0"></div>
-          <div class="col-6"><label class="form-label fw-500">Pcs/Carton</label><input type="number" id="editCarton" class="form-control form-control-lg" min="0"></div>
-          <div class="col-6"><label class="form-label fw-500">Order Date</label><input type="date" id="editDate" class="form-control form-control-lg"></div>
-          <div class="col-12"><label class="form-label fw-500">Location</label><input type="text" id="editLocNum" class="form-control form-control-lg"></div>
-          <div class="col-12"><label class="form-label fw-500">Remark</label><textarea id="editRemark" class="form-control" rows="2"></textarea></div>
+          <div class="col-6"><label class="form-label fw-500">Quantity</label><input type="number" id="editQty"
+              class="form-control form-control-lg" min="1"></div>
+          <div class="col-6"></div>
+          <div class="col-4"><label class="form-label fw-500">RMB</label><input type="number" id="editRmb"
+              class="form-control form-control-lg" step="0.01" min="0"></div>
+          <div class="col-4"><label class="form-label fw-500">Value</label><input type="number" id="editValue"
+              class="form-control form-control-lg" step="0.01" min="0"></div>
+          <div class="col-4"><label class="form-label fw-500">Rupees</label><input type="number" id="editRupees"
+              class="form-control form-control-lg" step="0.01" min="0" readonly></div>
+          <div class="col-6"><label class="form-label fw-500">Deposit (₹)</label><input type="number" id="editDeposit"
+              class="form-control form-control-lg" step="0.01" min="0"></div>
+          <div class="col-6"><label class="form-label fw-500">1 Carton CBM</label><input type="number" id="editCbm"
+              class="form-control form-control-lg" step="0.0001" min="0"></div>
+          <div class="col-6"><label class="form-label fw-500">Pcs/Carton</label><input type="number" id="editCarton"
+              class="form-control form-control-lg" min="0"></div>
+          <div class="col-6"><label class="form-label fw-500">Order Date</label><input type="date" id="editDate"
+              class="form-control form-control-lg"></div>
+          <div class="col-12"><label class="form-label fw-500">Shop</label><input type="text" id="editLocNum"
+              class="form-control form-control-lg"></div>
+          <div class="col-12"><label class="form-label fw-500">Remark</label><textarea id="editRemark"
+              class="form-control" rows="2"></textarea></div>
         </div>
       </div>
       <div class="modal-footer" style="border-top:1px solid var(--border);">
@@ -264,7 +434,8 @@
       <div class="modal-body text-center py-4">
         <i class="bi bi-exclamation-triangle-fill text-danger d-block fs-1 mb-3"></i>
         <h6 class="fw-700 mb-1">Delete Order?</h6>
-        <p class="text-muted small mb-3">Product: <strong id="deleteOrderName"></strong><br>This action cannot be undone.</p>
+        <p class="text-muted small mb-3">Product: <strong id="deleteOrderName"></strong><br>This action cannot be
+          undone.</p>
         <input type="hidden" id="deleteOrderPk">
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
@@ -280,113 +451,136 @@
 
 {% block extra_js %}
 <script>
-const CSRF = "{{ csrf_token }}";
+  const CSRF = "{{ csrf_token }}";
 
-// Date filter
-document.getElementById('applyDateFilter').addEventListener('click',()=>{
-  const from=document.getElementById('filterDateFrom').value;
-  const to=document.getElementById('filterDateTo').value;
-  const q=new URLSearchParams(window.location.search).get('q')||'';
-  let url='?';
-  if(q) url+=`q=${encodeURIComponent(q)}&`;
-  if(from) url+=`date_from=${from}&`;
-  if(to) url+=`date_to=${to}&`;
-  window.location.href=url;
-});
+  // Date and Sort filters
+  function applyAllFilters() {
+    const from = document.getElementById('filterDateFrom').value;
+    const to = document.getElementById('filterDateTo').value;
+    const sort = document.getElementById('filterSort').value;
+    const q = new URLSearchParams(window.location.search).get('q') || '';
 
-// View Order
-document.querySelectorAll('.view-order-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const id=btn.dataset.id;
-    document.getElementById('viewOrderId').textContent=id;
-    document.getElementById('viewOrderBody').innerHTML='<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
-    new bootstrap.Modal(document.getElementById('viewOrderModal')).show();
-    fetch(`/orders/${id}/`).then(r=>r.json()).then(d=>{
-      document.getElementById('viewOrderBody').innerHTML=`
+    let url = '?';
+    if (q) url += `q=${encodeURIComponent(q)}&`;
+    if (from) url += `date_from=${from}&`;
+    if (to) url += `date_to=${to}&`;
+    if (sort) url += `sort=${sort}&`;
+    window.location.href = url;
+  }
+
+  document.getElementById('applyDateFilter').addEventListener('click', applyAllFilters);
+  document.getElementById('filterSort').addEventListener('change', applyAllFilters);
+
+  // View Order
+  document.querySelectorAll('.view-order-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      document.getElementById('viewOrderId').textContent = id;
+      document.getElementById('viewOrderBody').innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
+      new bootstrap.Modal(document.getElementById('viewOrderModal')).show();
+      fetch(`/orders/${id}/`).then(r => r.json()).then(d => {
+        document.getElementById('viewOrderBody').innerHTML = `
         <div class="mb-3"><strong class="d-block mb-1" style="font-size:1.1rem;">${d.product_name}</strong>
         <span class="text-muted small">Created by: ${d.created_by} · ${d.created_at}</span></div>
         <div class="detail-grid mb-3">
-          <div class="spec-item"><span class="spec-label">Location</span><span class="spec-value">${d.location_number}</span></div>
+          <div class="spec-item"><span class="spec-label">Shop</span><span class="spec-value">${d.location_number}</span></div>
           <div class="spec-item"><span class="spec-label">Quantity</span><span class="spec-value">${d.quantity}</span></div>
-          <div class="spec-item"><span class="spec-label">Price</span><span class="spec-value">₹${d.price}</span></div>
+          <div class="spec-item"><span class="spec-label">RMB</span><span class="spec-value">${d.rmb}</span></div>
+          <div class="spec-item"><span class="spec-label">Value</span><span class="spec-value">${d.exchange_value}</span></div>
+          <div class="spec-item"><span class="spec-label">Rupees</span><span class="spec-value">₹${d.rupees}</span></div>
           <div class="spec-item"><span class="spec-label">Deposit</span><span class="spec-value">₹${d.deposit}</span></div>
           <div class="spec-item"><span class="spec-label">Remaining</span><span class="spec-value" style="color:var(--amber)">₹${d.remaining_to_pay}</span></div>
-          <div class="spec-item"><span class="spec-label">CBM</span><span class="spec-value">${d.cbm}</span></div>
+          <div class="spec-item"><span class="spec-label">1 Carton CBM</span><span class="spec-value">${d.cbm}</span></div>
           <div class="spec-item"><span class="spec-label">Pcs/Carton</span><span class="spec-value">${d.carton_piece}</span></div>
-          <div class="spec-item"><span class="spec-label">Total CBM</span><span class="spec-value">${d.total_cbm}</span></div>
+          <div class="spec-item"><span class="spec-label">Total 1 Carton CBM</span><span class="spec-value">${d.total_cbm}</span></div>
           <div class="spec-item"><span class="spec-label">Total Pieces</span><span class="spec-value">${d.total_pieces}</span></div>
           <div class="spec-item"><span class="spec-label">Order Date</span><span class="spec-value">${d.order_date}</span></div>
           <div class="spec-item"><span class="spec-label">Total Amount</span><span class="spec-value" style="color:var(--green);font-size:1.1rem;">₹${d.total_amount}</span></div>
         </div>
-        ${d.remark&&d.remark!=='—'?`<div><span class="spec-label d-block mb-1">Remark</span><div class="p-2 rounded" style="background:var(--surface-2);border:1px solid var(--border);font-size:.88rem;">${d.remark}</div></div>`:''}`;
+        ${d.remark && d.remark !== '—' ? `<div><span class="spec-label d-block mb-1">Remark</span><div class="p-2 rounded" style="background:var(--surface-2);border:1px solid var(--border);font-size:.88rem;">${d.remark}</div></div>` : ''}`;
+      });
     });
   });
-});
 
-// Edit Order
-document.querySelectorAll('.edit-order-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const id=btn.dataset.id;
-    document.getElementById('editOrderId').textContent=id;
-    document.getElementById('editOrderPk').value=id;
-    fetch(`/orders/${id}/edit/`).then(r=>r.json()).then(d=>{
-      document.getElementById('editQty').value=d.quantity;
-      document.getElementById('editPrice').value=d.price;
-      document.getElementById('editDeposit').value=d.deposit;
-      document.getElementById('editCbm').value=d.cbm;
-      document.getElementById('editCarton').value=d.carton_piece;
-      document.getElementById('editDate').value=d.order_date;
-      document.getElementById('editLocNum').value=d.location_number;
-      document.getElementById('editRemark').value=d.remark;
+  // Live Rupees calc in edit modal
+  function updateEditRupees() {
+    const rmb = parseFloat(document.getElementById('editRmb').value) || 0;
+    const val = parseFloat(document.getElementById('editValue').value) || 0;
+    document.getElementById('editRupees').value = (rmb * val).toFixed(2);
+  }
+  ['editRmb', 'editValue'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateEditRupees);
+  });
+
+  // Edit Order
+  document.querySelectorAll('.edit-order-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      document.getElementById('editOrderId').textContent = id;
+      document.getElementById('editOrderPk').value = id;
+      fetch(`/orders/${id}/edit/`).then(r => r.json()).then(d => {
+        document.getElementById('editQty').value = d.quantity;
+        document.getElementById('editRmb').value = d.rmb;
+        document.getElementById('editValue').value = d.exchange_value;
+        document.getElementById('editRupees').value = d.rupees;
+        document.getElementById('editDeposit').value = d.deposit;
+        document.getElementById('editCbm').value = d.cbm;
+        document.getElementById('editCarton').value = d.carton_piece;
+        document.getElementById('editDate').value = d.order_date;
+        document.getElementById('editLocNum').value = d.location_number;
+        document.getElementById('editRemark').value = d.remark;
+      });
+      new bootstrap.Modal(document.getElementById('editOrderModal')).show();
     });
-    new bootstrap.Modal(document.getElementById('editOrderModal')).show();
   });
-});
 
-document.getElementById('saveEditBtn').addEventListener('click',()=>{
-  const pk=document.getElementById('editOrderPk').value;
-  const btn=document.getElementById('saveEditBtn');
-  btn.disabled=true;
-  const fd=new FormData();
-  fd.append('csrfmiddlewaretoken',CSRF);
-  fd.append('quantity',document.getElementById('editQty').value);
-  fd.append('price',document.getElementById('editPrice').value);
-  fd.append('deposit',document.getElementById('editDeposit').value||'0');
-  fd.append('cbm',document.getElementById('editCbm').value||'0');
-  fd.append('carton_piece',document.getElementById('editCarton').value||'0');
-  fd.append('order_date',document.getElementById('editDate').value);
-  fd.append('location_number',document.getElementById('editLocNum').value);
-  fd.append('remark',document.getElementById('editRemark').value);
-  fetch(`/orders/${pk}/edit/`,{method:'POST',body:fd})
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.success) location.reload();
-      else{ let m='Errors:\n'; if(d.errors) Object.entries(d.errors).forEach(([k,v])=>m+=`${k}: ${v}\n`); alert(m); }
-    })
-    .catch(e=>{alert('Network error');console.error(e);})
-    .finally(()=>btn.disabled=false);
-});
-
-// Delete Order
-document.querySelectorAll('.delete-order-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.getElementById('deleteOrderPk').value=btn.dataset.id;
-    document.getElementById('deleteOrderName').textContent=btn.dataset.name;
-    new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+  document.getElementById('saveEditBtn').addEventListener('click', () => {
+    const pk = document.getElementById('editOrderPk').value;
+    const btn = document.getElementById('saveEditBtn');
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    fd.append('quantity', document.getElementById('editQty').value);
+    fd.append('rmb', document.getElementById('editRmb').value || '0');
+    fd.append('exchange_value', document.getElementById('editValue').value || '0');
+    fd.append('rupees', document.getElementById('editRupees').value || '0');
+    fd.append('price', document.getElementById('editRupees').value || '0');
+    fd.append('deposit', document.getElementById('editDeposit').value || '0');
+    fd.append('cbm', document.getElementById('editCbm').value || '0');
+    fd.append('carton_piece', document.getElementById('editCarton').value || '0');
+    fd.append('order_date', document.getElementById('editDate').value);
+    fd.append('location_number', document.getElementById('editLocNum').value);
+    fd.append('remark', document.getElementById('editRemark').value);
+    fetch(`/orders/${pk}/edit/`, { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) location.reload();
+        else { let m = 'Errors:\n'; if (d.errors) Object.entries(d.errors).forEach(([k, v]) => m += `${k}: ${v}\n`); alert(m); }
+      })
+      .catch(e => { alert('Network error'); console.error(e); })
+      .finally(() => btn.disabled = false);
   });
-});
 
-document.getElementById('confirmDeleteBtn').addEventListener('click',()=>{
-  const pk=document.getElementById('deleteOrderPk').value;
-  const btn=document.getElementById('confirmDeleteBtn');
-  btn.disabled=true;
-  const fd=new FormData();
-  fd.append('csrfmiddlewaretoken',CSRF);
-  fetch(`/orders/${pk}/delete/`,{method:'POST',body:fd})
-    .then(r=>r.json())
-    .then(d=>{if(d.success) location.reload(); else alert(d.message||'Error');})
-    .catch(e=>{alert('Network error');console.error(e);})
-    .finally(()=>btn.disabled=false);
-});
+  // Delete Order
+  document.querySelectorAll('.delete-order-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('deleteOrderPk').value = btn.dataset.id;
+      document.getElementById('deleteOrderName').textContent = btn.dataset.name;
+      new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+    });
+  });
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    const pk = document.getElementById('deleteOrderPk').value;
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    fetch(`/orders/${pk}/delete/`, { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => { if (d.success) location.reload(); else alert(d.message || 'Error'); })
+      .catch(e => { alert('Network error'); console.error(e); })
+      .finally(() => btn.disabled = false);
+  });
 </script>
 {% endblock %}

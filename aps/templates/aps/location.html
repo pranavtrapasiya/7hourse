@@ -254,7 +254,7 @@
     </div>
     <button class="btn btn-primary ms-auto flex-shrink-0" type="button"
             data-bs-toggle="collapse" data-bs-target="#addEntryCollapse" aria-expanded="false">
-      <i class="bi bi-plus-lg me-1"></i>Add Location
+      <i class="bi bi-plus-lg me-1"></i>Add Shop
     </button>
   </div>
 </div>
@@ -271,14 +271,14 @@
       <input type="hidden" name="product_id" value="{{ selected_product.pk }}">
       <div class="row g-3 mb-3">
         <div class="col-12 col-sm-6">
-          <label class="form-label fw-500">Location Number</label>
+          <label class="form-label fw-500">Shop Number</label>
           {{ inv_form.location_number }}
           {% if inv_form.location_number.errors %}
           <div class="invalid-feedback d-block">{{ inv_form.location_number.errors.0 }}</div>
           {% endif %}
         </div>
         <div class="col-12 col-sm-6">
-          <label class="form-label fw-500">Price (₹)</label>
+          <label class="form-label fw-500">RMB</label>
           {{ inv_form.price }}
         </div>
         <div class="col-6">
@@ -286,7 +286,7 @@
           {{ inv_form.carton_piece }}
         </div>
         <div class="col-6">
-          <label class="form-label fw-500">CBM</label>
+          <label class="form-label fw-500">1 Carton CBM</label>
           {{ inv_form.cbm }}
         </div>
       </div>
@@ -390,10 +390,10 @@
       <thead>
         <tr>
           <th>Sr No</th>
-          <th>Location</th>
-          <th>Price</th>
+          <th>Shop</th>
+          <th>RMB</th>
           <th>Carton</th>
-          <th>CBM</th>
+          <th>1 Carton CBM</th>
           <th>Remark</th>
           <th>Media</th>
           <th>Date</th>
@@ -458,7 +458,7 @@
   {% else %}
   <div class="text-center text-muted py-4">
     <i class="bi bi-inbox d-block fs-2 mb-2"></i>
-    No inventory entries yet. Click <strong>Add Location</strong> above to create one.
+    No shop entries yet. Click <strong>Add Shop</strong> above to create one.
   </div>
   {% endif %}
 </div>
@@ -478,11 +478,11 @@
         <!-- Specs Grid -->
         <div class="row g-3 mb-4">
           <div class="col-6 col-md-3">
-            <div class="spec-item"><span class="spec-label">Location</span>
+            <div class="spec-item"><span class="spec-label">Shop</span>
             <span class="spec-value fw-700 text-accent" id="detailLoc"></span></div>
           </div>
           <div class="col-6 col-md-3">
-            <div class="spec-item"><span class="spec-label">Price</span>
+            <div class="spec-item"><span class="spec-label">RMB</span>
             <span class="spec-value fw-700" id="detailPrice"></span></div>
           </div>
           <div class="col-6 col-md-3">
@@ -490,7 +490,7 @@
             <span class="spec-value" id="detailCarton"></span></div>
           </div>
           <div class="col-6 col-md-3">
-            <div class="spec-item"><span class="spec-label">CBM</span>
+            <div class="spec-item"><span class="spec-label">1 Carton CBM</span>
             <span class="spec-value" id="detailCbm"></span></div>
           </div>
         </div>
@@ -531,7 +531,7 @@
       <div class="modal-body text-center py-4">
         <i class="bi bi-exclamation-triangle-fill text-danger d-block fs-1 mb-3"></i>
         <h6 class="fw-700 mb-1">Delete Entry?</h6>
-        <p class="text-muted small mb-3">Location: <strong id="deleteEntryLoc"></strong><br>This will only remove this inventory entry, not the product.</p>
+        <p class="text-muted small mb-3">Shop: <strong id="deleteEntryLoc"></strong><br>This will only remove this shop entry, not the product.</p>
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
           <form method="post" id="deleteEntryForm" style="flex:1;">

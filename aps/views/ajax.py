@@ -1,15 +1,14 @@
 import datetime
 
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Case, When, Value, IntegerField
 from django.http import JsonResponse
 
 from aps.models import Product, SubCategory, WarehouseInventory
-from aps.permissions import filter_products_own, filter_inventory_own
+from aps.permissions import business_user_required, filter_inventory_own, filter_products_own
 
 
-@login_required
+@business_user_required
 def ajax_subcategories(request):
     category_id = request.GET.get('category_id')
     subcategories = []
@@ -22,7 +21,7 @@ def ajax_subcategories(request):
     return JsonResponse({'subcategories': subcategories})
 
 
-@login_required
+@business_user_required
 def ajax_product_search(request):
     q = request.GET.get('q', '').strip()
     results = []
@@ -51,7 +50,7 @@ def ajax_product_search(request):
     return JsonResponse({'results': results, 'query': q})
 
 
-@login_required
+@business_user_required
 def ajax_preview_code(request):
     fmt = request.GET.get('format', '{YEAR}{MONTH}{SEQ}')
     try:
@@ -65,7 +64,7 @@ def ajax_preview_code(request):
     return JsonResponse({'preview': preview})
 
 
-@login_required
+@business_user_required
 def ajax_order_locations(request):
     product_id = request.GET.get('product_id')
     if not product_id:
@@ -84,7 +83,7 @@ def ajax_order_locations(request):
     return JsonResponse({'locations': locations})
 
 
-@login_required
+@business_user_required
 def api_product_search(request):
     q = request.GET.get('q', '').strip()
     page_num = request.GET.get('page', 1)

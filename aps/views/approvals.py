@@ -7,9 +7,43 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from aps.models import ApprovalLog, AuditLog
+from django.utils import timezone
+
+from aps.models import ApprovalLog, AuditLog, UserProfile
 from aps.permissions import admin_required
 from aps.services.audit import AuditService
+from aps.services.email import EmailService
+
+
+def _approve_user(target_user, performed_by, note='', request=None):
+    target_user.is_active = True
+    target_user.save(update_fields=['is_active'])
+    profile, _ = UserProfile.objects.get_or_create(user=target_user)
+    profile.approved_at = timezone.now()
+    profile.save(update_fields=['approved_at'])
+    ApprovalLog.objects.create(
+        target_user=target_user, action='approved',
+        performed_by=performed_by, note=note,
+    )
+    AuditService.log_user_action(
+        performed_by, AuditLog.ACTION_USER_APPROVED, target_user, note=note, request=request,
+    )
+    EmailService.send_approval_email(target_user, performed_by=performed_by, request=request)
+
+
+def _reject_user(target_user, performed_by, note='', request=None):
+    target_user.is_active = False
+    target_user.save(update_fields=['is_active'])
+    ApprovalLog.objects.create(
+        target_user=target_user, action='rejected',
+        performed_by=performed_by, note=note,
+    )
+    AuditService.log_user_action(
+        performed_by, AuditLog.ACTION_USER_REJECTED, target_user, note=note, request=request,
+    )
+    EmailService.send_rejection_email(
+        target_user, note=note, performed_by=performed_by, request=request,
+    )
 
 
 @admin_required
@@ -55,7 +89,7 @@ def approval_requests(request):
         '-date_joined': '-date_joined', 'date_joined': 'date_joined',
         'username': 'username', '-username': '-username',
     }
-    qs = qs.order_by(sort_map.get(sort, '-date_joined'))
+    qs = qs.order_by(sort_map.get(sort, '-date_joined')).select_related('profile')
     recent_logs = ApprovalLog.objects.select_related(
         'target_user', 'performed_by'
     ).order_by('-created_at')[:20]
@@ -87,16 +121,7 @@ def approve_user_api(request, user_id):
             'error': f'User "{target_user.username}" is already active.',
         }, status=400)
 
-    target_user.is_active = True
-    target_user.save(update_fields=['is_active'])
-
-    ApprovalLog.objects.create(
-        target_user=target_user, action='approved',
-        performed_by=request.user, note=note,
-    )
-    AuditService.log_user_action(
-        request.user, AuditLog.ACTION_USER_APPROVED, target_user, note=note, request=request,
-    )
+    _approve_user(target_user, request.user, note=note, request=request)
 
     return JsonResponse({
         'success': True,
@@ -111,16 +136,7 @@ def reject_user_api(request, user_id):
     target_user = get_object_or_404(User, pk=user_id, is_superuser=False)
     note = request.POST.get('note', '').strip()
 
-    target_user.is_active = False
-    target_user.save(update_fields=['is_active'])
-
-    ApprovalLog.objects.create(
-        target_user=target_user, action='rejected',
-        performed_by=request.user, note=note,
-    )
-    AuditService.log_user_action(
-        request.user, AuditLog.ACTION_USER_REJECTED, target_user, note=note, request=request,
-    )
+    _reject_user(target_user, request.user, note=note, request=request)
 
     return JsonResponse({
         'success': True,
@@ -144,15 +160,7 @@ def bulk_approve_api(request):
     users = User.objects.filter(pk__in=user_ids, is_active=False, is_superuser=False)
     count = 0
     for u in users:
-        u.is_active = True
-        u.save(update_fields=['is_active'])
-        ApprovalLog.objects.create(
-            target_user=u, action='approved',
-            performed_by=request.user, note='Bulk approval',
-        )
-        AuditService.log_user_action(
-            request.user, AuditLog.ACTION_USER_APPROVED, u, note='Bulk approval', request=request,
-        )
+        _approve_user(u, request.user, note='Bulk approval', request=request)
         count += 1
 
     return JsonResponse({
@@ -177,15 +185,7 @@ def bulk_reject_api(request):
     users = User.objects.filter(pk__in=user_ids, is_superuser=False)
     count = 0
     for u in users:
-        u.is_active = False
-        u.save(update_fields=['is_active'])
-        ApprovalLog.objects.create(
-            target_user=u, action='rejected',
-            performed_by=request.user, note='Bulk rejection',
-        )
-        AuditService.log_user_action(
-            request.user, AuditLog.ACTION_USER_REJECTED, u, note='Bulk rejection', request=request,
-        )
+        _reject_user(u, request.user, note='Bulk rejection', request=request)
         count += 1
 
     return JsonResponse({

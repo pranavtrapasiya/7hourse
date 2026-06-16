@@ -16,6 +16,12 @@
               <h4 class="mb-1">{{ target_user.username }}</h4>
               <p class="text-muted mb-1">{{ target_user.get_full_name|default:"—" }}</p>
               <p class="text-muted small mb-2">{{ target_user.email }}</p>
+              {% if profile %}
+              <p class="text-muted small mb-2">
+                {{ profile.country_code }} {{ profile.mobile_number|default:"" }}
+                {% if profile.city %} · {{ profile.city }}{% endif %}
+              </p>
+              {% endif %}
               <div class="d-flex flex-wrap gap-3">
                 <span class="badge {% if target_user.is_active %}bg-success{% else %}bg-danger{% endif %}">
                   {% if target_user.is_active %}Active{% else %}Inactive{% endif %}
@@ -23,13 +29,14 @@
                 <span class="text-muted small">
                   <i class="bi bi-calendar3 me-1"></i>Joined: {{ target_user.date_joined|date:"M d, Y" }}
                 </span>
+                {% if stats.approved_at %}
+                <span class="text-muted small">
+                  <i class="bi bi-check-circle me-1"></i>Approved: {{ stats.approved_at|date:"M d, Y H:i" }}
+                </span>
+                {% endif %}
                 {% if last_login %}
                 <span class="text-muted small">
-                  <i class="bi bi-clock-history me-1"></i>Last Login: {{ last_login|date:"M d, Y H:i" }}
-                </span>
-                {% else %}
-                <span class="text-muted small">
-                  <i class="bi bi-clock-history me-1"></i>Last Login: Never
+                  <i class="bi bi-box-arrow-in-right me-1"></i>Last Login: {{ last_login|date:"M d, Y H:i" }}
                 </span>
                 {% endif %}
               </div>
@@ -54,7 +61,7 @@
       <div class="card bg-dark border-secondary">
         <div class="card-body text-center">
           <div class="stat-value-lg">{{ stats.total_inventory }}</div>
-          <div class="stat-label">Locations</div>
+          <div class="stat-label">Shops</div>
         </div>
       </div>
     </div>
@@ -85,7 +92,7 @@
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="locations-tab" data-bs-toggle="tab" data-bs-target="#locations" type="button" role="tab">
-        <i class="bi bi-geo-alt-fill me-2"></i>Locations
+        <i class="bi bi-shop me-2"></i>Shops
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -167,7 +174,7 @@
       <div class="card bg-dark border-secondary">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title mb-0">Locations Created by {{ target_user.username }}</h5>
+            <h5 class="card-title mb-0">Shops Created by {{ target_user.username }}</h5>
             <a href="{% url 'user_locations' target_user.id %}" class="btn btn-sm btn-outline-primary">
               View All <i class="bi bi-arrow-right ms-1"></i>
             </a>
@@ -177,12 +184,10 @@
               <thead>
                 <tr>
                   <th>Product</th>
-                  <th>Location</th>
-                  <th>Quantity</th>
-                  <th>CBM</th>
+                  <th>Shop</th>
+                  <th>RMB</th>
+                  <th>1 Carton CBM</th>
                   <th>Cartons</th>
-                  <th>Price</th>
-                  <th>Deposit</th>
                   <th>Created</th>
                   <th class="text-end">Actions</th>
                 </tr>
@@ -192,11 +197,9 @@
                 <tr>
                   <td>{{ location.product.product_name }}</td>
                   <td>{{ location.location_number|default:"—" }}</td>
-                  <td>{{ location.quantity }}</td>
+                  <td>{{ location.price }}</td>
                   <td>{{ location.cbm }}</td>
                   <td>{{ location.carton_piece }}</td>
-                  <td>${{ location.price }}</td>
-                  <td>${{ location.deposit }}</td>
                   <td>{{ location.created_at|date:"M d, Y" }}</td>
                   <td class="text-end">
                     <a href="{% url 'location' %}?product_id={{ location.product.id }}" class="btn btn-sm btn-outline-secondary me-1" title="View">
@@ -206,7 +209,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="9" class="text-center text-muted">No locations found</td>
+                  <td colspan="7" class="text-center text-muted">No shops found</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -232,11 +235,13 @@
                 <tr>
                   <th>Order #</th>
                   <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Total Price</th>
+                  <th>Shop</th>
+                  <th>Qty</th>
+                  <th>RMB</th>
+                  <th>Value</th>
+                  <th>Rupees</th>
                   <th>Deposit</th>
                   <th>Remaining</th>
-                  <th>Status</th>
                   <th>Created</th>
                   <th class="text-end">Actions</th>
                 </tr>
@@ -246,17 +251,13 @@
                 <tr>
                   <td>#{{ order.id }}</td>
                   <td>{{ order.product.product_name }}</td>
+                  <td>{{ order.location_number|default:"—" }}</td>
                   <td>{{ order.quantity }}</td>
-                  <td>${{ order.total_amount }}</td>
-                  <td>${{ order.deposit }}</td>
-                  <td>${{ order.remaining_to_pay }}</td>
-                  <td>
-                    {% if order.remaining_to_pay > 0 %}
-                    <span class="badge bg-warning text-dark">Pending</span>
-                    {% else %}
-                    <span class="badge bg-success">Paid</span>
-                    {% endif %}
-                  </td>
+                  <td>{{ order.rmb }}</td>
+                  <td>{{ order.exchange_value }}</td>
+                  <td>₹{{ order.rupees }}</td>
+                  <td>₹{{ order.deposit }}</td>
+                  <td>₹{{ order.remaining_to_pay }}</td>
                   <td>{{ order.created_at|date:"M d, Y" }}</td>
                   <td class="text-end">
                     <a href="{% url 'order_detail_api' order.id %}" class="btn btn-sm btn-outline-secondary me-1" title="View">
@@ -269,7 +270,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="9" class="text-center text-muted">No orders found</td>
+                  <td colspan="11" class="text-center text-muted">No orders found</td>
                 </tr>
                 {% endfor %}
               </tbody>

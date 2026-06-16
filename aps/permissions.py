@@ -241,6 +241,27 @@ def permission_denied_view(request, exception=None):
     return handle_permission_denied(request, exception)
 
 
+def business_user_required(view_func):
+    """
+    Restrict business pages (products, shops, orders) to non-admin staff.
+    Administrators manage user data via Users / Admin Control Center only.
+    """
+    @wraps(view_func)
+    @login_required
+    def _wrapped(request, *args, **kwargs):
+        if not is_active_approved(request.user):
+            return redirect('login')
+        if is_administrator(request.user):
+            from django.contrib import messages
+            messages.info(
+                request,
+                'Administrators view user business data from the Users page.',
+            )
+            return redirect('users_list')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
 # ── Security Decorators for IDOR Prevention ───────────────────────────────────
 
 def ownership_required(model_class, pk_kwarg='pk', lookup_field='pk'):

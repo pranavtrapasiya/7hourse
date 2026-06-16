@@ -15,7 +15,11 @@ class UserApprovalTests(TestCase):
         """Registering a new user should save them as inactive by default."""
         response = self.client.post(self.register_url, {
             'username': 'newuser',
+            'full_name': 'New User',
             'email': 'newuser@example.com',
+            'country_code': '+91',
+            'mobile_number': '9876543210',
+            'city': 'Mumbai',
             'password1': 'SecurePassword123!',
             'password2': 'SecurePassword123!',
         })
@@ -338,6 +342,95 @@ class AdminControlTests(TestCase):
         self.client.login(username='ctrladmin', password='password123')
         response = self.client.get(reverse('admin_control'))
         self.assertEqual(response.status_code, 200)
+
+
+class OrderCalculationTests(TestCase):
+    def setUp(self):
+        from aps.models import Category, Product
+        self.cat = Category.objects.create(name='TestCat')
+        self.product = Product.objects.create(
+            product_name='Test Product', category=self.cat, asin_code='RBAC1',
+        )
+
+    def test_calculation_by_carton(self):
+        """If carton_piece is 0, total_amount should be quantity * rupees."""
+        from datetime import date
+        from aps.models import Order
+        order = Order.objects.create(
+            product=self.product, quantity=5, rmb=10, exchange_value=85,
+            carton_piece=0, order_date=date.today()
+        )
+        # rupees = 10 * 85 = 850
+        # total_amount = 5 * 850 = 4250
+        self.assertEqual(order.rupees, 850)
+        self.assertEqual(order.total_amount, 4250)
+        self.assertEqual(order.total_pieces, 0)
+
+    def test_calculation_by_pieces(self):
+        """If carton_piece > 0, total_amount should be quantity * carton_piece * rupees."""
+        from datetime import date
+        from aps.models import Order
+        order = Order.objects.create(
+            product=self.product, quantity=5, rmb=10, exchange_value=85,
+            carton_piece=12, order_date=date.today()
+        )
+        # rupees = 10 * 85 = 850
+        # total_pieces = 5 * 12 = 60
+        # total_amount = 60 * 850 = 51000
+        self.assertEqual(order.rupees, 850)
+        self.assertEqual(order.total_pieces, 60)
+        self.assertEqual(order.total_amount, 51000)
+
+
+class OrderSortingTests(TestCase):
+    def setUp(self):
+        from datetime import date, timedelta
+        from aps.models import Category, Product, Order
+        self.user = User.objects.create_user('sortinguser', password='password123', is_active=True)
+        self.cat = Category.objects.create(name='TestCat')
+        self.product = Product.objects.create(
+            product_name='Test Product', category=self.cat, asin_code='SORT1',
+        )
+        # Order 1: Price 1000, Date Today
+        self.o1 = Order.objects.create(
+            product=self.product, quantity=1, price=1000, rupees=1000,
+            total_amount=1000, order_date=date.today(), created_by=self.user
+        )
+        # Order 2: Price 5000, Date Yesterday
+        self.o2 = Order.objects.create(
+            product=self.product, quantity=1, price=5000, rupees=5000,
+            total_amount=5000, order_date=date.today() - timedelta(days=1), created_by=self.user
+        )
+
+    def test_sorting_by_price_low_to_high(self):
+        from unittest.mock import patch
+        from django.test import RequestFactory
+        from aps.views.orders import order_list
+        rf = RequestFactory()
+        request = rf.get('/orders/?sort=total_amount')
+        request.user = self.user
+        with patch('aps.views.orders.render') as mock_render:
+            order_list(request)
+            context = mock_render.call_args[0][2]
+            orders = list(context['page_obj'].object_list)
+            # Low to High: o1 (1000), o2 (5000)
+            self.assertEqual(orders[0], self.o1)
+            self.assertEqual(orders[1], self.o2)
+
+    def test_sorting_by_price_high_to_low(self):
+        from unittest.mock import patch
+        from django.test import RequestFactory
+        from aps.views.orders import order_list
+        rf = RequestFactory()
+        request = rf.get('/orders/?sort=-total_amount')
+        request.user = self.user
+        with patch('aps.views.orders.render') as mock_render:
+            order_list(request)
+            context = mock_render.call_args[0][2]
+            orders = list(context['page_obj'].object_list)
+            # High to Low: o2 (5000), o1 (1000)
+            self.assertEqual(orders[0], self.o2)
+            self.assertEqual(orders[1], self.o1)
 
 
 

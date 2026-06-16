@@ -10,7 +10,10 @@ from aps.models import AuditLog, Category, Product, ProductCodeSettings
 from aps.services.audit import AuditService
 
 
+from aps.permissions import business_user_required
+
 @login_required
+@business_user_required
 def settings_view(request):
     cat_form = CategoryForm(user=request.user)
     subcat_form = SubCategoryForm(user=request.user)
@@ -87,6 +90,7 @@ def settings_view(request):
 
 @login_required
 @require_POST
+@business_user_required
 def migrate_product_codes(request):
     products = Product.objects.filter(
         asin_code__isnull=True, is_deleted=False, created_by=request.user

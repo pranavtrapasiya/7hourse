@@ -9,12 +9,13 @@ from django.views.decorators.http import require_POST
 from aps.forms import OrderForm
 from aps.models import AuditLog, Order, Product, WarehouseInventory
 from aps.permissions import (
-    can_edit_order, can_delete_order, filter_orders_own, get_order_for_user,
+    business_user_required, can_edit_order, can_delete_order,
+    filter_orders_own, get_order_for_user, get_product_for_user,
 )
 from aps.services.audit import AuditService
 
 
-@login_required
+@business_user_required
 def order_create(request):
     return render(request, 'aps/order_create.html', {
         'page_title': 'New Order',
@@ -22,7 +23,7 @@ def order_create(request):
     })
 
 
-@login_required
+@business_user_required
 def order_list(request):
     qs = filter_orders_own(
         request.user,
@@ -79,6 +80,9 @@ def order_detail_api(request, pk):
         'location_number': order.location_number or '—',
         'quantity': order.quantity,
         'price': str(order.price),
+        'rmb': str(order.rmb),
+        'exchange_value': str(order.exchange_value),
+        'rupees': str(order.rupees),
         'deposit': str(order.deposit),
         'cbm': str(order.cbm),
         'carton_piece': order.carton_piece,
@@ -95,17 +99,23 @@ def order_detail_api(request, pk):
     })
 
 
-@login_required
+@business_user_required
 def order_save_api(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
 
     product_id = request.POST.get('product_id')
     location_id = request.POST.get('location_id') or None
-    product = get_object_or_404(Product, pk=product_id, is_deleted=False)
+    try:
+        product = get_product_for_user(request.user, product_id)
+    except (Product.DoesNotExist, PermissionDenied):
+        return JsonResponse({'success': False, 'error': 'Product not found or access denied.'}, status=403)
+
     location = None
     if location_id:
-        location = get_object_or_404(WarehouseInventory, pk=location_id)
+        location = get_object_or_404(WarehouseInventory, pk=location_id, created_by=request.user)
+        if location.product_id != product.pk:
+            return JsonResponse({'success': False, 'error': 'Invalid shop for this product.'}, status=400)
 
     form = OrderForm(request.POST)
     if form.is_valid():
@@ -145,6 +155,9 @@ def order_edit(request, pk):
             'location_id': order.location_id or '',
             'quantity': order.quantity,
             'price': str(order.price),
+            'rmb': str(order.rmb),
+            'exchange_value': str(order.exchange_value),
+            'rupees': str(order.rupees),
             'deposit': str(order.deposit),
             'cbm': str(order.cbm),
             'carton_piece': order.carton_piece,

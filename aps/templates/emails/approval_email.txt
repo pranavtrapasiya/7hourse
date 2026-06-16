@@ -1,0 +1,8 @@
+Hello {{ username }},
+
+Your warehouse management account has been approved. You can now sign in.
+
+Username: {{ username }}
+Sign in: {{ login_url }}
+
+If you did not register for this account, please contact your administrator.

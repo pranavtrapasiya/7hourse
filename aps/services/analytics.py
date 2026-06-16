@@ -123,6 +123,7 @@ class AnalyticsService:
                 total=Sum('total_amount')
             )['total'] or 0,
             'registration_date': user.date_joined,
+            'approved_at': getattr(getattr(user, 'profile', None), 'approved_at', None),
             'last_activity': AuditLog.objects.filter(user=user).order_by('-created_at').first(),
             'account_status': 'Active' if user.is_active else 'Inactive',
         }

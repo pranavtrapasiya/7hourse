@@ -26,7 +26,7 @@
     <div class="stat-card stat-green"><div class="stat-value">{{ active_users }}</div><div class="stat-label">Active Users</div></div>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card stat-purple"><div class="stat-value">{{ total_inventory }}</div><div class="stat-label">Inventory</div></div>
+    <div class="stat-card stat-purple"><div class="stat-value">{{ total_inventory }}</div><div class="stat-label">Shops</div></div>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
     <div class="stat-card stat-blue"><div class="stat-value">{{ orders_this_week }}</div><div class="stat-label">Orders/Week</div></div>
@@ -74,12 +74,12 @@
     <div class="content-card p-3">
       <div class="row g-3 mb-3">
         <div class="col-6"><span class="text-muted text-sm">Total Entries</span><div class="fw-600">{{ inventory_analytics.total_entries }}</div></div>
-        <div class="col-6"><span class="text-muted text-sm">Unique Locations</span><div class="fw-600">{{ inventory_analytics.unique_locations }}</div></div>
+        <div class="col-6"><span class="text-muted text-sm">Unique Shops</span><div class="fw-600">{{ inventory_analytics.unique_locations }}</div></div>
         <div class="col-6"><span class="text-muted text-sm">This Week</span><div class="fw-600">{{ inventory_analytics.entries_this_week }}</div></div>
         <div class="col-6"><span class="text-muted text-sm">Products w/ Stock</span><div class="fw-600">{{ inventory_analytics.products_with_inventory }}</div></div>
       </div>
       {% if inventory_analytics.by_location %}
-      <h6 class="text-sm text-muted mb-2">Top Locations</h6>
+      <h6 class="text-sm text-muted mb-2">Top Shops</h6>
       <ul class="list-unstyled mb-0">
         {% for loc in inventory_analytics.by_location|slice:":8" %}
         <li class="d-flex justify-content-between py-1 border-bottom border-secondary">

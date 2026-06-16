@@ -40,10 +40,16 @@
             <div class="user-avatar-lg me-3">
               {{ user_data.user.username|first|upper }}
             </div>
-            <div class="flex-grow-1">
-              <h5 class="card-title mb-1">{{ user_data.user.username }}</h5>
-              <p class="card-text text-muted mb-1">{{ user_data.user.get_full_name|default:"—" }}</p>
-              <p class="card-text text-muted small mb-0">{{ user_data.user.email }}</p>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <h5 class="card-title mb-1 text-truncate" title="{{ user_data.user.username }}">{{ user_data.user.username }}</h5>
+              <p class="card-text text-muted mb-1 text-truncate" title="{{ user_data.user.get_full_name }}">{{ user_data.user.get_full_name|default:"—" }}</p>
+              <p class="card-text text-muted small mb-0 text-truncate" title="{{ user_data.user.email }}">{{ user_data.user.email }}</p>
+              {% if user_data.profile %}
+              <p class="card-text text-muted small mb-0 text-truncate" title="{{ user_data.profile.country_code }} {{ user_data.profile.mobile_number|default:'' }}{% if user_data.profile.city %} · {{ user_data.profile.city }}{% endif %}">
+                {{ user_data.profile.country_code }} {{ user_data.profile.mobile_number|default:"" }}
+                {% if user_data.profile.city %} · {{ user_data.profile.city }}{% endif %}
+              </p>
+              {% endif %}
             </div>
           </div>
 
@@ -57,7 +63,7 @@
             <div class="col-6">
               <div class="stat-box">
                 <div class="stat-value">{{ user_data.total_inventory }}</div>
-                <div class="stat-label">Locations</div>
+                <div class="stat-label">Shops</div>
               </div>
             </div>
             <div class="col-6">

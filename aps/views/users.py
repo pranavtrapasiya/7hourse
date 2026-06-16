@@ -58,7 +58,7 @@ def users_list(request):
         ).order_by('-created_at').first()
         users_data.append({
             'user': user,
-            'profile': getattr(user, 'userprofile', None),
+            'profile': getattr(user, 'profile', None),
             'total_products': user.total_products,
             'total_inventory': user.total_inventory,
             'total_orders': user.total_orders,

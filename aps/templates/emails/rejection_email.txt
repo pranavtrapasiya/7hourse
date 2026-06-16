@@ -1,0 +1,7 @@
+Hello {{ username }},
+
+Your registration request for the warehouse management system was not approved at this time.
+
+{% if note %}Note from administrator: {{ note }}{% endif %}
+
+If you believe this was a mistake, please contact your company administrator.

@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-  <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -18,7 +17,6 @@
     </div>
   </div>
 
-  <!-- Orders Table -->
   <div class="row">
     <div class="col-12">
       <div class="card bg-dark border-secondary">
@@ -29,87 +27,56 @@
                 <tr>
                   <th>Order #</th>
                   <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Total Price</th>
+                  <th>Shop</th>
+                  <th>Qty</th>
+                  <th>RMB</th>
+                  <th>Value</th>
+                  <th>Rupees</th>
                   <th>Deposit</th>
                   <th>Remaining</th>
-                  <th>Status</th>
                   <th>Created</th>
-                  <th class="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {% for order in page_obj %}
                 <tr>
                   <td>#{{ order.id }}</td>
-                  <td>
-                    <a href="{% url 'product_detail' order.product.id %}" class="text-decoration-none">
-                      {{ order.product.product_name }}
-                    </a>
-                  </td>
+                  <td>{{ order.product.product_name }}</td>
+                  <td>{{ order.location_number|default:"—" }}</td>
                   <td>{{ order.quantity }}</td>
-                  <td>${{ order.total_amount }}</td>
-                  <td>${{ order.deposit }}</td>
-                  <td>${{ order.remaining_to_pay }}</td>
-                  <td>
-                    {% if order.remaining_to_pay > 0 %}
-                    <span class="badge bg-warning text-dark">Pending</span>
-                    {% else %}
-                    <span class="badge bg-success">Paid</span>
-                    {% endif %}
-                  </td>
+                  <td>{{ order.rmb }}</td>
+                  <td>{{ order.exchange_value }}</td>
+                  <td>₹{{ order.rupees }}</td>
+                  <td>₹{{ order.deposit }}</td>
+                  <td>₹{{ order.remaining_to_pay }}</td>
                   <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
-                  <td class="text-end">
-                    <a href="{% url 'order_detail_api' order.id %}" class="btn btn-sm btn-outline-secondary me-1" title="View">
-                      <i class="bi bi-eye"></i>
-                    </a>
-                    <a href="{% url 'order_edit' order.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    <button onclick="confirmDelete({{ order.id }})" class="btn btn-sm btn-outline-danger" title="Delete">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td>
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="9" class="text-center text-muted">No orders found for this user</td>
+                  <td colspan="10" class="text-center text-muted">No orders found for this user</td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
 
-          <!-- Pagination -->
           {% if page_obj.has_other_pages %}
           <nav class="mt-4">
             <ul class="pagination justify-content-center">
               {% if page_obj.has_previous %}
-              <li class="page-item">
-                <a class="page-link bg-dark text-white border-secondary" href="?page=1">
-                  <i class="bi bi-chevron-double-left"></i>
-                </a>
-              </li>
               <li class="page-item">
                 <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.previous_page_number }}">
                   <i class="bi bi-chevron-left"></i>
                 </a>
               </li>
               {% endif %}
-
               <li class="page-item active">
                 <span class="page-link bg-primary text-white border-primary">{{ page_obj.number }}</span>
               </li>
-
               {% if page_obj.has_next %}
               <li class="page-item">
                 <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.next_page_number }}">
                   <i class="bi bi-chevron-right"></i>
-                </a>
-              </li>
-              <li class="page-item">
-                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.paginator.num_pages }}">
-                  <i class="bi bi-chevron-double-right"></i>
                 </a>
               </li>
               {% endif %}
@@ -121,12 +88,4 @@
     </div>
   </div>
 </div>
-
-<script>
-function confirmDelete(orderId) {
-  if (confirm('Are you sure you want to delete this order?')) {
-    window.location.href = '/orders/' + orderId + '/delete/';
-  }
-}
-</script>
 {% endblock %}
