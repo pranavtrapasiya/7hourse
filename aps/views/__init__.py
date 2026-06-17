@@ -8,7 +8,7 @@ from .products import (
     product_permanent_delete, deleted_products, product_list,
     product_detail, export_products_csv,
 )
-from .inventory import location_view, delete_inventory_entry
+from .inventory import location_view, delete_inventory_entry, edit_inventory_price
 from .orders import (
     order_create, order_list, order_detail_api, order_save_api,
     order_edit, order_delete,
@@ -17,7 +17,7 @@ from .ajax import (
     ajax_subcategories, ajax_product_search, ajax_preview_code,
     ajax_order_locations, api_product_search,
 )
-from .auth import register_view, logout_view
+from .auth import register_view, logout_view, profile_view, forgot_password_view
 from .wishlist import wishlist_list, wishlist_toggle
 from .approvals import (
     approval_requests, approve_user_api, reject_user_api,
@@ -38,12 +38,12 @@ __all__ = [
     'product_add', 'product_edit', 'product_delete', 'product_restore',
     'product_permanent_delete', 'deleted_products', 'product_list',
     'product_detail', 'export_products_csv',
-    'location_view', 'delete_inventory_entry',
+    'location_view', 'delete_inventory_entry', 'edit_inventory_price',
     'order_create', 'order_list', 'order_detail_api', 'order_save_api',
     'order_edit', 'order_delete',
     'ajax_subcategories', 'ajax_product_search', 'ajax_preview_code',
     'ajax_order_locations', 'api_product_search',
-    'register_view', 'logout_view',
+    'register_view', 'logout_view', 'profile_view', 'forgot_password_view',
     'wishlist_list', 'wishlist_toggle',
     'approval_requests', 'approve_user_api', 'reject_user_api',
     'bulk_approve_api', 'bulk_reject_api', 'approval_history_api',

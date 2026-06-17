@@ -17,9 +17,17 @@ from aps.services.audit import AuditService
 
 @business_user_required
 def order_create(request):
+    product_id = request.GET.get('product_id')
+    preselected_product = None
+    if product_id:
+        try:
+            preselected_product = get_product_for_user(request.user, product_id)
+        except Exception:
+            pass
     return render(request, 'aps/order_create.html', {
         'page_title': 'New Order',
         'active_menu': 'order',
+        'preselected_product': preselected_product,
     })
 
 

@@ -160,6 +160,38 @@
       grid-template-columns: repeat(3, 1fr)
     }
   }
+
+  /* ── Order Product Thumb Hover Zoom ── */
+  .order-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .order-product-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    display: block;
+  }
+  .order-product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .order-product-thumb:hover {
+    transform: scale(1.25);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    z-index: 99;
+    position: relative;
+    border-color: var(--accent);
+  }
 </style>
 {% endblock %}
 
@@ -220,8 +252,17 @@
 <div class="order-cards-mobile order-cards">
   {% for order in page_obj %}
   <div class="order-card">
-    <div class="order-card-top">
-      <div class="order-card-product">{{ order.product.product_name }}</div>
+    <div class="order-card-top align-items-center">
+      <div class="d-flex align-items-center gap-2 min-width-0">
+        <div class="order-product-thumb" style="width: 32px; height: 32px;">
+          {% if order.product.main_image %}
+          <img src="{{ order.product.main_image.url }}" alt="{{ order.product.product_name }}">
+          {% else %}
+          <div class="d-flex align-items-center justify-content-center h-100" style="background:var(--surface-3);"><i class="bi bi-image text-muted" style="font-size: 0.8rem;"></i></div>
+          {% endif %}
+        </div>
+        <div class="order-card-product">{{ order.product.product_name }}</div>
+      </div>
       <span class="order-card-id">#{{ order.pk }}</span>
     </div>
     <div class="order-card-grid">
@@ -294,8 +335,17 @@
         {% for order in page_obj %}
         <tr>
           <td class="text-muted small">{{ order.pk }}</td>
-          <td class="fw-600" style="max-width:180px;">
-            <div class="text-truncate">{{ order.product.product_name }}</div>
+          <td class="fw-600" style="max-width:240px;">
+            <div class="order-product-cell">
+              <div class="order-product-thumb">
+                {% if order.product.main_image %}
+                <img src="{{ order.product.main_image.url }}" alt="{{ order.product.product_name }}">
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center h-100" style="background:var(--surface-3);"><i class="bi bi-image text-muted" style="font-size: 1.1rem;"></i></div>
+                {% endif %}
+              </div>
+              <div class="text-truncate" title="{{ order.product.product_name }}">{{ order.product.product_name }}</div>
+            </div>
           </td>
           <td><span class="loc-badge"
               style="background:var(--accent);color:#fff;padding:3px 10px;border-radius:6px;font-weight:600;font-size:.82rem;">{{ order.location_number|default:"—" }}</span></td>

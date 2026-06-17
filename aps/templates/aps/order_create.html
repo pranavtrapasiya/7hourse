@@ -497,5 +497,16 @@ document.getElementById('orderModal').addEventListener('hidden.bs.modal',()=>{
   document.getElementById('step3Badge').className='step-badge';
   document.getElementById('step2Badge').className='step-badge active';
 });
+
+{% if preselected_product %}
+document.addEventListener('DOMContentLoaded', () => {
+  selectProduct({
+    id: "{{ preselected_product.pk }}",
+    name: "{{ preselected_product.product_name|escapejs }}",
+    code: "{{ preselected_product.asin_code|escapejs }}",
+    img: "{% if preselected_product.main_image %}{{ preselected_product.main_image.url }}{% endif %}"
+  });
+});
+{% endif %}
 </script>
 {% endblock %}

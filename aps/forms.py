@@ -72,6 +72,9 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['product_name', 'sh_code', 'category', 'subcategory', 'main_image', 'description', 'tags']
+        labels = {
+            'sh_code': 'Product Code',
+        }
         widgets = {
             'product_name': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -80,7 +83,7 @@ class ProductForm(forms.ModelForm):
             }),
             'sh_code': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
-                'placeholder': 'SH Code (optional)',
+                'placeholder': 'Product Code (optional)',
             }),
             'category': forms.Select(attrs={
                 'class': 'form-select form-select-lg',
@@ -413,3 +416,103 @@ class ApprovedUserLoginForm(AuthenticationForm):
                 pass
 
         return super().clean()
+
+
+class UserProfileEditForm(forms.ModelForm):
+    full_name = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter full name',
+            'autocomplete': 'name',
+        }),
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'Enter email address',
+            'autocomplete': 'email',
+        }),
+    )
+    country_code = forms.ChoiceField(
+        choices=COUNTRY_CODE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+    )
+    mobile_number = forms.CharField(
+        max_length=15,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Mobile number',
+            'autocomplete': 'tel',
+            'inputmode': 'numeric',
+        }),
+    )
+    city = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter city',
+            'autocomplete': 'address-level2',
+        }),
+    )
+
+    class Meta:
+        model = User
+        fields = ('email',)
+
+    def __init__(self, *args, user=None, **kwargs):
+        self._user = user
+        # Initialize form with current values
+        initial = kwargs.get('initial', {})
+        if user:
+            initial['email'] = user.email
+            initial['full_name'] = f"{user.first_name} {user.last_name}".strip()
+            profile = getattr(user, 'profile', None)
+            if profile:
+                initial['country_code'] = profile.country_code
+                initial['mobile_number'] = profile.mobile_number
+                initial['city'] = profile.city
+        kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
+        for field_name in ('full_name', 'email', 'mobile_number', 'city'):
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs.setdefault('class', 'form-control form-control-lg')
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        if not email:
+            raise ValidationError('Email is required.')
+        if User.objects.filter(email=email).exclude(pk=self._user.pk).exists():
+            raise ValidationError('A user with this email address already exists.')
+        return email
+
+    def clean_mobile_number(self):
+        from .models import UserProfile
+        from .validators import validate_mobile_number
+        country_code = self.cleaned_data.get('country_code', '+91')
+        mobile = validate_mobile_number(
+            self.cleaned_data.get('mobile_number', ''), country_code=country_code,
+        )
+        if UserProfile.objects.filter(mobile_number=mobile).exclude(user=self._user).exists():
+            raise ValidationError('This mobile number is already registered.')
+        return mobile
+
+    def save(self, commit=True):
+        user = self._user
+        user.email = self.cleaned_data.get('email', '').strip()
+        full_name = self.cleaned_data.get('full_name', '').strip()
+        parts = full_name.split(None, 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ''
+        if commit:
+            user.save()
+            from .models import UserProfile
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'mobile_number': self.cleaned_data['mobile_number'],
+                    'country_code': self.cleaned_data['country_code'],
+                    'city': self.cleaned_data['city'],
+                },
+            )
+        return user

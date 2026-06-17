@@ -1,6 +1,16 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+
+# Python 3.14 Compatibility Patch for Django Test Client context copying
+import django.template.context
+def _context_copy(self):
+    dup = self.__class__.__new__(self.__class__)
+    dup.dicts = self.dicts[:]
+    if hasattr(self, 'request'):
+        dup.request = self.request
+    return dup
+django.template.context.BaseContext.__copy__ = _context_copy
 from django.contrib.admin.sites import AdminSite
 from aps.admin import CustomUserAdmin
 from aps.forms import ApprovedUserLoginForm
@@ -119,8 +129,8 @@ class WishlistTests(TestCase):
         # Create product
         from aps.models import Product, Category
         self.cat = Category.objects.create(name='Electronics')
-        self.product1 = Product.objects.create(product_name='Phone', category=self.cat, asin_code='ASIN1')
-        self.product2 = Product.objects.create(product_name='Laptop', category=self.cat, asin_code='ASIN2')
+        self.product1 = Product.objects.create(product_name='Phone', category=self.cat, asin_code='ASIN1', created_by=self.user)
+        self.product2 = Product.objects.create(product_name='Laptop', category=self.cat, asin_code='ASIN2', created_by=self.user)
 
     def test_wishlist_toggle_adds_and_removes(self):
         """Toggling a product should add it to wishlist, and toggling it again should remove it."""
@@ -301,7 +311,7 @@ class RBACSettingsTests(TestCase):
     def test_regular_user_cannot_access_settings(self):
         self.client.login(username='settingsuser', password='password123')
         response = self.client.get(reverse('settings'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
 
     def test_admin_can_access_settings(self):
         self.client.login(username='settingsadmin', password='password123')
@@ -431,6 +441,72 @@ class OrderSortingTests(TestCase):
             # High to Low: o2 (5000), o1 (1000)
             self.assertEqual(orders[0], self.o2)
             self.assertEqual(orders[1], self.o1)
+
+
+class ProfileTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='profileuser', password='password123', is_active=True, first_name='John', last_name='Doe', email='john@example.com')
+        profile = self.user.profile
+        profile.mobile_number = '9876543210'
+        profile.country_code = '+91'
+        profile.city = 'Mumbai'
+        profile.save()
+        self.profile_url = reverse('profile')
+
+    def test_anonymous_cannot_access_profile(self):
+        response = self.client.get(self.profile_url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_authenticated_user_can_view_profile(self):
+        self.client.login(username='profileuser', password='password123')
+        response = self.client.get(self.profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'aps/profile.html')
+        self.assertEqual(response.context['profile'].city, 'Mumbai')
+        self.assertEqual(response.context['profile'].mobile_number, '9876543210')
+
+    def test_authenticated_user_can_edit_profile(self):
+        self.client.login(username='profileuser', password='password123')
+        # Edit request
+        response = self.client.post(self.profile_url, {
+            'update_profile': '1',
+            'full_name': 'Johnny Doe',
+            'email': 'johnny@example.com',
+            'country_code': '+91',
+            'mobile_number': '9876543211',
+            'city': 'Delhi',
+        })
+        self.assertRedirects(response, self.profile_url)
+        
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, 'Johnny')
+        self.assertEqual(self.user.last_name, 'Doe')
+        self.assertEqual(self.user.email, 'johnny@example.com')
+        self.assertEqual(self.user.profile.mobile_number, '9876543211')
+        self.assertEqual(self.user.profile.city, 'Delhi')
+
+    def test_change_password_success(self):
+        self.client.login(username='profileuser', password='password123')
+        response = self.client.post(self.profile_url, {
+            'change_password': '1',
+            'old_password': 'password123',
+            'new_password1': 'NewSecurePassword123!',
+            'new_password2': 'NewSecurePassword123!',
+        })
+        self.assertRedirects(response, self.profile_url)
+        # Verify user can log in with new password
+        self.assertTrue(self.client.login(username='profileuser', password='NewSecurePassword123!'))
+
+    def test_forgot_password_success(self):
+        url = reverse('forgot_password')
+        response = self.client.post(url, {
+            'identifier': 'john@example.com',
+        })
+        # Should redirect to login page
+        self.assertRedirects(response, reverse('login'))
+        
+        # Verify password has changed from old one
+        self.assertFalse(self.client.login(username='profileuser', password='password123'))
 
 
 

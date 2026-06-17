@@ -1,9 +1,12 @@
 from django.urls import path
+# pyrefly: ignore [missing-import]
 from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('settings/', views.settings_view, name='settings'),
+    path('profile/', views.profile_view, name='profile'),
+    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     path('products/', views.product_list, name='product_list'),
     path('products/add/', views.product_add, name='product_add'),
     path('products/<int:pk>/', views.product_detail, name='product_detail'),
@@ -15,6 +18,7 @@ urlpatterns = [
     path('products/export/', views.export_products_csv, name='export_products_csv'),
     path('location/', views.location_view, name='location'),
     path('location/entry/<int:pk>/delete/', views.delete_inventory_entry, name='delete_inventory_entry'),
+    path('location/entry/<int:pk>/edit-price/', views.edit_inventory_price, name='edit_inventory_price'),
     # ── Order Module ──
     path('orders/', views.order_list, name='order_list'),
     path('orders/new/', views.order_create, name='order_create'),

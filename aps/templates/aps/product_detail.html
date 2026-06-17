@@ -65,6 +65,9 @@
       <a href="{% url 'product_edit' product.pk %}" class="btn btn-primary">
         <i class="bi bi-pencil-fill me-2"></i>Edit Catalog Entry
       </a>
+      <a href="{% url 'order_create' %}?product_id={{ product.pk }}" class="btn btn-success">
+        <i class="bi bi-cart-fill me-2"></i>Place Order
+      </a>
       {% if can_delete_products %}
       <button type="button" class="btn btn-outline-danger" onclick="triggerSoftDelete()">
         <i class="bi bi-trash3-fill me-2"></i>Move to Trash (Delete)
@@ -95,7 +98,7 @@
         <span class="badge-subcat"><i class="bi bi-folder-fill me-1"></i>{{ product.subcategory.name }}</span>
         {% endif %}
         {% if product.sh_code %}
-        <span class="badge bg-secondary"><i class="bi bi-box-fill me-1"></i>SH: {{ product.sh_code }}</span>
+        <span class="badge bg-secondary"><i class="bi bi-box-fill me-1"></i>Product Code: {{ product.sh_code }}</span>
         {% endif %}
       </div>
 
@@ -132,13 +135,21 @@
     <!-- Inventory Locations Details -->
     {% if inventory_entries %}
     <div class="content-card">
-      <h6 class="fw-700 mb-3"><i class="bi bi-shop text-amber me-1"></i>Inventory & Storage Log</h6>
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h6 class="fw-700 mb-0"><i class="bi bi-shop text-amber me-1"></i>Inventory & Storage Log</h6>
+        <div class="d-flex align-items-center gap-2">
+          <label for="exchangeValueInput" class="small text-muted fw-600 mb-0">Value (Exchange Rate):</label>
+          <input type="number" id="exchangeValueInput" class="form-control form-control-sm text-center" value="85" style="width:75px;" min="0" step="0.01">
+        </div>
+      </div>
       <div class="table-responsive" style="border-radius:10px; border:1px solid var(--border); overflow:hidden;">
         <table class="table table-hover align-middle mb-0" style="color:var(--text); --bs-table-bg:transparent; --bs-table-border-color:var(--border);">
           <thead>
             <tr style="background:var(--surface-3);">
               <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Shop</th>
               <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">RMB</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Value</th>
+              <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Rupees</th>
               <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Carton (Qty)</th>
               <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">1 Carton CBM</th>
               <th style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); padding:10px 14px;">Recorded</th>
@@ -146,12 +157,18 @@
           </thead>
           <tbody>
             {% for entry in inventory_entries %}
-            <tr style="border-bottom:1px solid var(--border);">
+            <tr style="border-bottom:1px solid var(--border);" class="inventory-row" data-rmb="{{ entry.price }}">
               <td style="padding:12px 14px;">
                 <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-family:var(--font-mono); letter-spacing:1px;">{{ entry.location_number|default:"—" }}</span>
               </td>
-              <td style="padding:12px 14px;" class="text-green fw-600">
-                {{ entry.price|currency }}
+              <td style="padding:12px 14px;" class="fw-600">
+                {{ entry.price }}
+              </td>
+              <td style="padding:12px 14px;" class="value-col text-muted">
+                85.00
+              </td>
+              <td style="padding:12px 14px;" class="rupees-col text-green fw-600">
+                ₹0.00
               </td>
               <td style="padding:12px 14px;">
                 {{ entry.carton_piece }} pcs
@@ -273,5 +290,32 @@ document.getElementById('detailWishlistBtn')?.addEventListener('click', function
     btn.disabled = false;
   });
 });
+
+// Exchange calculation
+function updateExchangeCalculations() {
+  const valueInput = document.getElementById('exchangeValueInput');
+  if (!valueInput) return;
+  const val = parseFloat(valueInput.value) || 0;
+  
+  document.querySelectorAll('.inventory-row').forEach(row => {
+    const rmb = parseFloat(row.dataset.rmb) || 0;
+    const rupees = rmb * val;
+    
+    row.querySelector('.value-col').textContent = val.toFixed(2);
+    
+    if (rupees === Math.floor(rupees)) {
+      row.querySelector('.rupees-col').textContent = `₹${parseInt(rupees).toLocaleString()}`;
+    } else {
+      row.querySelector('.rupees-col').textContent = `₹${rupees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+  });
+}
+
+const exchangeValueInput = document.getElementById('exchangeValueInput');
+if (exchangeValueInput) {
+  exchangeValueInput.addEventListener('input', updateExchangeCalculations);
+  // Initial run
+  updateExchangeCalculations();
+}
 </script>
 {% endblock %}

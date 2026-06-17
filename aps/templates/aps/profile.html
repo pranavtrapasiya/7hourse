@@ -1,0 +1,395 @@
+{% extends 'aps/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <!-- Left Column: User Card & Stats -->
+    <div class="col-12 col-lg-4">
+      <div class="content-card text-center mb-4">
+        <div class="d-flex flex-column align-items-center">
+          <div class="user-avatar-xl mb-3">
+            {{ request.user.username|first|upper }}
+          </div>
+          <h4 class="mb-1 fw-700">{{ request.user.get_full_name|default:request.user.username }}</h4>
+          <p class="text-muted small mb-3">@{{ request.user.username }}</p>
+          
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+            <span class="badge bg-success">Approved & Active</span>
+            {% if request.user.is_superuser or request.user.is_staff %}
+              <span class="badge bg-info"><i class="bi bi-shield-lock-fill me-1"></i>Administrator</span>
+            {% else %}
+              <span class="badge bg-secondary"><i class="bi bi-person-fill me-1"></i>Staff Member</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr class="border-secondary my-3">
+
+        <div class="text-start">
+          <h6 class="section-label mb-3">Account Details</h6>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+            <span class="text-muted small">Email</span>
+            <span class="text-sm font-monospace">{{ request.user.email }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+            <span class="text-muted small">Mobile</span>
+            <span class="text-sm fw-500">{{ profile.country_code }} {{ profile.mobile_number }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+            <span class="text-muted small">City</span>
+            <span class="text-sm fw-500">{{ profile.city }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+            <span class="text-muted small">Joined</span>
+            <span class="text-sm fw-500">{{ request.user.date_joined|date:"M d, Y" }}</span>
+          </div>
+          {% if last_login %}
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Last Login</span>
+            <span class="text-sm fw-500">{{ last_login|date:"M d, Y H:i" }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- User Stats Card -->
+      <div class="content-card">
+        <h6 class="section-label mb-3">My Workspace Stats</h6>
+        <div class="row g-2 text-center">
+          <div class="col-4">
+            <div class="p-2 rounded bg-dark border border-secondary">
+              <div class="fs-4 fw-700 text-blue">{{ product_count }}</div>
+              <div class="text-muted small" style="font-size: 0.75rem;">Products</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 rounded bg-dark border border-secondary">
+              <div class="fs-4 fw-700 text-amber">{{ inventory_count }}</div>
+              <div class="text-muted small" style="font-size: 0.75rem;">Shops</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 rounded bg-dark border border-secondary">
+              <div class="fs-4 fw-700 text-green">{{ order_count }}</div>
+              <div class="text-muted small" style="font-size: 0.75rem;">Orders</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Tabs (View Details / Edit Details / Change Password) -->
+    <div class="col-12 col-lg-8">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header border-secondary bg-transparent p-0">
+          <ul class="nav nav-tabs border-0" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if active_tab == 'view-profile' %}active{% endif %} py-3 px-4" id="view-profile-tab" data-bs-toggle="tab" data-bs-target="#view-profile" type="button" role="tab" aria-selected="{% if active_tab == 'view-profile' %}true{% else %}false{% endif %}">
+                <i class="bi bi-person-lines-fill me-2"></i>Profile Details
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if active_tab == 'edit-profile' %}active{% endif %} py-3 px-4" id="edit-profile-tab" data-bs-toggle="tab" data-bs-target="#edit-profile" type="button" role="tab" aria-selected="{% if active_tab == 'edit-profile' %}true{% else %}false{% endif %}">
+                <i class="bi bi-pencil-square me-2"></i>Edit Details
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if active_tab == 'change-password' %}active{% endif %} py-3 px-4" id="change-password-tab" data-bs-toggle="tab" data-bs-target="#change-password" type="button" role="tab" aria-selected="{% if active_tab == 'change-password' %}true{% else %}false{% endif %}">
+                <i class="bi bi-shield-lock-fill me-2"></i>Change Password
+              </button>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="card-body p-4">
+          <div class="tab-content" id="profileTabsContent">
+            <!-- View Profile Details Tab -->
+            <div class="tab-pane fade {% if active_tab == 'view-profile' %}show active{% endif %}" id="view-profile" role="tabpanel" aria-labelledby="view-profile-tab">
+              <div class="row g-4">
+                <div class="col-12">
+                  <h5 class="fw-600 mb-3 text-accent"><i class="bi bi-info-circle me-2"></i>Registration Profile Info</h5>
+                  <p class="text-muted small mb-4">These are the profile details associated with your account in the system.</p>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">USERNAME</div>
+                    <div class="fw-600 font-monospace fs-5 text-white">{{ request.user.username }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">FULL NAME</div>
+                    <div class="fw-600 fs-5 text-white">{{ request.user.get_full_name|default:"—" }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">EMAIL ADDRESS</div>
+                    <div class="fw-600 fs-5 text-white">{{ request.user.email }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">MOBILE NUMBER</div>
+                    <div class="fw-600 fs-5 text-white">{{ profile.country_code }} {{ profile.mobile_number }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">CITY / LOCATION</div>
+                    <div class="fw-600 fs-5 text-white">{{ profile.city }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-3 rounded border border-secondary" style="background:var(--surface-2);">
+                    <div class="text-muted small mb-1">REGISTRATION TIME</div>
+                    <div class="fw-600 fs-5 text-white">{{ request.user.date_joined|date:"M d, Y H:i" }}</div>
+                  </div>
+                </div>
+                
+                <!-- Permissions Info -->
+                <div class="col-12 mt-4">
+                  <h5 class="fw-600 mb-3 text-accent"><i class="bi bi-shield-check me-2"></i>My Access Permissions</h5>
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-download text-blue fs-5"></i>
+                          <div>
+                            <div class="fw-500 text-sm">Export Data</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">Can export company-wide lists</div>
+                          </div>
+                        </div>
+                        {% if can_export %}
+                          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Granted</span>
+                        {% else %}
+                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Denied</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                      <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-trash3 text-red fs-5"></i>
+                          <div>
+                            <div class="fw-500 text-sm">Delete Products</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">Can soft-delete and delete products</div>
+                          </div>
+                        </div>
+                        {% if can_delete_products %}
+                          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Granted</span>
+                        {% else %}
+                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Denied</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                      <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-sliders text-purple fs-5"></i>
+                          <div>
+                            <div class="fw-500 text-sm">Manage Settings</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">Can adjust prefix / code settings</div>
+                          </div>
+                        </div>
+                        {% if can_manage_settings %}
+                          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Granted</span>
+                        {% else %}
+                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Denied</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                      <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-cart text-amber fs-5"></i>
+                          <div>
+                            <div class="fw-500 text-sm">Manage All Orders</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">Can access orders by other staff</div>
+                          </div>
+                        </div>
+                        {% if profile.can_manage_all_orders or request.user.is_superuser %}
+                          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Granted</span>
+                        {% else %}
+                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Denied</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Edit Profile Details Tab -->
+            <div class="tab-pane fade {% if active_tab == 'edit-profile' %}show active{% endif %}" id="edit-profile" role="tabpanel" aria-labelledby="edit-profile-tab">
+              <form method="post" novalidate>
+                {% csrf_token %}
+                <h5 class="fw-600 mb-3 text-accent"><i class="bi bi-pencil-square me-2"></i>Update Personal Information</h5>
+                <p class="text-muted small mb-4">Modify your profile details. Username cannot be changed for audit compliance.</p>
+                
+                <div class="row g-3">
+                  <!-- Username (Disabled) -->
+                  <div class="col-md-6">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control form-control-lg" value="{{ request.user.username }}" disabled readonly style="background-color: var(--surface-3); opacity: 0.7;">
+                    <div class="form-text">Username is locked.</div>
+                  </div>
+                  
+                  <!-- Full Name -->
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_full_name">Full Name <span class="text-danger">*</span></label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                      <div class="invalid-feedback d-block">{{ form.full_name.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Email -->
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_email">Email Address <span class="text-danger">*</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                      <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Country Code -->
+                  <div class="col-md-3">
+                    <label class="form-label" for="id_country_code">Country Code <span class="text-danger">*</span></label>
+                    {{ form.country_code }}
+                    {% if form.country_code.errors %}
+                      <div class="invalid-feedback d-block">{{ form.country_code.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Mobile Number -->
+                  <div class="col-md-3">
+                    <label class="form-label" for="id_mobile_number">Mobile Number <span class="text-danger">*</span></label>
+                    {{ form.mobile_number }}
+                    {% if form.mobile_number.errors %}
+                      <div class="invalid-feedback d-block">{{ form.mobile_number.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- City -->
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_city">City <span class="text-danger">*</span></label>
+                    {{ form.city }}
+                    {% if form.city.errors %}
+                      <div class="invalid-feedback d-block">{{ form.city.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Action Buttons -->
+                  <div class="col-12 mt-4">
+                    <button type="submit" name="update_profile" class="btn btn-primary btn-lg w-100">
+                      <i class="bi bi-check-circle-fill me-2"></i>Save Changes
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div class="tab-pane fade {% if active_tab == 'change-password' %}show active{% endif %}" id="change-password" role="tabpanel" aria-labelledby="change-password-tab">
+              <form method="post" novalidate>
+                {% csrf_token %}
+                <h5 class="fw-600 mb-3 text-accent"><i class="bi bi-shield-lock-fill me-2"></i>Change Password</h5>
+                <p class="text-muted small mb-4">Enter your current password and your new password to update your login credentials.</p>
+                
+                <div class="row g-3">
+                  {% for field in password_form %}
+                    <div class="col-12">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }} <span class="text-danger">*</span></label>
+                      <input type="password" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="form-control form-control-lg" required>
+                      {% if field.help_text %}
+                        <div class="form-text text-muted small mt-1">{{ field.help_text|safe }}</div>
+                      {% endif %}
+                      {% if field.errors %}
+                        <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                  
+                  <!-- Action Buttons -->
+                  <div class="col-12 mt-4">
+                    <button type="submit" name="change_password" class="btn btn-primary btn-lg w-100">
+                      <i class="bi bi-shield-check-fill me-2"></i>Update Password
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.user-avatar-xl {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.nav-tabs .nav-link {
+  color: var(--text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--accent);
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+.bg-success-subtle {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+.bg-danger-subtle {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+.text-success {
+  color: #22c55e !important;
+}
+.text-danger {
+  color: #ef4444 !important;
+}
+.border-success-subtle {
+  border-color: rgba(34, 197, 94, 0.2) !important;
+}
+.border-danger-subtle {
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+</style>
+{% endblock %}

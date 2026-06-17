@@ -9,6 +9,7 @@ from aps.models import (
 from aps.permissions import (
     business_user_required, can_delete_inventory, permission_required,
     filter_products_own, filter_inventory_own, get_product_for_user,
+    filter_inventory_for_user,
 )
 from aps.services.audit import AuditService
 
@@ -56,7 +57,7 @@ def location_view(request):
             for f in request.FILES.getlist('carton_images')[:MAX_CARTON_IMAGES]:
                 CartonImage.objects.create(inventory=inventory, image=f, uploaded_by=request.user)
             if len(request.FILES.getlist('carton_images')) > MAX_CARTON_IMAGES:
-                messages.warning(request, f'Max {MAX_CARTON_IMAGES} carton images allowed. Some skipped.')
+                messages.warning(request, f'Max {MAX_CARTON_IMAGES} QR code images allowed. Some skipped.')
 
             for f in request.FILES.getlist('product_images')[:MAX_PRODUCT_IMAGES]:
                 InventoryProductImage.objects.create(inventory=inventory, image=f, uploaded_by=request.user)
@@ -102,4 +103,25 @@ def delete_inventory_entry(request, pk):
         )
         entry.delete()
         messages.success(request, 'Inventory entry deleted.')
+    return redirect(f'/location/?product_id={product_id}')
+
+
+@business_user_required
+def edit_inventory_price(request, pk):
+    entry = get_object_or_404(filter_inventory_for_user(request.user), pk=pk)
+    product_id = entry.product.pk
+    if request.method == 'POST':
+        price = request.POST.get('price')
+        if price is not None:
+            try:
+                entry.price = price
+                entry.save()
+                AuditService.log_inventory(
+                    request.user, AuditLog.ACTION_INVENTORY_UPDATED, entry,
+                    details={'price': str(entry.price), 'action': 'edit_price'},
+                    request=request,
+                )
+                messages.success(request, 'Inventory price updated.')
+            except (ValueError, TypeError):
+                messages.error(request, 'Invalid price format.')
     return redirect(f'/location/?product_id={product_id}')

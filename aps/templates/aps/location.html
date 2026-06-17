@@ -295,11 +295,11 @@
         {{ inv_form.remark }}
       </div>
 
-      <!-- Carton Images -->
+      <!-- QR Code Image -->
       <div class="content-card mb-3" style="border:1px solid var(--border);">
         <div class="d-flex align-items-center gap-2 mb-2">
-          <i class="bi bi-box text-amber"></i>
-          <span class="fw-600">Carton Images</span>
+          <i class="bi bi-qr-code text-amber"></i>
+          <span class="fw-600">QR Code Image</span>
           <span class="badge bg-secondary ms-auto">Max {{ max_carton }}</span>
         </div>
         <div class="upload-grid">
@@ -406,7 +406,7 @@
           <td>
             <a href="#" class="btn btn-sm btn-outline-primary fw-700 entry-detail-btn"
                data-loc="{{ entry.location_number|default:'—' }}"
-               data-price="₹{{ entry.price }}"
+               data-price="{{ entry.price }}"
                data-carton="{{ entry.carton_piece }}"
                data-cbm="{{ entry.cbm }}"
                data-remark="{{ entry.remark|default:'—' }}"
@@ -417,7 +417,7 @@
             >{{ forloop.counter }}</a>
           </td>
           <td><span class="loc-badge">{{ entry.location_number|default:"—" }}</span></td>
-          <td class="fw-600 text-nowrap">₹{{ entry.price }}</td>
+          <td class="fw-600 text-nowrap">{{ entry.price }}</td>
           <td class="text-nowrap">{{ entry.carton_piece }} pcs</td>
           <td class="text-nowrap">{{ entry.cbm }}</td>
           <td style="max-width:180px;" class="text-truncate text-muted">{{ entry.remark|default:"—" }}</td>
@@ -441,14 +441,23 @@
           </td>
           <td class="text-muted small text-nowrap">{{ entry.created_at|date:"d M Y" }}</td>
           <td>
-            {% if can_delete_inventory %}
-            <button type="button" class="btn btn-sm btn-outline-danger delete-entry-btn"
-                    data-entry-id="{{ entry.pk }}"
-                    data-entry-loc="{{ entry.location_number|default:'—' }}"
-                    title="Delete entry">
-              <i class="bi bi-trash3"></i>
-            </button>
-            {% endif %}
+            <div class="d-flex gap-1">
+              <button type="button" class="btn btn-sm btn-outline-secondary edit-price-btn"
+                      data-entry-id="{{ entry.pk }}"
+                      data-entry-price="{{ entry.price }}"
+                      data-entry-loc="{{ entry.location_number|default:'—' }}"
+                      title="Edit price">
+                <i class="bi bi-pencil"></i>
+              </button>
+              {% if can_delete_inventory %}
+              <button type="button" class="btn btn-sm btn-outline-danger delete-entry-btn"
+                      data-entry-id="{{ entry.pk }}"
+                      data-entry-loc="{{ entry.location_number|default:'—' }}"
+                      title="Delete entry">
+                <i class="bi bi-trash3"></i>
+              </button>
+              {% endif %}
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -504,9 +513,9 @@
           <span class="spec-label d-block mb-1">Submitted On</span>
           <span class="text-muted" id="detailDate"></span>
         </div>
-        <!-- Carton Images -->
+        <!-- QR Code Image -->
         <div class="mb-4" id="detailCartonWrap" style="display:none;">
-          <span class="spec-label d-block mb-2"><i class="bi bi-box text-amber me-1"></i>Carton Images</span>
+          <span class="spec-label d-block mb-2"><i class="bi bi-qr-code text-amber me-1"></i>QR Code Image</span>
           <div class="d-flex gap-2 flex-wrap" id="detailCartonImgs"></div>
         </div>
         <!-- Product Images -->
@@ -542,6 +551,35 @@
           </form>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Price Modal ─────────────────── -->
+<div class="modal fade" id="editPriceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="background:var(--surface);border:1px solid var(--border);">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-pencil-square text-amber"></i>
+          <h5 class="modal-title mb-0">Edit Price</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" id="editPriceForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Shop: <strong id="editPriceLoc"></strong></p>
+          <div class="mb-3">
+            <label class="form-label fw-500">RMB Price</label>
+            <input type="number" name="price" id="editPriceInput" class="form-control form-control-lg" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid var(--border);">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -1125,7 +1163,7 @@ function handlePhotoCamClick(engineKey, title, nativeInputId) {
   openPhotoModal(engineKey, title);
 }
 
-document.getElementById('cartonCamBtn').addEventListener('click', () => handlePhotoCamClick('carton', 'Carton Photo', 'cartonCamNativeInput'));
+document.getElementById('cartonCamBtn').addEventListener('click', () => handlePhotoCamClick('carton', 'QR Code Photo', 'cartonCamNativeInput'));
 document.getElementById('prodImgCamBtn').addEventListener('click', () => handlePhotoCamClick('prodImg', 'Product Photo', 'prodImgCamNativeInput'));
 
 document.getElementById('cartonCamNativeInput')?.addEventListener('change', function() {
@@ -1248,6 +1286,20 @@ document.querySelectorAll('.delete-entry-btn').forEach(btn => {
     document.getElementById('deleteEntryLoc').textContent = entryLoc;
     document.getElementById('deleteEntryForm').action = `/location/entry/${entryId}/delete/`;
     deleteEntryModal.show();
+  });
+});
+
+// ── Edit Price ──────────────────────────────────────────
+const editPriceModal = new bootstrap.Modal(document.getElementById('editPriceModal'));
+document.querySelectorAll('.edit-price-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const entryId = this.dataset.entryId;
+    const entryPrice = this.dataset.entryPrice;
+    const entryLoc = this.dataset.entryLoc;
+    document.getElementById('editPriceLoc').textContent = entryLoc;
+    document.getElementById('editPriceInput').value = entryPrice;
+    document.getElementById('editPriceForm').action = `/location/entry/${entryId}/edit-price/`;
+    editPriceModal.show();
   });
 });
 {% endif %}
