@@ -156,46 +156,21 @@ def forgot_password_view(request):
                 )
                 
                 # Send Email
-                from django.core.mail import send_mail
                 from django.conf import settings
-                from django.template.loader import render_to_string
-                
-                subject = 'Your WMS Account Password Reset OTP'
-                context = {'username': user.username, 'otp': otp, 'expiry_minutes': 10}
-                # Fallback to text if template missing
-                try:
-                    html_message = render_to_string('emails/otp_email.html', context)
-                    text_message = render_to_string('emails/otp_email.txt', context)
-                except Exception:
-                    html_message = None
-                    text_message = f"Hello {user.username},\n\nYour OTP is: {otp}\nIt expires in 10 minutes.\n"
-                
-                try:
-                    if html_message:
-                        from django.core.mail import EmailMultiAlternatives
-                        msg = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL or 'noreply@wms.local', [user.email])
-                        msg.attach_alternative(html_message, "text/html")
-                        msg.send(fail_silently=False)
-                    else:
-                        send_mail(subject, text_message, settings.DEFAULT_FROM_EMAIL or 'noreply@wms.local', [user.email], fail_silently=False)
-                        
+                from aps.services.email import EmailService
+
+                if settings.DEBUG:
+                    print(f"\n[LOCAL DEV] OTP for {user.username}: {otp}\n")
+
+                success, error_msg = EmailService.send_otp_email(user, otp, request=request)
+                if success:
                     request.session['reset_user_id'] = user.id
-                except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Failed to send password reset email: {e}")
-                    if settings.DEBUG:
-                        print(f"\n[LOCAL DEV] OTP for {user.username}: {otp}\n")
-                        request.session['reset_user_id'] = user.id
-                        messages.success(request, f'[LOCAL DEV] Simulated OTP sent. Check console. {success_msg}')
-                        return redirect('verify_otp')
-                    else:
-                        otp_record.delete()
-                        messages.error(request, 'An error occurred while sending the email. Please try again later.')
-                        return render(request, 'aps/forgot_password.html')
-                        
-                messages.success(request, success_msg)
-                return redirect('verify_otp')
+                    messages.success(request, success_msg)
+                    return redirect('verify_otp')
+                else:
+                    otp_record.delete()
+                    messages.error(request, 'An error occurred while sending the email. Please try again later.')
+                    return render(request, 'aps/forgot_password.html')
                 
         # If user not found, still redirect and show success message
         messages.success(request, success_msg)

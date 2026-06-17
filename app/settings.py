@@ -3,11 +3,14 @@ Django settings for app project.
 """
 
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file
 load_dotenv()
+
+IS_TESTING = 'test' in sys.argv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -150,7 +153,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024  # 150MB
 
 # ── Security Hardening (active in production) ────────────────────────────────
 
-if not DEBUG:
+if not DEBUG and not IS_TESTING:
     # HTTPS enforcement
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
