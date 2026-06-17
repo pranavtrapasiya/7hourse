@@ -6,9 +6,8 @@ from django.contrib.auth.models import User
 import django.template.context
 def _context_copy(self):
     dup = self.__class__.__new__(self.__class__)
+    dup.__dict__.update(self.__dict__)
     dup.dicts = self.dicts[:]
-    if hasattr(self, 'request'):
-        dup.request = self.request
     return dup
 django.template.context.BaseContext.__copy__ = _context_copy
 from django.contrib.admin.sites import AdminSite
