@@ -89,15 +89,15 @@ def filter_orders_for_user(user, queryset=None):
     if queryset is None:
         queryset = Order.objects.all()
     if is_administrator(user) or can_manage_all_orders(user):
-        return queryset
-    return queryset.filter(created_by=user)
+        return queryset.filter(product__is_deleted=False)
+    return queryset.filter(created_by=user, product__is_deleted=False)
 
 
 def filter_orders_own(user, queryset=None):
     """Return only orders created by this user (regardless of admin status)."""
     if queryset is None:
         queryset = Order.objects.all()
-    return queryset.filter(created_by=user)
+    return queryset.filter(created_by=user, product__is_deleted=False)
 
 
 def get_order_for_user(user, pk):
@@ -179,15 +179,15 @@ def filter_inventory_for_user(user, queryset=None):
     if queryset is None:
         queryset = WarehouseInventory.objects.all()
     if is_administrator(user):
-        return queryset
-    return queryset.filter(created_by=user)
+        return queryset.filter(product__is_deleted=False)
+    return queryset.filter(created_by=user, product__is_deleted=False)
 
 
 def filter_inventory_own(user, queryset=None):
     """Return only inventory entries created by this user (regardless of admin status)."""
     if queryset is None:
         queryset = WarehouseInventory.objects.all()
-    return queryset.filter(created_by=user)
+    return queryset.filter(created_by=user, product__is_deleted=False)
 
 
 def get_inventory_for_user(user, pk):

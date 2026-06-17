@@ -721,3 +721,24 @@ class AuditLog(models.Model):
     def __str__(self):
         who = self.user.username if self.user else 'System'
         return f'{self.get_action_display()} by {who} at {self.created_at}'
+
+
+# ── Password Reset OTP ───────────────────────────────────────────────────────
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_otps')
+    otp = models.CharField(max_length=6)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"OTP for {self.user.username}"
+        
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at

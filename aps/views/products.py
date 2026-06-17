@@ -225,12 +225,17 @@ def export_products_csv(request):
 
     count = 0
     for p in products:
+        def sanitize(text):
+            if text and str(text).strip().startswith(('=', '+', '-', '@')):
+                return "'" + str(text)
+            return text
+            
         writer.writerow([
-            p.id, p.product_name, p.asin_code or '', p.sh_code or '',
-            p.category.name if p.category else '',
-            p.subcategory.name if p.subcategory else '',
-            p.description or '', p.tags or '',
-            p.created_by.username if p.created_by else '',
+            p.id, sanitize(p.product_name), sanitize(p.asin_code or ''), sanitize(p.sh_code or ''),
+            sanitize(p.category.name if p.category else ''),
+            sanitize(p.subcategory.name if p.subcategory else ''),
+            sanitize(p.description or ''), sanitize(p.tags or ''),
+            sanitize(p.created_by.username if p.created_by else ''),
             p.created_at.strftime('%Y-%m-%d %H:%M:%S') if p.created_at else '',
         ])
         count += 1

@@ -155,9 +155,11 @@ def bulk_approve_api(request):
 
     users = User.objects.filter(pk__in=user_ids, is_active=False, is_superuser=False)
     count = 0
-    for u in users:
-        _approve_user(u, request.user, note='Bulk approval', request=request)
-        count += 1
+    from django.db import transaction
+    with transaction.atomic():
+        for u in users:
+            _approve_user(u, request.user, note='Bulk approval', request=request)
+            count += 1
 
     return JsonResponse({
         'success': True,
@@ -180,9 +182,11 @@ def bulk_reject_api(request):
 
     users = User.objects.filter(pk__in=user_ids, is_superuser=False)
     count = 0
-    for u in users:
-        _reject_user(u, request.user, note='Bulk rejection', request=request)
-        count += 1
+    from django.db import transaction
+    with transaction.atomic():
+        for u in users:
+            _reject_user(u, request.user, note='Bulk rejection', request=request)
+            count += 1
 
     return JsonResponse({
         'success': True,

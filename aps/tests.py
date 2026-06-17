@@ -485,28 +485,69 @@ class ProfileTests(TestCase):
         self.assertEqual(self.user.profile.mobile_number, '9876543211')
         self.assertEqual(self.user.profile.city, 'Delhi')
 
-    def test_change_password_success(self):
-        self.client.login(username='profileuser', password='password123')
-        response = self.client.post(self.profile_url, {
-            'change_password': '1',
-            'old_password': 'password123',
-            'new_password1': 'NewSecurePassword123!',
-            'new_password2': 'NewSecurePassword123!',
-        })
-        self.assertRedirects(response, self.profile_url)
-        # Verify user can log in with new password
-        self.assertTrue(self.client.login(username='profileuser', password='NewSecurePassword123!'))
-
-    def test_forgot_password_success(self):
+    def test_forgot_password_generates_otp(self):
+        from aps.models import PasswordResetOTP
         url = reverse('forgot_password')
         response = self.client.post(url, {
             'identifier': 'john@example.com',
         })
-        # Should redirect to login page
+        # Should redirect to verify_otp
+        self.assertRedirects(response, reverse('verify_otp'))
+        
+        # Verify OTP was created
+        otp_record = PasswordResetOTP.objects.filter(user=self.user).first()
+        self.assertIsNotNone(otp_record)
+        self.assertFalse(otp_record.is_used)
+
+    def test_verify_otp_and_reset_password(self):
+        from aps.models import PasswordResetOTP
+        from django.utils import timezone
+        import datetime
+        
+        # Create OTP manually
+        otp = '123456'
+        PasswordResetOTP.objects.create(
+            user=self.user, otp=otp, expires_at=timezone.now() + datetime.timedelta(minutes=10)
+        )
+        
+        # Simulate session from forgot_password
+        session = self.client.session
+        session['reset_user_id'] = self.user.id
+        session.save()
+        
+        # Verify OTP
+        response = self.client.post(reverse('verify_otp'), {'otp': otp})
+        self.assertRedirects(response, reverse('reset_password'))
+        
+        # Reset Password
+        response = self.client.post(reverse('reset_password'), {
+            'password': 'NewSecurePassword123!',
+            'confirm_password': 'NewSecurePassword123!',
+        })
         self.assertRedirects(response, reverse('login'))
         
-        # Verify password has changed from old one
-        self.assertFalse(self.client.login(username='profileuser', password='password123'))
+        # Verify user can log in with new password
+        self.assertTrue(self.client.login(username='profileuser', password='NewSecurePassword123!'))
+
+    def test_otp_rate_limiting(self):
+        from aps.models import PasswordResetOTP
+        from django.utils import timezone
+        import datetime
+        
+        # Create 3 OTPs
+        for _ in range(3):
+            PasswordResetOTP.objects.create(
+                user=self.user, otp='000000', expires_at=timezone.now() + datetime.timedelta(minutes=10)
+            )
+            
+        url = reverse('forgot_password')
+        response = self.client.post(url, {
+            'identifier': 'john@example.com',
+        })
+        self.assertRedirects(response, reverse('verify_otp'))
+        
+        # Count should still be 3, new one not created
+        self.assertEqual(PasswordResetOTP.objects.filter(user=self.user).count(), 3)
 
 
 

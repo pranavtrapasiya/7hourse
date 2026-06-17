@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+db.sqlite3
+wms.log
+backup.log
+.env
+staticfiles/
+media/
+project_hierarchy.txt

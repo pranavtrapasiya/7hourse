@@ -14,18 +14,25 @@ def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            from aps.models import UserProfile
-            UserProfile.objects.update_or_create(
-                user=user,
-                defaults={
-                    'mobile_number': form.cleaned_data['mobile_number'],
-                    'country_code': form.cleaned_data['country_code'],
-                    'city': form.cleaned_data['city'],
-                },
-            )
+            from django.db import transaction
+            try:
+                with transaction.atomic():
+                    user = form.save(commit=False)
+                    user.is_active = False
+                    user.save()
+                    from aps.models import UserProfile
+                    UserProfile.objects.update_or_create(
+                        user=user,
+                        defaults={
+                            'mobile_number': form.cleaned_data['mobile_number'],
+                            'country_code': form.cleaned_data['country_code'],
+                            'city': form.cleaned_data['city'],
+                        },
+                    )
+            except Exception as e:
+                messages.error(request, 'An error occurred during registration. Please try again.')
+                return render(request, 'aps/register.html', {'page_title': 'Register Access', 'form': form})
+
             messages.success(
                 request,
                 'Your account registration request has been submitted. '
@@ -111,9 +118,7 @@ def profile_view(request):
 
 
 def forgot_password_view(request):
-    """Generate a temporary password and send it to the user's email address."""
-    if request.user.is_authenticated:
-        return redirect('dashboard')
+    """Generate OTP and send it to the user's email address without revealing account existence."""
         
     if request.method == 'POST':
         identifier = request.POST.get('identifier', '').strip()
@@ -125,65 +130,158 @@ def forgot_password_view(request):
         from django.db.models import Q
         
         user = User.objects.filter(Q(username=identifier) | Q(email=identifier)).first()
-        if user:
-            if not user.email:
-                messages.error(request, 'Your account does not have an associated email address. Please contact an administrator.')
-                return render(request, 'aps/forgot_password.html')
-                
-            # Generate temporary password
-            temp_pass = User.objects.make_random_password(length=10)
-            user.set_password(temp_pass)
-            user.save()
+        
+        # Security: Always show the same success message to prevent enumeration
+        success_msg = 'If an account exists with that identifier, an OTP has been sent to the associated email.'
+        
+        if user and user.email:
+            from aps.models import PasswordResetOTP
+            from django.utils import timezone
+            import datetime
+            # Check rate limit (e.g. no more than 3 active OTPs)
+            recent_otps = PasswordResetOTP.objects.filter(
+                user=user, 
+                created_at__gte=timezone.now() - datetime.timedelta(minutes=10)
+            ).count()
             
-            # Send Email
-            from django.core.mail import send_mail
-            from django.conf import settings
-            
-            subject = 'Your WMS Account Temporary Password'
-            message = (
-                f"Hello {user.username},\n\n"
-                f"A password reset was requested for your Warehouse Management System (WMS) account.\n"
-                f"Your new temporary password is:\n\n"
-                f"    {temp_pass}\n\n"
-                f"Please log in and change your password immediately in your profile settings.\n\n"
-                f"Best regards,\n"
-                f"WMS Admin Team"
-            )
-            
-            email_sent = False
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL or 'noreply@wms.local',
-                    [user.email],
-                    fail_silently=False,
-                )
-                email_sent = True
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Failed to send password reset email: {e}")
-            
-            if settings.DEBUG:
-                # Print to terminal for local development ease
-                print(f"\n[LOCAL DEV] Password Reset for {user.username}: {temp_pass}\n")
-                try:
-                    with open(settings.BASE_DIR / 'temp_password.txt', 'w') as f:
-                        f.write(temp_pass)
-                except Exception:
-                    pass
-            
-            if email_sent:
-                messages.success(request, f'A temporary password has been successfully sent to {user.email}.')
+            if recent_otps >= 3:
+                # Silently fail or log, but still show success to user
+                pass
             else:
-                # Fallback message for local development if SMTP fails
-                messages.success(
-                    request, 
-                    f'Temporary password generated: "{temp_pass}" (Email sending failed. Simulated output sent to terminal console for local debugging).'
+                import secrets
+                otp = ''.join(secrets.choice('0123456789') for i in range(6))
+                expires_at = timezone.now() + datetime.timedelta(minutes=10)
+                otp_record = PasswordResetOTP.objects.create(
+                    user=user, otp=otp, expires_at=expires_at
                 )
-            return redirect('login')
-        else:
-            messages.error(request, 'No account found with that username or email address.')
+                
+                # Send Email
+                from django.core.mail import send_mail
+                from django.conf import settings
+                from django.template.loader import render_to_string
+                
+                subject = 'Your WMS Account Password Reset OTP'
+                context = {'username': user.username, 'otp': otp, 'expiry_minutes': 10}
+                # Fallback to text if template missing
+                try:
+                    html_message = render_to_string('emails/otp_email.html', context)
+                    text_message = render_to_string('emails/otp_email.txt', context)
+                except Exception:
+                    html_message = None
+                    text_message = f"Hello {user.username},\n\nYour OTP is: {otp}\nIt expires in 10 minutes.\n"
+                
+                try:
+                    if html_message:
+                        from django.core.mail import EmailMultiAlternatives
+                        msg = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL or 'noreply@wms.local', [user.email])
+                        msg.attach_alternative(html_message, "text/html")
+                        msg.send(fail_silently=False)
+                    else:
+                        send_mail(subject, text_message, settings.DEFAULT_FROM_EMAIL or 'noreply@wms.local', [user.email], fail_silently=False)
+                        
+                    request.session['reset_user_id'] = user.id
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Failed to send password reset email: {e}")
+                    if settings.DEBUG:
+                        print(f"\n[LOCAL DEV] OTP for {user.username}: {otp}\n")
+                        request.session['reset_user_id'] = user.id
+                        messages.success(request, f'[LOCAL DEV] Simulated OTP sent. Check console. {success_msg}')
+                        return redirect('verify_otp')
+                    else:
+                        otp_record.delete()
+                        messages.error(request, 'An error occurred while sending the email. Please try again later.')
+                        return render(request, 'aps/forgot_password.html')
+                        
+                messages.success(request, success_msg)
+                return redirect('verify_otp')
+                
+        # If user not found, still redirect and show success message
+        messages.success(request, success_msg)
+        return redirect('verify_otp')
             
     return render(request, 'aps/forgot_password.html')
+
+def verify_otp_view(request):
+    user_id = request.session.get('reset_user_id')
+    
+    if request.method == 'POST':
+        otp_entered = request.POST.get('otp', '').strip()
+        if not otp_entered:
+            messages.error(request, 'Please enter the OTP.')
+            return render(request, 'aps/verify_otp.html')
+            
+        if user_id:
+            from aps.models import PasswordResetOTP
+            from django.contrib.auth.models import User
+            user = User.objects.filter(id=user_id).first()
+            if user:
+                otp_record = PasswordResetOTP.objects.filter(
+                    user=user, otp=otp_entered, is_used=False
+                ).order_by('-created_at').first()
+                
+                if otp_record:
+                    if otp_record.is_expired:
+                        messages.error(request, 'OTP has expired. Please request a new one.')
+                        return redirect('forgot_password')
+                        
+                    # OTP is valid
+                    otp_record.is_used = True
+                    otp_record.save(update_fields=['is_used'])
+                    
+                    import uuid
+                    reset_token = str(uuid.uuid4())
+                    request.session['reset_token'] = reset_token
+                    
+                    from aps.services.audit import AuditService
+                    from aps.models import AuditLog
+                    AuditService.log(user, AuditLog.ACTION_SETTINGS_CHANGED, details={'note': 'OTP verified successfully'}, request=request)
+                    
+                    messages.success(request, 'OTP verified successfully. You can now reset your password.')
+                    return redirect('reset_password')
+                    
+        messages.error(request, 'Invalid OTP. Please try again.')
+        
+    return render(request, 'aps/verify_otp.html')
+
+def reset_password_view(request):
+    user_id = request.session.get('reset_user_id')
+    reset_token = request.session.get('reset_token')
+    
+    if not user_id or not reset_token:
+        messages.error(request, 'Session expired or invalid request. Please start over.')
+        return redirect('forgot_password')
+        
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        if not password or not confirm_password:
+            messages.error(request, 'Please fill out both fields.')
+            return render(request, 'aps/reset_password.html')
+            
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'aps/reset_password.html')
+            
+        from django.contrib.auth.models import User
+        user = User.objects.filter(id=user_id).first()
+        if user:
+            user.set_password(password)
+            user.save()
+            from aps.services.audit import AuditService
+            from aps.models import AuditLog
+            AuditService.log(user, AuditLog.ACTION_SETTINGS_CHANGED, details={'note': 'Password reset via OTP'}, request=request)
+            
+            # Clear session
+            request.session.pop('reset_user_id', None)
+            request.session.pop('reset_token', None)
+            
+            messages.success(request, 'Your password has been reset successfully. You can now log in.')
+            return redirect('login')
+        else:
+            messages.error(request, 'Invalid user.')
+            return redirect('forgot_password')
+            
+    return render(request, 'aps/reset_password.html')

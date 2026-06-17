@@ -54,19 +54,36 @@ def location_view(request):
             inventory.updated_by = request.user
             inventory.save()
 
+            from django.core.exceptions import ValidationError
+            
             for f in request.FILES.getlist('carton_images')[:MAX_CARTON_IMAGES]:
-                CartonImage.objects.create(inventory=inventory, image=f, uploaded_by=request.user)
+                img = CartonImage(inventory=inventory, image=f, uploaded_by=request.user)
+                try:
+                    img.full_clean()
+                    img.save()
+                except ValidationError as e:
+                    messages.error(request, f'Validation error for carton image {f.name}: {e.messages}')
             if len(request.FILES.getlist('carton_images')) > MAX_CARTON_IMAGES:
                 messages.warning(request, f'Max {MAX_CARTON_IMAGES} QR code images allowed. Some skipped.')
 
             for f in request.FILES.getlist('product_images')[:MAX_PRODUCT_IMAGES]:
-                InventoryProductImage.objects.create(inventory=inventory, image=f, uploaded_by=request.user)
+                img = InventoryProductImage(inventory=inventory, image=f, uploaded_by=request.user)
+                try:
+                    img.full_clean()
+                    img.save()
+                except ValidationError as e:
+                    messages.error(request, f'Validation error for product image {f.name}: {e.messages}')
             if len(request.FILES.getlist('product_images')) > MAX_PRODUCT_IMAGES:
                 messages.warning(request, f'Max {MAX_PRODUCT_IMAGES} product images allowed. Some skipped.')
 
             video_file = request.FILES.get('video')
             if video_file:
-                InventoryVideo.objects.create(inventory=inventory, video=video_file, uploaded_by=request.user)
+                vid = InventoryVideo(inventory=inventory, video=video_file, uploaded_by=request.user)
+                try:
+                    vid.full_clean()
+                    vid.save()
+                except ValidationError as e:
+                    messages.error(request, f'Validation error for video: {e.messages}')
 
             AuditService.log_inventory(
                 request.user, AuditLog.ACTION_INVENTORY_CREATED, inventory,

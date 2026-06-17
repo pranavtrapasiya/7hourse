@@ -17,7 +17,7 @@ from .ajax import (
     ajax_subcategories, ajax_product_search, ajax_preview_code,
     ajax_order_locations, api_product_search,
 )
-from .auth import register_view, logout_view, profile_view, forgot_password_view
+from .auth import register_view, logout_view, profile_view, forgot_password_view, verify_otp_view, reset_password_view
 from .wishlist import wishlist_list, wishlist_toggle
 from .approvals import (
     approval_requests, approve_user_api, reject_user_api,
@@ -44,6 +44,7 @@ __all__ = [
     'ajax_subcategories', 'ajax_product_search', 'ajax_preview_code',
     'ajax_order_locations', 'api_product_search',
     'register_view', 'logout_view', 'profile_view', 'forgot_password_view',
+    'verify_otp_view', 'reset_password_view',
     'wishlist_list', 'wishlist_toggle',
     'approval_requests', 'approve_user_api', 'reject_user_api',
     'bulk_approve_api', 'bulk_reject_api', 'approval_history_api',

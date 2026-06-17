@@ -65,6 +65,15 @@ class SubCategoryForm(forms.ModelForm):
             raise ValidationError('Subcategory name cannot be blank.')
         return name
 
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get('category')
+        name = cleaned_data.get('name', '').strip()
+        if category and name:
+            if SubCategory.objects.filter(category=category, name=name).exists():
+                raise ValidationError(f'Subcategory "{name}" already exists in this category.')
+        return cleaned_data
+
 
 # ── Product (Catalogue) Form ─────────────────────────────────────────────────
 

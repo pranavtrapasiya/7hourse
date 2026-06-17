@@ -86,6 +86,13 @@ def admin_user_detail(request, user_id):
             AuditService.log_user_action(
                 request.user, audit_action, target, request=request,
             )
+            from aps.models import ApprovalLog
+            ApprovalLog.objects.create(
+                target_user=target, 
+                action='approved' if target.is_active else 'rejected',
+                performed_by=request.user, 
+                note='Status toggled via Admin Control',
+            )
             messages.success(request, f'User "{target.username}" status updated.')
             return redirect('admin_user_detail', user_id=target.pk)
         elif action == 'toggle_staff':
