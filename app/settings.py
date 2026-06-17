@@ -16,11 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Generate with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
-    "django-insecure-dev-only-change-in-production-!ghm-ub%)l1hl5mr1j)*zppse",
+    "yhj&mf62)z21cen$3qegi9&$u4qkn55!j&-xy@ms-3w_syx7wm",
 )
 
 # SECURITY: Set to False in production.
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "*").split(",") if host.strip()]
 
@@ -186,12 +186,12 @@ EMAIL_BACKEND = os.environ.get(
 )
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "support.productpilotgo@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "yxcv anyd dinq bzst")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER or "noreply@wms.local",
+    EMAIL_HOST_USER or "support.productpilotgo@gmail.com",
 )
 
 # Logging
