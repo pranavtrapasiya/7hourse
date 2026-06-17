@@ -5,7 +5,6 @@ __pycache__/
 *.pyd
 
 # Django
-db.sqlite3
 wms.log
 backup.log
 .env
