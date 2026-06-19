@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Warehouse Management System (WMS)
+Product Pilot Go
 Automated Backup and Restore Verification Script
 Performs backup of SQLite database and Media files, with rotation.
 """

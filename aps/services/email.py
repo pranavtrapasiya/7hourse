@@ -97,7 +97,7 @@ class EmailService:
             'login_url': request.build_absolute_uri('/login/') if request else '/login/',
         }
         return cls._send(
-            subject='Your WMS account has been approved',
+            subject='Your Product Pilot Go account has been approved',
             to_email=user.email,
             html_template='emails/approval_email.html',
             text_template='emails/approval_email.txt',
@@ -115,7 +115,7 @@ class EmailService:
             'note': note,
         }
         return cls._send(
-            subject='Your WMS registration request',
+            subject='Your Product Pilot Go registration request',
             to_email=user.email,
             html_template='emails/rejection_email.html',
             text_template='emails/rejection_email.txt',
@@ -133,7 +133,7 @@ class EmailService:
             'expiry_minutes': 10,
         }
         return cls._send(
-            subject='Your WMS Account Password Reset OTP',
+            subject='Your Product Pilot Go Account Password Reset OTP',
             to_email=user.email,
             html_template='emails/otp_email.html',
             text_template='emails/otp_email.txt',

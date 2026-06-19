@@ -197,6 +197,13 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     EMAIL_HOST_USER or "support.productpilotgo@gmail.com",
 )
 
+# ── Anymail (HTTP API Email Services) ─────────────────────────────────────────
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY"),
+    "SENDGRID_API_KEY": os.environ.get("SENDGRID_API_KEY"),
+}
+
+
 # Logging
 LOGGING = {
     "version": 1,

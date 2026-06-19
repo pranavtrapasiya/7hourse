@@ -1,5 +1,5 @@
 """
-Role-based access control for the single-company WMS.
+Role-based access control for the single-company Product Pilot Go.
 
 Administrators (is_staff or is_superuser) have unrestricted access.
 Regular users access shared catalog/inventory data but only manage

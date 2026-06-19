@@ -1,5 +1,5 @@
 /**
- * WMS — Main JavaScript
+ * Product Pilot Go — Main JavaScript
  * Handles global UI interactions
  */
 
