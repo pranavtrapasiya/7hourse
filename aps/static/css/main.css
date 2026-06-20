@@ -457,6 +457,19 @@ a:hover { color: #7ab8fb; }
 .stat-purple .stat-icon { color: var(--purple); }
 .stat-purple .stat-value { color: var(--purple); }
 
+a.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+}
+a.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+a.stat-card.stat-blue:hover { border-color: var(--accent); }
+a.stat-card.stat-green:hover { border-color: var(--green); }
+a.stat-card.stat-purple:hover { border-color: var(--purple); }
+a.stat-card.stat-amber:hover { border-color: var(--amber); }
+
 /* ── Quick Action Cards ─────────────────────────────── */
 .quick-action-card {
   display: flex;

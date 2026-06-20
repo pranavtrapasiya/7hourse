@@ -7,11 +7,11 @@
 <div class="row g-3 mb-4">
   {% if is_admin_dashboard %}
   <div class="col-6 col-lg-3">
-    <div class="stat-card stat-blue">
+    <a href="{% url 'users_list' %}" class="stat-card stat-blue d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
       <div class="stat-value">{{ active_users }}</div>
       <div class="stat-label">Active Users</div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
     <div class="stat-card stat-amber">
@@ -28,26 +28,26 @@
     </div>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card stat-purple">
+    <a href="{% url 'approval_requests' %}" class="stat-card stat-purple d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-person-exclamation"></i></div>
       <div class="stat-value">{{ pending_users }}</div>
       <div class="stat-label">Pending Approvals</div>
-    </div>
+    </a>
   </div>
   {% else %}
   <div class="col-6 col-lg-6">
-    <div class="stat-card stat-blue">
+    <a href="{% url 'order_list' %}" class="stat-card stat-blue d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-receipt"></i></div>
       <div class="stat-value">{{ my_orders }}</div>
       <div class="stat-label">My Orders</div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-6">
-    <div class="stat-card stat-green">
+    <a href="{% url 'order_list' %}" class="stat-card stat-green d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
       <div class="stat-value">{{ my_order_value|currency }}</div>
       <div class="stat-label">My Order Value</div>
-    </div>
+    </a>
   </div>
   {% endif %}
 </div>
@@ -56,18 +56,18 @@
 {% if not is_admin_dashboard %}
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-6">
-    <div class="stat-card stat-blue">
+    <a href="{% url 'product_list' %}" class="stat-card stat-blue d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-boxes"></i></div>
       <div class="stat-value">{{ total_products }}</div>
       <div class="stat-label">Products</div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-md-6">
-    <div class="stat-card stat-purple">
+    <a href="{% url 'location' %}" class="stat-card stat-purple d-block text-decoration-none">
       <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
       <div class="stat-value">{{ total_inventory }}</div>
       <div class="stat-label">Shops</div>
-    </div>
+    </a>
   </div>
 </div>
 {% endif %}
