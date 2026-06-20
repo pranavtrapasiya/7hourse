@@ -110,6 +110,11 @@
         <i class="bi bi-sliders2 me-2"></i>Settings
       </button>
     </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions" type="button" role="tab">
+        <i class="bi bi-shield-check me-2"></i>Permissions
+      </button>
+    </li>
   </ul>
 
   <!-- Tab Content -->
@@ -396,7 +401,176 @@
         </div>
       </div>
     </div>
+
+    <!-- Permissions Tab -->
+    <div class="tab-pane fade" id="permissions" role="tabpanel">
+      <div class="row g-4">
+        <!-- Account Status & Role Management -->
+        <div class="col-12 col-xl-4">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-3"><i class="bi bi-person-badge-fill text-blue me-2"></i>Account Control</h5>
+              <p class="text-muted small mb-4">Manage account activation status and administration role.</p>
+              
+              <div class="p-3 rounded border border-secondary mb-4" style="background:var(--surface-2);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Status</span>
+                  {% if target_user.is_active %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Inactive / Pending</span>
+                  {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted small">Role</span>
+                  {% if target_user.is_staff or target_user.is_superuser %}
+                    <span class="badge bg-primary">Administrator</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Staff Member</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <form method="post" class="d-grid gap-2">
+                {% csrf_token %}
+                <button type="submit" name="action" value="toggle_active" class="btn btn-sm {% if target_user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                  {% if target_user.is_active %}
+                    <i class="bi bi-person-x-fill me-1"></i>Deactivate User
+                  {% else %}
+                    <i class="bi bi-person-check-fill me-1"></i>Activate & Approve User
+                  {% endif %}
+                </button>
+                <button type="submit" name="action" value="toggle_staff" class="btn btn-sm btn-outline-primary">
+                  {% if target_user.is_staff or target_user.is_superuser %}
+                    <i class="bi bi-shield-slash-fill me-1"></i>Remove Admin Role
+                  {% else %}
+                    <i class="bi bi-shield-fill me-1"></i>Grant Admin Role
+                  {% endif %}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Granular Permissions Settings -->
+        <div class="col-12 col-xl-8">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-3"><i class="bi bi-shield-lock-fill text-green me-2"></i>Granular Permissions</h5>
+              <p class="text-muted small mb-4">Grant or revoke specific access rights. Administrators automatically have full system permissions regardless of these switches.</p>
+
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_permissions">
+                
+                <div class="row g-3">
+                  <!-- Export Data -->
+                  <div class="col-12 col-md-6">
+                    <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-download text-blue fs-5"></i>
+                        <div>
+                          <div class="fw-500 text-sm">Export Data</div>
+                          <div class="text-muted small" style="font-size: 0.75rem;">Can export company-wide lists</div>
+                        </div>
+                      </div>
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="can_export" id="can_export" {% if profile.can_export %}checked{% endif %} role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Delete Products -->
+                  <div class="col-12 col-md-6">
+                    <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-trash3 text-red fs-5"></i>
+                        <div>
+                          <div class="fw-500 text-sm">Delete Products</div>
+                          <div class="text-muted small" style="font-size: 0.75rem;">Can soft-delete and delete products</div>
+                        </div>
+                      </div>
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="can_delete_products" id="can_delete_products" {% if profile.can_delete_products %}checked{% endif %} role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Manage Settings -->
+                  <div class="col-12 col-md-6">
+                    <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-sliders text-purple fs-5"></i>
+                        <div>
+                          <div class="fw-500 text-sm">Manage Settings</div>
+                          <div class="text-muted small" style="font-size: 0.75rem;">Can adjust prefix / code settings</div>
+                        </div>
+                      </div>
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="can_manage_settings" id="can_manage_settings" {% if profile.can_manage_settings %}checked{% endif %} role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Manage All Orders -->
+                  <div class="col-12 col-md-6">
+                    <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-cart text-amber fs-5"></i>
+                        <div>
+                          <div class="fw-500 text-sm">Manage All Orders</div>
+                          <div class="text-muted small" style="font-size: 0.75rem;">Can access orders by other staff</div>
+                        </div>
+                      </div>
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="can_manage_all_orders" id="can_manage_all_orders" {% if profile.can_manage_all_orders %}checked{% endif %} role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Delete Inventory -->
+                  <div class="col-12 col-md-6">
+                    <div class="p-3 rounded border border-secondary d-flex align-items-center justify-content-between" style="background:var(--surface);">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-x-circle text-info fs-5"></i>
+                        <div>
+                          <div class="fw-500 text-sm">Delete Inventory</div>
+                          <div class="text-muted small" style="font-size: 0.75rem;">Can delete shop inventory entries</div>
+                        </div>
+                      </div>
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" name="can_delete_inventory" id="can_delete_inventory" {% if profile.can_delete_inventory %}checked{% endif %} role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                  <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>Save Permissions
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) {
+        const tabEl = document.querySelector(`#${tabParam}-tab`);
+        if (tabEl) {
+          const tab = new bootstrap.Tab(tabEl);
+          tab.show();
+        }
+      }
+    });
+  </script>
 </div>
 
 <style>

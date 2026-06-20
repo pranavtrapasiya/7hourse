@@ -84,6 +84,65 @@ def user_details(request, user_id):
     target_user = get_object_or_404(User, pk=user_id, is_superuser=False)
     profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
+    if request.method == 'POST':
+        from django.contrib import messages
+        from aps.services.audit import AuditService
+        from aps.models import ApprovalLog
+
+        action = request.POST.get('action')
+        if action == 'toggle_active':
+            target_user.is_active = not target_user.is_active
+            target_user.save(update_fields=['is_active'])
+            audit_action = (
+                AuditLog.ACTION_USER_ACTIVATED if target_user.is_active
+                else AuditLog.ACTION_USER_DEACTIVATED
+            )
+            AuditService.log_user_action(
+                request.user, audit_action, target_user, request=request,
+            )
+            ApprovalLog.objects.create(
+                target_user=target_user, 
+                action='approved' if target_user.is_active else 'rejected',
+                performed_by=request.user, 
+                note='Status toggled via User Dashboard',
+            )
+            messages.success(request, f'User "{target_user.username}" status updated.')
+            return redirect(f'/users/{target_user.id}/?tab=permissions')
+        elif action == 'toggle_staff':
+            target_user.is_staff = not target_user.is_staff
+            target_user.save(update_fields=['is_staff'])
+            AuditService.log(
+                request.user, AuditLog.ACTION_PERMISSION_CHANGED,
+                object_type='user', object_id=target_user.pk,
+                object_repr=target_user.username,
+                details={'is_staff': target_user.is_staff},
+                request=request,
+            )
+            messages.success(request, f'Administrator role updated for "{target_user.username}".')
+            return redirect(f'/users/{target_user.id}/?tab=permissions')
+        elif action == 'update_permissions':
+            profile.can_export = request.POST.get('can_export') == 'on'
+            profile.can_manage_all_orders = request.POST.get('can_manage_all_orders') == 'on'
+            profile.can_manage_settings = request.POST.get('can_manage_settings') == 'on'
+            profile.can_delete_products = request.POST.get('can_delete_products') == 'on'
+            profile.can_delete_inventory = request.POST.get('can_delete_inventory') == 'on'
+            profile.save()
+            AuditService.log(
+                request.user, AuditLog.ACTION_PERMISSION_CHANGED,
+                object_type='user_profile', object_id=profile.pk,
+                object_repr=target_user.username,
+                details={
+                    'can_export': profile.can_export,
+                    'can_manage_all_orders': profile.can_manage_all_orders,
+                    'can_manage_settings': profile.can_manage_settings,
+                    'can_delete_products': profile.can_delete_products,
+                    'can_delete_inventory': profile.can_delete_inventory,
+                },
+                request=request,
+            )
+            messages.success(request, f'Permissions updated for "{target_user.username}".')
+            return redirect(f'/users/{target_user.id}/?tab=permissions')
+
     # Get comprehensive stats
     stats = AnalyticsService.user_comprehensive_stats(target_user)
 
