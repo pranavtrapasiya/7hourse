@@ -2,65 +2,6 @@
 {% load static %}
 
 {% block content %}
-<div class="row g-4">
-
-  <!-- ── ADD CATEGORY ─────────────────────────────────── -->
-  <div class="col-12 col-lg-6">
-    <div class="content-card">
-      <div class="content-card-header">
-        <i class="bi bi-tag-fill text-amber"></i>
-        <h5 class="mb-0">Add Category</h5>
-      </div>
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="category">
-        <div class="mb-3">
-          <label class="form-label fw-500">Category Name <span class="text-danger">*</span></label>
-          {{ cat_form.name }}
-          {% if cat_form.name.errors %}
-          <div class="invalid-feedback d-block">{{ cat_form.name.errors.0 }}</div>
-          {% endif %}
-        </div>
-        <button type="submit" class="btn btn-primary btn-lg w-100">
-          <i class="bi bi-plus-circle-fill me-2"></i>Add Category
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ── ADD SUBCATEGORY ──────────────────────────────── -->
-  <div class="col-12 col-lg-6">
-    <div class="content-card">
-      <div class="content-card-header">
-        <i class="bi bi-tags-fill text-blue"></i>
-        <h5 class="mb-0">Add Subcategory</h5>
-      </div>
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="subcategory">
-        <div class="mb-3">
-          <label class="form-label fw-500">Category <span class="text-danger">*</span></label>
-          {{ subcat_form.category }}
-          {% if subcat_form.category.errors %}
-          <div class="invalid-feedback d-block">{{ subcat_form.category.errors.0 }}</div>
-          {% endif %}
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-500">Subcategory Name <span class="text-danger">*</span></label>
-          {{ subcat_form.name }}
-          {% if subcat_form.name.errors %}
-          <div class="invalid-feedback d-block">{{ subcat_form.name.errors.0 }}</div>
-          {% endif %}
-        </div>
-        <button type="submit" class="btn btn-primary btn-lg w-100">
-          <i class="bi bi-plus-circle-fill me-2"></i>Add Subcategory
-        </button>
-      </form>
-    </div>
-  </div>
-
-</div>
-
 <!-- ── PRODUCT CODE SETTINGS ────────────────────── -->
 <div class="row g-4 mt-1">
   <div class="col-12">
@@ -132,35 +73,6 @@
     </div>
   </div>
 </div>
-
-<!-- ── EXISTING CATEGORIES ─────────────────────────── -->
-{% if categories %}
-<div class="mt-4">
-  <h6 class="section-label mb-3">Existing Categories & Subcategories</h6>
-  <div class="row g-3">
-    {% for cat in categories %}
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="content-card">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <i class="bi bi-tag-fill text-amber"></i>
-          <h6 class="mb-0 fw-600">{{ cat.name }}</h6>
-          <span class="badge bg-secondary ms-auto">{{ cat.subcategories.count }}</span>
-        </div>
-        {% if cat.subcategories.all %}
-        <div class="d-flex flex-wrap gap-1 mt-2">
-          {% for sub in cat.subcategories.all %}
-          <span class="badge-subcat">{{ sub.name }}</span>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-muted small mb-0 mt-1">No subcategories yet.</p>
-        {% endif %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
 
 {% endblock %}
 

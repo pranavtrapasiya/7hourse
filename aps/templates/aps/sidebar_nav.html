@@ -92,6 +92,13 @@
         {% endif %}
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{% url 'categories_list' %}" class="nav-link {% active_class request 'categories_list' %}">
+        <i class="bi bi-tags-fill"></i>
+        <span>Categories</span>
+      </a>
+    </li>
+    {% if request.user|can_user_settings %}
     <li class="nav-divider"></li>
     <li class="nav-label">System</li>
     <li class="nav-item">
@@ -100,6 +107,7 @@
         <span>Settings</span>
       </a>
     </li>
+    {% endif %}
     {% endif %}
 
     <li class="nav-item">

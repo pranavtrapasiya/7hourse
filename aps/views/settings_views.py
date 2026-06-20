@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
-from aps.forms import CategoryForm, SubCategoryForm, ProductCodeSettingsForm
-from aps.models import AuditLog, Category, Product, ProductCodeSettings
+from aps.forms import ProductCodeSettingsForm
+from aps.models import AuditLog, Product, ProductCodeSettings
 from aps.services.audit import AuditService
 
 
@@ -15,40 +15,12 @@ from aps.permissions import can_manage_settings, permission_required
 @login_required
 @permission_required(can_manage_settings, 'You do not have permission to access settings.')
 def settings_view(request):
-    cat_form = CategoryForm(user=request.user)
-    subcat_form = SubCategoryForm(user=request.user)
     code_settings = ProductCodeSettings.load(user=request.user)
     code_form = ProductCodeSettingsForm(instance=code_settings)
 
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
-        if form_type == 'category':
-            cat_form = CategoryForm(request.POST, user=request.user)
-            if cat_form.is_valid():
-                category = cat_form.save(commit=False)
-                category.created_by = request.user
-                category.save()
-                AuditService.log(
-                    request.user, AuditLog.ACTION_CATEGORY_CREATED,
-                    object_type='category', object_id=category.pk,
-                    object_repr=category.name, request=request,
-                )
-                messages.success(request, 'Category added.')
-                return redirect('settings')
-            messages.error(request, 'Fix the errors below.')
-        elif form_type == 'subcategory':
-            subcat_form = SubCategoryForm(request.POST, user=request.user)
-            if subcat_form.is_valid():
-                subcat = subcat_form.save()
-                AuditService.log(
-                    request.user, AuditLog.ACTION_SUBCATEGORY_CREATED,
-                    object_type='subcategory', object_id=subcat.pk,
-                    object_repr=str(subcat), request=request,
-                )
-                messages.success(request, 'Subcategory added.')
-                return redirect('settings')
-            messages.error(request, 'Fix the errors below.')
-        elif form_type == 'product_code_settings':
+        if form_type == 'product_code_settings':
             code_form = ProductCodeSettingsForm(request.POST, instance=code_settings)
             if code_form.is_valid():
                 code_form.save()
@@ -70,21 +42,13 @@ def settings_view(request):
         asin_code__isnull=True, is_deleted=False, created_by=request.user
     ).count()
 
-    # Show only this user's categories
-    categories = Category.objects.filter(
-        created_by=request.user
-    ).prefetch_related('subcategories').order_by('name')
-
     return render(request, 'aps/settings.html', {
         'page_title': 'Settings',
         'active_menu': 'settings',
-        'cat_form': cat_form,
-        'subcat_form': subcat_form,
         'code_form': code_form,
         'code_settings': code_settings,
         'preview_code': preview_code,
         'products_without_code': products_without_code,
-        'categories': categories,
     })
 
 

@@ -549,4 +549,51 @@ class ProfileTests(TestCase):
         self.assertEqual(PasswordResetOTP.objects.filter(user=self.user).count(), 3)
 
 
+class CategoriesTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('catuser', password='password123', is_active=True)
+        self.admin = User.objects.create_superuser('catadmin', password='password123')
+        self.categories_url = reverse('categories_list')
+
+    def test_anonymous_cannot_access_categories(self):
+        response = self.client.get(self.categories_url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_regular_user_can_access_categories(self):
+        self.client.login(username='catuser', password='password123')
+        response = self.client.get(self.categories_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'aps/categories.html')
+
+    def test_admin_redirected_from_categories(self):
+        self.client.login(username='catadmin', password='password123')
+        response = self.client.get(self.categories_url)
+        # Administrators are redirected from business pages to user list
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('users_list'), response.url)
+
+    def test_add_category_and_subcategory(self):
+        from aps.models import Category, SubCategory
+        self.client.login(username='catuser', password='password123')
+        
+        # Add category
+        response = self.client.post(self.categories_url, {
+            'form_type': 'category',
+            'name': 'New Category'
+        })
+        self.assertRedirects(response, self.categories_url)
+        cat = Category.objects.filter(name='New Category', created_by=self.user).first()
+        self.assertIsNotNone(cat)
+
+        # Add subcategory
+        response = self.client.post(self.categories_url, {
+            'form_type': 'subcategory',
+            'category': cat.id,
+            'name': 'New Subcategory'
+        })
+        self.assertRedirects(response, self.categories_url)
+        self.assertTrue(SubCategory.objects.filter(name='New Subcategory', category=cat).exists())
+
+
+
 
