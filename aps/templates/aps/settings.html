@@ -127,6 +127,21 @@ function updatePreview() {
     .catch(() => {});
 }
 
+function updatePlaceholderButtons() {
+  if (!fmtInput) return;
+  const currentValue = fmtInput.value;
+  document.querySelectorAll('.preset-insert-btn').forEach(btn => {
+    const placeholder = btn.getAttribute('data-placeholder');
+    if (currentValue.includes(placeholder)) {
+      btn.disabled = true;
+      btn.classList.add('disabled');
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('disabled');
+    }
+  });
+}
+
 function initPresetSelect() {
   if (!presetSelect || !fmtInput) return;
   const currentValue = fmtInput.value;
@@ -152,6 +167,9 @@ if (presetSelect) {
   presetSelect.addEventListener('change', function() {
     if (this.value === 'custom') {
       customGroup.style.display = 'block';
+      fmtInput.value = ''; // Don't give predefined code in custom
+      updatePreview();
+      updatePlaceholderButtons();
     } else {
       customGroup.style.display = 'none';
       fmtInput.value = this.value;
@@ -160,7 +178,12 @@ if (presetSelect) {
   });
 }
 
-if (fmtInput) fmtInput.addEventListener('input', updatePreview);
+if (fmtInput) {
+  fmtInput.addEventListener('input', () => {
+    updatePreview();
+    updatePlaceholderButtons();
+  });
+}
 if (seqInput) seqInput.addEventListener('input', updatePreview);
 
 function insertAtCursor(input, text) {
@@ -182,6 +205,7 @@ document.querySelectorAll('.preset-insert-btn').forEach(btn => {
     const placeholder = this.getAttribute('data-placeholder');
     insertAtCursor(fmtInput, placeholder);
     updatePreview();
+    updatePlaceholderButtons();
   });
 });
 
@@ -189,6 +213,7 @@ document.querySelectorAll('.preset-insert-btn').forEach(btn => {
 document.addEventListener('DOMContentLoaded', () => {
   initPresetSelect();
   updatePreview();
+  updatePlaceholderButtons();
 });
 </script>
 {% endblock %}
