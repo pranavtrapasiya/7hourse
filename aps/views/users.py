@@ -5,7 +5,7 @@ Provides user-centric monitoring with separate sections for products, locations,
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Sum, Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 
 from aps.models import (
