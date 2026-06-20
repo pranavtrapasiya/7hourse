@@ -27,9 +27,21 @@
 
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
-            <label class="form-label fw-500">Prefix Format</label>
-            {{ code_form.prefix_format }}
-            <div class="form-text">Placeholders: <code>{YEAR}</code> <code>{MONTH}</code> <code>{SEQ}</code></div>
+            <label class="form-label fw-500">Product Code Format</label>
+            <select class="form-select form-select-lg mb-2" id="formatPresetSelect">
+              <option value="{YEAR}{MONTH}{SEQ}">Year + Month + Sequence (e.g. 2026JUN0001)</option>
+              <option value="{YEAR}{SEQ}">Year + Sequence (e.g. 20260001)</option>
+              <option value="{MONTH}{YEAR}{SEQ}">Month + Year + Sequence (e.g. JUN20260001)</option>
+              <option value="PPG-{YEAR}{SEQ}">Prefix 'PPG-' + Year + Sequence (e.g. PPG-20260001)</option>
+              <option value="PPG-{SEQ}">Prefix 'PPG-' + Sequence (e.g. PPG-0001)</option>
+              <option value="custom">Custom Format...</option>
+            </select>
+            
+            <div id="customFormatGroup" style="display: none;">
+              <label class="form-label fw-500 mt-2">Custom Prefix Format</label>
+              {{ code_form.prefix_format }}
+              <div class="form-text">Placeholders: <code>{YEAR}</code> <code>{MONTH}</code> <code>{SEQ}</code></div>
+            </div>
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label fw-500">Sequence Length</label>
@@ -82,6 +94,8 @@
 const fmtInput = document.getElementById('id_prefix_format');
 const seqInput = document.getElementById('id_seq_length');
 const preview  = document.getElementById('livePreview');
+const presetSelect = document.getElementById('formatPresetSelect');
+const customGroup = document.getElementById('customFormatGroup');
 
 function updatePreview() {
   if (!fmtInput || !seqInput) return;
@@ -91,7 +105,46 @@ function updatePreview() {
     .catch(() => {});
 }
 
+function initPresetSelect() {
+  if (!presetSelect || !fmtInput) return;
+  const currentValue = fmtInput.value;
+  let matched = false;
+  
+  for (let i = 0; i < presetSelect.options.length; i++) {
+    if (presetSelect.options[i].value === currentValue) {
+      presetSelect.selectedIndex = i;
+      matched = true;
+      break;
+    }
+  }
+  
+  if (!matched) {
+    presetSelect.value = 'custom';
+    customGroup.style.display = 'block';
+  } else {
+    customGroup.style.display = 'none';
+  }
+}
+
+if (presetSelect) {
+  presetSelect.addEventListener('change', function() {
+    if (this.value === 'custom') {
+      customGroup.style.display = 'block';
+    } else {
+      customGroup.style.display = 'none';
+      fmtInput.value = this.value;
+      updatePreview();
+    }
+  });
+}
+
 if (fmtInput) fmtInput.addEventListener('input', updatePreview);
 if (seqInput) seqInput.addEventListener('input', updatePreview);
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initPresetSelect();
+  updatePreview();
+});
 </script>
 {% endblock %}
