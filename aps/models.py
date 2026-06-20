@@ -235,8 +235,11 @@ class Product(models.Model):
             next_seq = seq_obj.last_sequence
 
         seq_str = str(next_seq).zfill(settings.sequence_length)
+        day = now.strftime('%d')
         code = settings.prefix_format.replace('{YEAR}', str(year))
         code = code.replace('{MONTH}', month)
+        code = code.replace('{DATE}', day)
+        code = code.replace('{PREFIX}', 'PPG')
         code = code.replace('{SEQ}', seq_str)
         return code
 

@@ -60,6 +60,8 @@ def ajax_preview_code(request):
     now = datetime.datetime.now()
     preview = fmt.replace('{YEAR}', str(now.year))
     preview = preview.replace('{MONTH}', now.strftime('%b').upper())
+    preview = preview.replace('{DATE}', now.strftime('%d'))
+    preview = preview.replace('{PREFIX}', 'PPG')
     preview = preview.replace('{SEQ}', '1'.zfill(seq_len))
     return JsonResponse({'preview': preview})
 

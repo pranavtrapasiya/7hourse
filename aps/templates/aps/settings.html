@@ -40,7 +40,29 @@
             <div id="customFormatGroup" style="display: none;">
               <label class="form-label fw-500 mt-2">Custom Prefix Format</label>
               {{ code_form.prefix_format }}
-              <div class="form-text">Placeholders: <code>{YEAR}</code> <code>{MONTH}</code> <code>{SEQ}</code></div>
+              
+              <div class="mt-3">
+                <span class="text-muted d-block small mb-2"><i class="bi bi-info-circle me-1"></i>Click to insert placeholders at cursor position:</span>
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm preset-insert-btn" data-placeholder="{YEAR}">
+                    <i class="bi bi-calendar3 me-1"></i>Year
+                  </button>
+                  <button type="button" class="btn btn-outline-info btn-sm preset-insert-btn" data-placeholder="{MONTH}">
+                    <i class="bi bi-calendar2-range me-1"></i>Month
+                  </button>
+                  <button type="button" class="btn btn-outline-warning btn-sm preset-insert-btn" data-placeholder="{DATE}">
+                    <i class="bi bi-calendar-date me-1"></i>Date
+                  </button>
+                  <button type="button" class="btn btn-outline-success btn-sm preset-insert-btn" data-placeholder="{SEQ}">
+                    <i class="bi bi-hash me-1"></i>Sequence
+                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm preset-insert-btn" data-placeholder="{PREFIX}">
+                    <i class="bi bi-tag me-1"></i>Prefix
+                  </button>
+                </div>
+              </div>
+              
+              <div class="form-text mt-2">Placeholders will be replaced when generating codes (e.g. {PREFIX} replaced with "PPG").</div>
             </div>
           </div>
           <div class="col-6 col-md-3">
@@ -140,6 +162,28 @@ if (presetSelect) {
 
 if (fmtInput) fmtInput.addEventListener('input', updatePreview);
 if (seqInput) seqInput.addEventListener('input', updatePreview);
+
+function insertAtCursor(input, text) {
+  if (!input) return;
+  const startPos = input.selectionStart;
+  const endPos = input.selectionEnd;
+  const originalVal = input.value;
+  
+  input.value = originalVal.substring(0, startPos) + text + originalVal.substring(endPos, originalVal.length);
+  
+  // Set cursor position after inserted text
+  input.selectionStart = input.selectionEnd = startPos + text.length;
+  input.focus();
+}
+
+document.querySelectorAll('.preset-insert-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const placeholder = this.getAttribute('data-placeholder');
+    insertAtCursor(fmtInput, placeholder);
+    updatePreview();
+  });
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
