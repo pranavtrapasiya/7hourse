@@ -1,6 +1,49 @@
 {% extends 'aps/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+  .ts-wrapper.form-select {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  .ts-control {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 12px !important;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+  .ts-wrapper.focus .ts-control {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 0.25rem rgba(79, 156, 249, 0.25) !important;
+  }
+  .ts-dropdown {
+    background-color: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  .ts-dropdown .active {
+    background-color: var(--accent) !important;
+    color: #ffffff !important;
+  }
+  .ts-dropdown .option {
+    padding: 8px 12px !important;
+  }
+  .ts-wrapper .ts-control input {
+    color: var(--text) !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row g-4">
 
@@ -129,4 +172,19 @@
   color: #fff;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  new TomSelect('#id_category', {
+    create: false,
+    controlInput: '<input autofocus>',
+    onDropdownOpen: function() {
+      this.clearActiveOption();
+    }
+  });
+});
+</script>
 {% endblock %}

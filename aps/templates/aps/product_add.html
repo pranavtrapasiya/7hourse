@@ -1,7 +1,7 @@
 {% extends 'aps/base.html' %}
 {% load static %}
 
-{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
 .upload-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .btn-upload {
@@ -30,6 +30,43 @@
 .asin-badge {
   font-family: monospace; background: var(--surface-2);
   padding: 8px 14px; border-radius: 8px; font-size: 0.95rem; color: var(--accent);
+}
+.ts-wrapper.form-select {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+.ts-control {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 8px 12px !important;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+.ts-wrapper.focus .ts-control {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 0.25rem rgba(79, 156, 249, 0.25) !important;
+}
+.ts-dropdown {
+  background-color: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: var(--radius-sm) !important;
+}
+.ts-dropdown .active {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+}
+.ts-dropdown .option {
+  padding: 8px 12px !important;
+}
+.ts-wrapper .ts-control input {
+  color: var(--text) !important;
 }
 </style>
 {% endblock %}
@@ -222,26 +259,52 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 const AJAX_SUBCATS_URL = "{% url 'ajax_subcategories' %}";
 
-// ── Category → Subcategory AJAX ─────────────────────────
-document.getElementById('id_category').addEventListener('change', function() {
-  const catId = this.value;
-  const sel = document.getElementById('id_subcategory');
-  sel.innerHTML = '<option value="">Loading...</option>';
-  if (!catId) { sel.innerHTML = '<option value="">— Select Subcategory —</option>'; return; }
-  fetch(`${AJAX_SUBCATS_URL}?category_id=${catId}`)
-    .then(r => r.json())
-    .then(data => {
-      sel.innerHTML = '<option value="">— Select Subcategory —</option>';
-      data.subcategories.forEach(s => {
-        const o = document.createElement('option');
-        o.value = s.id; o.textContent = s.name;
-        sel.appendChild(o);
+// Initialize Tom Select search dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+  const catSelect = new TomSelect('#id_category', {
+    create: false,
+    controlInput: '<input autofocus>',
+    onDropdownOpen: function() {
+      this.clearActiveOption();
+    }
+  });
+
+  const subSelect = new TomSelect('#id_subcategory', {
+    create: false,
+    controlInput: '<input autofocus>',
+    onDropdownOpen: function() {
+      this.clearActiveOption();
+    }
+  });
+
+  catSelect.on('change', function(catId) {
+    subSelect.clear();
+    subSelect.clearOptions();
+    if (!catId) return;
+
+    subSelect.settings.placeholder = "Loading...";
+    subSelect.inputState();
+
+    fetch(`${AJAX_SUBCATS_URL}?category_id=${catId}`)
+      .then(r => r.json())
+      .then(data => {
+        subSelect.settings.placeholder = "— Select Subcategory —";
+        const options = data.subcategories.map(s => ({
+          value: s.id,
+          text: s.name
+        }));
+        subSelect.addOptions(options);
+        subSelect.inputState();
+      })
+      .catch(() => {
+        subSelect.settings.placeholder = "— Select Subcategory —";
+        subSelect.inputState();
       });
-    })
-    .catch(() => { sel.innerHTML = '<option value="">— Select Subcategory —</option>'; });
+  });
 });
 
 // ── Image Preview (works for BOTH gallery & camera inputs) ──
