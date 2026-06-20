@@ -75,13 +75,32 @@ TEMPLATES = [
 WSGI_APPLICATION = "app.wsgi.application"
 
 
-# Database
+# Database & Media Persistence (Render Ephemeral filesystem support)
 
+import os
 import dj_database_url
+
+RENDER = os.environ.get("RENDER", "false") == "true"
+if RENDER:
+    PERSISTENT_DIR = "/var/data" if os.path.exists("/var/data") else "/data"
+    if not os.path.exists(PERSISTENT_DIR):
+        PERSISTENT_DIR = str(BASE_DIR)
+else:
+    PERSISTENT_DIR = str(BASE_DIR)
+
+# Ensure persistent directories exist for SQLite and Media uploads
+MEDIA_DIR = os.path.join(PERSISTENT_DIR, "media")
+try:
+    os.makedirs(PERSISTENT_DIR, exist_ok=True)
+    os.makedirs(MEDIA_DIR, exist_ok=True)
+except Exception:
+    pass
+
+db_path = os.path.join(PERSISTENT_DIR, 'db.sqlite3')
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=f"sqlite:///{db_path}",
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -117,7 +136,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Media files (uploads)
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = MEDIA_DIR
 
 
 # Default primary key field type

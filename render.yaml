@@ -4,6 +4,10 @@ services:
     runtime: python
     buildCommand: "./build.sh"
     startCommand: "gunicorn app.wsgi:application"
+    disk:
+      name: wms-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: app.settings
