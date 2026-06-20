@@ -174,14 +174,15 @@ if not DEBUG and not IS_TESTING:
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = "DENY"
 
-    # Session timeout (8 hours)
-    SESSION_COOKIE_AGE = 28800
-    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    # Session timeout (2 weeks)
+    SESSION_COOKIE_AGE = 1209600
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 else:
     X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Session engine — database-backed for reliability
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_SAVE_EVERY_REQUEST = True
 
 # ── Email (SMTP) ─────────────────────────────────────────────────────────────
 EMAIL_BACKEND = os.environ.get(
