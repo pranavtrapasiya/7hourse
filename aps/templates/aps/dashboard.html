@@ -35,32 +35,18 @@
     </div>
   </div>
   {% else %}
-  <div class="col-6 col-lg-3">
+  <div class="col-6 col-lg-6">
     <div class="stat-card stat-blue">
       <div class="stat-icon"><i class="bi bi-receipt"></i></div>
       <div class="stat-value">{{ my_orders }}</div>
       <div class="stat-label">My Orders</div>
     </div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="stat-card stat-amber">
-      <div class="stat-icon"><i class="bi bi-calendar-week"></i></div>
-      <div class="stat-value">{{ my_orders_this_week }}</div>
-      <div class="stat-label">Orders This Week</div>
-    </div>
-  </div>
-  <div class="col-6 col-lg-3">
+  <div class="col-6 col-lg-6">
     <div class="stat-card stat-green">
       <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
       <div class="stat-value">{{ my_order_value|currency }}</div>
       <div class="stat-label">My Order Value</div>
-    </div>
-  </div>
-  <div class="col-6 col-lg-3">
-    <div class="stat-card stat-purple">
-      <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
-      <div class="stat-value">{{ pending_payment_orders }}</div>
-      <div class="stat-label">Remaining RMB</div>
     </div>
   </div>
   {% endif %}
@@ -69,28 +55,14 @@
 <!-- ── SYSTEM / WORKSPACE STATS ───────────────────────── -->
 {% if not is_admin_dashboard %}
 <div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md-6">
     <div class="stat-card stat-blue">
       <div class="stat-icon"><i class="bi bi-boxes"></i></div>
       <div class="stat-value">{{ total_products }}</div>
       <div class="stat-label">Products</div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card stat-amber">
-      <div class="stat-icon"><i class="bi bi-tag-fill"></i></div>
-      <div class="stat-value">{{ total_categories }}</div>
-      <div class="stat-label">Categories</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card stat-green">
-      <div class="stat-icon"><i class="bi bi-tags-fill"></i></div>
-      <div class="stat-value">{{ total_subcategories }}</div>
-      <div class="stat-label">Subcategories</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md-6">
     <div class="stat-card stat-purple">
       <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
       <div class="stat-value">{{ total_inventory }}</div>
