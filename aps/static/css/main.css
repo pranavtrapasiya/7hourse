@@ -71,10 +71,7 @@ a:hover { color: #7ab8fb; }
   display: flex; align-items: center; justify-content: center;
   background: var(--surface-3); color: var(--text-dim); font-size: 1.2rem;
 }
-.product-list-table tr:hover .product-thumb {
-  transform: scale(2.2); z-index: 20; position: relative;
-  box-shadow: 0 8px 24px rgba(0,0,0,.5);
-}
+
 
 .fw-500 { font-weight: 500; }
 .fw-600 { font-weight: 600; }
@@ -989,3 +986,66 @@ a.stat-card.stat-amber:hover { border-color: var(--amber); }
   font-size: 0.72rem;
   color: var(--text-muted);
 }
+
+/* ── Image Preview Hover System ─────────────────────── */
+#globalImagePreview {
+  position: fixed;
+  z-index: 99999;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+#globalImagePreview.show {
+  opacity: 1;
+  transform: scale(1);
+}
+#globalImagePreview img {
+  max-width: 300px;
+  max-height: 300px;
+  min-width: 200px;
+  min-height: 200px;
+  object-fit: contain;
+  display: block;
+  border-radius: calc(var(--radius) - 4px);
+}
+
+@media (max-width: 768px) {
+  #globalImagePreview {
+    display: none !important;
+  }
+}
+
+#mobileImagePreviewModal .modal-body {
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#mobileImagePreviewModal img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+#mobileImagePreviewModal .modal-content {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+#mobileImagePreviewModal .btn-close-white {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  z-index: 10;
+}
