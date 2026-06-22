@@ -252,6 +252,14 @@ def business_user_required(view_func):
         if not is_active_approved(request.user):
             return redirect('login')
         if is_administrator(request.user):
+            # Exception for first-time setup wizard
+            from aps.models import Category, SubCategory, ProductCodeSettings
+            has_cat = Category.objects.filter(created_by=request.user).exists()
+            has_subcat = SubCategory.objects.filter(category__created_by=request.user).exists()
+            has_set = ProductCodeSettings.objects.filter(user=request.user).exists()
+            if not (has_cat and has_subcat and has_set):
+                return view_func(request, *args, **kwargs)
+                
             from django.contrib import messages
             messages.info(
                 request,
