@@ -98,6 +98,16 @@ except Exception:
 
 db_path = os.path.join(PERSISTENT_DIR, 'db.sqlite3')
 
+# Copy build-time database to persistent storage on Render if it doesn't exist yet
+if RENDER and db_path != os.path.join(str(BASE_DIR), 'db.sqlite3'):
+    import shutil
+    build_db = os.path.join(str(BASE_DIR), 'db.sqlite3')
+    if os.path.exists(build_db) and not os.path.exists(db_path):
+        try:
+            shutil.copy2(build_db, db_path)
+        except Exception:
+            pass
+
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{db_path}",

@@ -3,7 +3,7 @@ services:
     name: wms-app
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn app.wsgi:application"
+    startCommand: "python manage.py migrate && gunicorn app.wsgi:application"
     disk:
       name: wms-data
       mountPath: /var/data
