@@ -164,10 +164,6 @@ STORAGES = {
     },
 }
 
-# Fallbacks for older third-party packages (like django-cloudinary-storage)
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-
 if os.environ.get("CLOUDINARY_CLOUD_NAME"):
     CLOUDINARY_STORAGE = {
         'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
