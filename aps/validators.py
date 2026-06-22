@@ -74,8 +74,6 @@ def validate_mobile_number(value, country_code='+91'):
     digits = ''.join(c for c in str(value).strip() if c.isdigit())
     if not digits:
         raise ValidationError('Mobile number is required.')
-    if country_code == '+91' and len(digits) != 10:
-        raise ValidationError('Indian mobile numbers must be exactly 10 digits.')
-    if len(digits) < 6 or len(digits) > 15:
-        raise ValidationError('Mobile number must be between 6 and 15 digits.')
+    if len(digits) != 10:
+        raise ValidationError('Mobile number must be exactly 10 digits.')
     return digits

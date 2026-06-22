@@ -338,12 +338,15 @@ class UserRegistrationForm(UserCreationForm):
         widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
     )
     mobile_number = forms.CharField(
-        max_length=15,
+        max_length=10,
+        min_length=10,
         required=True,
         widget=forms.TextInput(attrs={
             'placeholder': '10-digit mobile number',
             'autocomplete': 'tel',
             'inputmode': 'numeric',
+            'pattern': '[0-9]{10}',
+            'maxlength': '10',
         }),
     )
     city = forms.CharField(
@@ -469,12 +472,15 @@ class UserProfileEditForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
     )
     mobile_number = forms.CharField(
-        max_length=15,
+        max_length=10,
+        min_length=10,
         required=True,
         widget=forms.TextInput(attrs={
-            'placeholder': 'Mobile number',
+            'placeholder': '10-digit mobile number',
             'autocomplete': 'tel',
             'inputmode': 'numeric',
+            'pattern': '[0-9]{10}',
+            'maxlength': '10',
         }),
     )
     city = forms.CharField(

@@ -377,4 +377,15 @@
   border-color: rgba(239, 68, 68, 0.2) !important;
 }
 </style>
+
+{% block extra_js %}
+<script>
+  // Enforce strictly 10 digits max and numeric only
+  const mobileInput = document.getElementById('id_mobile_number');
+  if (mobileInput) {
+    mobileInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+    });
+  }
+</script>
 {% endblock %}
