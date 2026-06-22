@@ -604,7 +604,7 @@ class UserProfile(models.Model):
         help_text='View and manage orders created by other users.',
     )
     can_manage_settings = models.BooleanField(
-        default=False,
+        default=True,
         help_text='Access system settings and product code configuration.',
     )
     can_delete_products = models.BooleanField(
