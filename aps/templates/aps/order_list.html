@@ -291,7 +291,7 @@
         <span class="field-value">{{ order.order_date|date:"d M Y" }}</span>
       </div>
       <div class="order-card-field">
-        <span class="field-label">Remaining</span>
+        <span class="field-label">Remaining Amount To Pay (₹)</span>
         <span class="field-value" style="color:var(--amber)">₹{{ order.remaining_to_pay }}</span>
       </div>
     </div>
@@ -325,7 +325,7 @@
           <th>Value</th>
           <th>Rupees</th>
           <th>Deposit</th>
-          <th>Remaining</th>
+          <th>Remaining Amount To Pay (₹)</th>
           <th>Total</th>
           <th>Date</th>
           <th></th>
@@ -539,7 +539,7 @@
           <div class="spec-item"><span class="spec-label">Value</span><span class="spec-value">${d.exchange_value}</span></div>
           <div class="spec-item"><span class="spec-label">Rupees</span><span class="spec-value">₹${d.rupees}</span></div>
           <div class="spec-item"><span class="spec-label">Deposit</span><span class="spec-value">₹${d.deposit}</span></div>
-          <div class="spec-item"><span class="spec-label">Remaining</span><span class="spec-value" style="color:var(--amber)">₹${d.remaining_to_pay}</span></div>
+          <div class="spec-item"><span class="spec-label">Remaining Amount To Pay (₹)</span><span class="spec-value" style="color:var(--amber)">₹${d.remaining_to_pay}</span></div>
           <div class="spec-item"><span class="spec-label">1 Carton CBM</span><span class="spec-value">${d.cbm}</span></div>
           <div class="spec-item"><span class="spec-label">Pcs/Carton</span><span class="spec-value">${d.carton_piece}</span></div>
           <div class="spec-item"><span class="spec-label">Total 1 Carton CBM</span><span class="spec-value">${d.total_cbm}</span></div>
