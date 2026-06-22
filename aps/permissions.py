@@ -46,7 +46,15 @@ def can_manage_settings(user):
     if is_administrator(user):
         return True
     profile = get_user_profile(user)
-    return profile and profile.can_manage_settings
+    if profile and profile.can_manage_settings:
+        return True
+        
+    # Allow access if they haven't completed the setup wizard for settings
+    from aps.models import ProductCodeSettings
+    if not ProductCodeSettings.objects.filter(user=user).exists():
+        return True
+        
+    return False
 
 
 def can_delete_products(user):

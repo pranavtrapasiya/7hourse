@@ -30,7 +30,9 @@ def settings_view(request):
                     object_repr='Product Code Settings', request=request,
                 )
                 messages.success(request, 'Product code settings saved.')
-                return redirect('settings')
+                if can_manage_settings(request.user):
+                    return redirect('settings')
+                return redirect('dashboard')
             messages.error(request, 'Fix the errors below.')
 
     now = datetime.datetime.now()
