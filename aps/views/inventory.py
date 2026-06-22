@@ -63,6 +63,9 @@ def location_view(request):
                     img.save()
                 except ValidationError as e:
                     messages.error(request, f'Validation error for carton image {f.name}: {e.messages}')
+                except Exception as e:
+                    messages.error(request, f'Storage error for carton image {f.name}. Could not save to cloud.')
+
             if len(request.FILES.getlist('carton_images')) > MAX_CARTON_IMAGES:
                 messages.warning(request, f'Max {MAX_CARTON_IMAGES} QR code images allowed. Some skipped.')
 
@@ -73,6 +76,9 @@ def location_view(request):
                     img.save()
                 except ValidationError as e:
                     messages.error(request, f'Validation error for product image {f.name}: {e.messages}')
+                except Exception as e:
+                    messages.error(request, f'Storage error for product image {f.name}. Could not save to cloud.')
+
             if len(request.FILES.getlist('product_images')) > MAX_PRODUCT_IMAGES:
                 messages.warning(request, f'Max {MAX_PRODUCT_IMAGES} product images allowed. Some skipped.')
 
@@ -84,6 +90,8 @@ def location_view(request):
                     vid.save()
                 except ValidationError as e:
                     messages.error(request, f'Validation error for video: {e.messages}')
+                except Exception as e:
+                    messages.error(request, f'Storage error for video. Could not save to cloud.')
 
             AuditService.log_inventory(
                 request.user, AuditLog.ACTION_INVENTORY_CREATED, inventory,
