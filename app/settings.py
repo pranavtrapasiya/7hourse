@@ -17,19 +17,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY: Use environment variable in production.
 # Generate with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "yhj&mf62)z21cen$3qegi9&$u4qkn55!j&-xy@ms-3w_syx7wm",
-)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY: Set to False in production.
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "*").split(",") if host.strip()]
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://*.trycloudflare.com",
-# ]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 # Application definition
 
 INSTALLED_APPS = [
@@ -108,13 +103,21 @@ if RENDER and db_path != os.path.join(str(BASE_DIR), 'db.sqlite3'):
         except Exception:
             pass
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{db_path}",
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -220,7 +223,7 @@ EMAIL_BACKEND = os.environ.get(
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "support.productpilotgo@gmail.com")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "yxcv anyd dinq bzst")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",

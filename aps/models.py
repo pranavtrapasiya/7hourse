@@ -84,7 +84,7 @@ class ProductCodeSettings(models.Model):
     enabled = models.BooleanField(default=True, verbose_name='Enable Auto Product Code')
     prefix_format = models.CharField(
         max_length=100, default='{YEAR}{MONTH}{SEQ}',
-        help_text='Template: {YEAR}, {MONTH}, {SEQ}'
+        help_text='Template: {YEAR}, {MONTH}, {DATE}, {SEQ}'
     )
     sequence_length = models.PositiveIntegerField(default=4)
     reset_monthly = models.BooleanField(default=True, verbose_name='Reset Sequence Monthly')

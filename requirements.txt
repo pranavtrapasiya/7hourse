@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 Pillow
 django-anymail[resend]
 
+psycopg[binary]
