@@ -368,11 +368,20 @@ class UserRegistrationForm(UserCreationForm):
                 if not isinstance(field.widget, forms.Select):
                     field.widget.attrs.setdefault('class', 'form-control form-control-lg')
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if (
+            username
+            and User.objects.filter(username__iexact=username, is_active=True).exists()
+        ):
+            raise ValidationError('A user with that username already exists.')
+        return username
+
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip()
         if not email:
             raise ValidationError('Email is required.')
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email=email, is_active=True).exists():
             raise ValidationError('A user with this email address already exists.')
         return email
 
@@ -383,9 +392,21 @@ class UserRegistrationForm(UserCreationForm):
         mobile = validate_mobile_number(
             self.cleaned_data.get('mobile_number', ''), country_code=country_code,
         )
-        if UserProfile.objects.filter(mobile_number=mobile).exists():
+        if UserProfile.objects.filter(mobile_number=mobile, user__is_active=True).exists():
             raise ValidationError('This mobile number is already registered.')
         return mobile
+
+    def validate_unique(self):
+        username = self.cleaned_data.get('username')
+        email = self.cleaned_data.get('email')
+        
+        # Clean up any existing inactive user with this username or email to bypass uniqueness checks
+        if username:
+            User.objects.filter(username=username, is_active=False).delete()
+        if email:
+            User.objects.filter(email=email, is_active=False).delete()
+            
+        super().validate_unique()
 
     def save(self, commit=True):
         user = super().save(commit=False)

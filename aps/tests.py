@@ -40,6 +40,32 @@ class UserApprovalTests(TestCase):
         self.assertFalse(user.is_active)
         self.assertEqual(user.email, 'newuser@example.com')
 
+    def test_registration_allows_duplicate_inactive_username(self):
+        """Registering with a username of an existing inactive user should succeed and replace them."""
+        # Create an initial inactive user
+        initial_user = User.objects.create_user(username='newuser', password='password123', email='old@example.com')
+        initial_user.is_active = False
+        initial_user.save()
+
+        # Attempt to register again with same username
+        response = self.client.post(self.register_url, {
+            'username': 'newuser',
+            'full_name': 'New User Re-registered',
+            'email': 'newuser@example.com',
+            'country_code': '+91',
+            'mobile_number': '9876543210',
+            'city': 'Mumbai',
+            'password1': 'SecurePassword123!',
+            'password2': 'SecurePassword123!',
+        })
+        self.assertRedirects(response, self.login_url)
+
+        # Verify new user details replaced the old one
+        user = User.objects.get(username='newuser')
+        self.assertFalse(user.is_active)
+        self.assertEqual(user.email, 'newuser@example.com')
+        self.assertEqual(user.first_name, 'New')
+
     def test_inactive_user_cannot_login(self):
         """An inactive user should get a specific validation error and fail to login."""
         # Create an inactive user
