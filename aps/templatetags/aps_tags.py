@@ -61,3 +61,16 @@ def currency_filter(value):
         return f"₹{amount:,.2f}"
     except (ValueError, TypeError):
         return f"₹{value}"
+
+
+@register.filter(name="clean_decimal")
+def clean_decimal(value):
+    """Remove trailing zeros from a Decimal, avoiding scientific notation."""
+    try:
+        if value is None or str(value).strip() == '':
+            return ''
+        from decimal import Decimal
+        d = value if isinstance(value, Decimal) else Decimal(str(value))
+        return f"{d.normalize():f}"
+    except (ValueError, TypeError):
+        return value

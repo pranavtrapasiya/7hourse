@@ -435,7 +435,7 @@ function updateSummary(){
   const totalRupees = pcsPerCarton > 0 ? (totalPieces * rupees) : (qty * rupees);
   const remaining   = totalRupees - deposit;
 
-  document.getElementById('sumTotalCbm').textContent    = totalCbm.toFixed(4);
+  document.getElementById('sumTotalCbm').textContent    = parseFloat(totalCbm.toFixed(4)).toString();
   document.getElementById('sumTotalRmb').textContent    = totalRmb.toFixed(2);
   document.getElementById('sumTotalRupees').textContent = `₹${fmt(totalRupees)}`;
   document.getElementById('sumTotalCartons').textContent = qty;

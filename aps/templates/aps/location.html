@@ -408,7 +408,7 @@
                data-loc="{{ entry.location_number|default:'—' }}"
                data-price="{{ entry.price }}"
                data-carton="{{ entry.carton_piece }}"
-               data-cbm="{{ entry.cbm }}"
+               data-cbm="{{ entry.cbm|clean_decimal }}"
                data-remark="{{ entry.remark|default:'—' }}"
                data-date="{{ entry.created_at|date:'d M Y, h:i A' }}"
                data-carton-imgs="{% for ci in entry.carton_images.all %}{{ ci.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
@@ -419,7 +419,7 @@
           <td><span class="loc-badge">{{ entry.location_number|default:"—" }}</span></td>
           <td class="fw-600 text-nowrap">{{ entry.price }}</td>
           <td class="text-nowrap">{{ entry.carton_piece }} pcs</td>
-          <td class="text-nowrap">{{ entry.cbm }}</td>
+          <td class="text-nowrap">{{ entry.cbm|clean_decimal }}</td>
           <td style="max-width:180px;" class="text-truncate text-muted">{{ entry.remark|default:"—" }}</td>
           <td>
             <div class="inv-media-thumbs">

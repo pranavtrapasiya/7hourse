@@ -77,7 +77,7 @@ def ajax_order_locations(request):
         'id': e.pk,
         'location_number': e.location_number or '—',
         'price': str(e.price),
-        'cbm': str(e.cbm),
+        'cbm': f"{e.cbm.normalize():f}" if e.cbm else '0',
         'carton_piece': e.carton_piece,
         'remark': e.remark or '',
         'created_at': e.created_at.strftime('%d %b %Y') if e.created_at else '',
