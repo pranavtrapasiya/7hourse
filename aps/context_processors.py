@@ -25,8 +25,7 @@ def sidebar_context(request):
         from aps.models import SubCategory, ProductCodeSettings
         has_category = Category.objects.filter(created_by=request.user).exists()
         has_subcategory = SubCategory.objects.filter(category__created_by=request.user).exists()
-        has_settings = ProductCodeSettings.objects.filter(user=request.user).exists()
-        setup_complete = has_category and has_subcategory and has_settings
+        setup_complete = has_category and has_subcategory
         
         show_wizard = False
         if not setup_complete and not is_administrator(request.user):
@@ -60,6 +59,6 @@ def sidebar_context(request):
             'show_wizard': show_wizard,
             'wizard_has_category': has_category,
             'wizard_has_subcategory': has_subcategory,
-            'wizard_has_settings': has_settings,
+            'wizard_has_settings': True,
         }
     return {}

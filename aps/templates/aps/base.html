@@ -109,7 +109,7 @@
           <i class="bi bi-rocket-takeoff-fill text-accent" style="font-size: 3rem; color: #4f9cf9;"></i>
         </div>
         <h5 class="mb-3">Before creating products, please complete the initial setup.</h5>
-        <p class="text-muted mb-4">You must complete all 3 steps below to unlock the application.</p>
+        <p class="text-muted mb-4">You must complete both steps below to unlock the application.</p>
         
         <div class="d-flex flex-column gap-3 max-w-md mx-auto" style="max-width: 500px; margin: 0 auto;">
           <!-- Step 1: Category -->
@@ -150,28 +150,6 @@
               </div>
               {% if not wizard_has_subcategory %}
               <a href="{% url 'categories_list' %}" class="btn btn-primary btn-sm {% if not wizard_has_category %}disabled{% endif %}">Configure</a>
-              {% else %}
-              <span class="badge bg-success">Done</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Step 3: Product Code -->
-          <div class="card bg-black border-{% if wizard_has_settings %}success{% else %}secondary{% endif %}" style="background: var(--surface-2);">
-            <div class="card-body d-flex align-items-center justify-content-between p-3">
-              <div class="d-flex align-items-center gap-3">
-                {% if wizard_has_settings %}
-                <i class="bi bi-check-circle-fill text-success fs-4"></i>
-                {% else %}
-                <i class="bi bi-circle text-muted fs-4"></i>
-                {% endif %}
-                <div class="text-start">
-                  <div class="fw-bold {% if wizard_has_settings %}text-success{% else %}text-white{% endif %}">Step 3: Configure Product Code</div>
-                  <div class="small text-muted">Set up your auto-generation rules</div>
-                </div>
-              </div>
-              {% if not wizard_has_settings %}
-              <a href="{% url 'settings' %}" class="btn btn-primary btn-sm">Configure</a>
               {% else %}
               <span class="badge bg-success">Done</span>
               {% endif %}
