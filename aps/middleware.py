@@ -31,7 +31,7 @@ class SetupWizardMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         
-        if request.user.is_authenticated and response.status_code == 302:
+        if request.user.is_authenticated and not (request.user.is_staff or request.user.is_superuser) and response.status_code == 302:
             from django.urls import reverse
             try:
                 cat_url = reverse('categories_list')

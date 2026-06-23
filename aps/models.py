@@ -229,19 +229,27 @@ class Product(models.Model):
                     user=user, year=year, month='ALL', defaults={'last_sequence': 0}
                 )
 
-            seq_obj.last_sequence = F('last_sequence') + 1
-            seq_obj.save(update_fields=['last_sequence'])
-            seq_obj.refresh_from_db()
-            next_seq = seq_obj.last_sequence
+            # Loop to find the next unused sequence number if a product with the generated code already exists
+            while True:
+                # If created, last_sequence is 0. If not, it has some value.
+                # Increment sequence number safely.
+                if isinstance(seq_obj.last_sequence, F):
+                    # In case of any leftover Expressions, refresh first
+                    seq_obj.refresh_from_db()
+                seq_obj.last_sequence += 1
+                seq_obj.save(update_fields=['last_sequence'])
 
-        seq_str = str(next_seq).zfill(settings.sequence_length)
-        day = now.strftime('%d')
-        code = settings.prefix_format.replace('{YEAR}', str(year))
-        code = code.replace('{MONTH}', month)
-        code = code.replace('{DATE}', day)
-        code = code.replace('{PREFIX}', 'PPG')
-        code = code.replace('{SEQ}', seq_str)
-        return code
+                seq_str = str(seq_obj.last_sequence).zfill(settings.sequence_length)
+                day = now.strftime('%d')
+                code = settings.prefix_format.replace('{YEAR}', str(year))
+                code = code.replace('{MONTH}', month)
+                code = code.replace('{DATE}', day)
+                code = code.replace('{PREFIX}', 'PPG')
+                code = code.replace('{SEQ}', seq_str)
+
+                # Check if it already exists for this user (including soft-deleted)
+                if not Product.objects.filter(asin_code=code, created_by=user).exists():
+                    return code
 
     @property
     def primary_image(self):
@@ -658,7 +666,9 @@ class AuditLog(models.Model):
     ACTION_EXPORT = 'export'
     ACTION_SETTINGS_CHANGED = 'settings_changed'
     ACTION_CATEGORY_CREATED = 'category_created'
+    ACTION_CATEGORY_UPDATED = 'category_updated'
     ACTION_SUBCATEGORY_CREATED = 'subcategory_created'
+    ACTION_SUBCATEGORY_UPDATED = 'subcategory_updated'
     ACTION_WISHLIST_ADD = 'wishlist_add'
     ACTION_WISHLIST_REMOVE = 'wishlist_remove'
     ACTION_PERMISSION_CHANGED = 'permission_changed'
@@ -687,7 +697,9 @@ class AuditLog(models.Model):
         (ACTION_EXPORT, 'Data Export'),
         (ACTION_SETTINGS_CHANGED, 'Settings Changed'),
         (ACTION_CATEGORY_CREATED, 'Category Created'),
+        (ACTION_CATEGORY_UPDATED, 'Category Updated'),
         (ACTION_SUBCATEGORY_CREATED, 'Subcategory Created'),
+        (ACTION_SUBCATEGORY_UPDATED, 'Subcategory Updated'),
         (ACTION_WISHLIST_ADD, 'Wishlist Add'),
         (ACTION_WISHLIST_REMOVE, 'Wishlist Remove'),
         (ACTION_PERMISSION_CHANGED, 'Permission Changed'),

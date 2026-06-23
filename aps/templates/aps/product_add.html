@@ -85,21 +85,16 @@
           <h5 class="mb-0">Basic Details</h5>
         </div>
 
-        {% if is_edit %}
-        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-          <div>
-            <span class="form-label small text-muted mb-0 d-block">ASIN Code</span>
-            <span class="asin-badge">{{ product.asin_code }}</span>
+        <div class="mb-3">
+          <label class="form-label fw-500">Product Code <span class="text-danger">*</span></label>
+          {{ product_form.asin_code }}
+          {% if product_form.asin_code.errors %}
+          <div class="invalid-feedback d-block">{{ product_form.asin_code.errors.0 }}</div>
+          {% endif %}
+          <div class="form-text text-muted small">
+            {% if is_edit %}This code is locked and cannot be changed.{% else %}Once set, this code cannot be changed.{% endif %}
           </div>
         </div>
-        {% else %}
-        <div class="mb-3 p-2 rounded" style="background:var(--surface-2);border:1px solid var(--border);">
-          <div class="d-flex align-items-center gap-2 small text-muted">
-            <i class="bi bi-upc-scan text-green"></i>
-            Product code will be auto-generated on save.
-          </div>
-        </div>
-        {% endif %}
 
         <div class="mb-3">
           <label class="form-label fw-500">Product Name <span class="text-danger">*</span></label>
@@ -110,8 +105,11 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-500">Product Code</label>
+          <label class="form-label fw-500">Secondary Code</label>
           {{ product_form.sh_code }}
+          {% if product_form.sh_code.errors %}
+          <div class="invalid-feedback d-block">{{ product_form.sh_code.errors.0 }}</div>
+          {% endif %}
         </div>
 
         <div class="row g-3">

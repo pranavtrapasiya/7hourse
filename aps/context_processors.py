@@ -29,7 +29,7 @@ def sidebar_context(request):
         setup_complete = has_category and has_subcategory and has_settings
         
         show_wizard = False
-        if not setup_complete:
+        if not setup_complete and not is_administrator(request.user):
             try:
                 from django.urls import resolve
                 current_url_name = resolve(request.path_info).url_name

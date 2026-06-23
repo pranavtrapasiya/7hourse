@@ -89,9 +89,55 @@
 
 <!-- Confirmation Modal -->
 <div class="confirm-modal-overlay" id="confirmModal">
-  <div class="confirm-modal-box">
+  <div class="confirm-modal-box" style="max-width: 480px;">
     <h5 id="confirmTitle">Confirm Action</h5>
     <p id="confirmText">Are you sure?</p>
+    
+    <!-- Permissions Grant Section -->
+    <div id="permissionsSection" style="display: none; margin-bottom: 20px; padding: 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+      <div style="font-weight: 600; font-size: 0.85rem; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+        <i class="bi bi-shield-lock-fill text-primary"></i>
+        <span>Grant User Permissions</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text);">
+          <input type="checkbox" id="permExport" style="accent-color: var(--accent); cursor: pointer; margin-top: 3px;">
+          <div>
+            <strong>Allow Exporting Data</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Allows exporting company-wide inventory and reports.</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text);">
+          <input type="checkbox" id="permManageAllOrders" style="accent-color: var(--accent); cursor: pointer; margin-top: 3px;">
+          <div>
+            <strong>Manage All Orders</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">View and manage orders created by other users.</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text);">
+          <input type="checkbox" id="permManageSettings" checked style="accent-color: var(--accent); cursor: pointer; margin-top: 3px;">
+          <div>
+            <strong>Manage Settings</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Access settings and product code configuration.</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text);">
+          <input type="checkbox" id="permDeleteProducts" style="accent-color: var(--accent); cursor: pointer; margin-top: 3px;">
+          <div>
+            <strong>Delete Products</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Soft-delete, restore, and permanently delete products.</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text);">
+          <input type="checkbox" id="permDeleteInventory" style="accent-color: var(--accent); cursor: pointer; margin-top: 3px;">
+          <div>
+            <strong>Delete Inventory</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Delete warehouse inventory entries.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
     <textarea class="form-control note-input" id="confirmNote" rows="2" placeholder="Optional note / reason..."></textarea>
     <div class="modal-btns">
       <button class="btn btn-outline-secondary" onclick="closeConfirm()">Cancel</button>
@@ -269,6 +315,19 @@ function confirmAction(action, userId, username) {
   document.getElementById('confirmBtn').className = 'btn ' + (action === 'approve' ? 'btn-success' : 'btn-danger');
   document.getElementById('confirmBtn').textContent = action === 'approve' ? 'Approve' : 'Reject';
   document.getElementById('confirmNote').value = '';
+  
+  const permSection = document.getElementById('permissionsSection');
+  if (action === 'approve') {
+    permSection.style.display = 'block';
+    document.getElementById('permExport').checked = false;
+    document.getElementById('permManageAllOrders').checked = false;
+    document.getElementById('permManageSettings').checked = true;
+    document.getElementById('permDeleteProducts').checked = false;
+    document.getElementById('permDeleteInventory').checked = false;
+  } else {
+    permSection.style.display = 'none';
+  }
+  
   document.getElementById('confirmModal').classList.add('show');
 }
 
@@ -289,6 +348,13 @@ async function executeConfirm() {
       : `/approval-requests/reject/${userId}/`;
     const fd = new FormData();
     fd.append('note', note);
+    if (action === 'approve') {
+      fd.append('can_export', document.getElementById('permExport').checked);
+      fd.append('can_manage_all_orders', document.getElementById('permManageAllOrders').checked);
+      fd.append('can_manage_settings', document.getElementById('permManageSettings').checked);
+      fd.append('can_delete_products', document.getElementById('permDeleteProducts').checked);
+      fd.append('can_delete_inventory', document.getElementById('permDeleteInventory').checked);
+    }
     const res = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: fd });
     const data = await res.json();
     if (data.success) {

@@ -236,6 +236,31 @@ class CustomUserApprovalUITests(TestCase):
         self.assertEqual(log.performed_by, self.admin_user)
         self.assertEqual(log.note, 'Approved for access')
 
+    def test_approve_user_api_with_permissions(self):
+        self.client.login(username='admin_user', password='password123')
+        url = reverse('approve_user_api', kwargs={'user_id': self.pending_user1.pk})
+        
+        response = self.client.post(url, {
+            'note': 'Approved with custom permissions',
+            'can_export': 'true',
+            'can_manage_all_orders': 'true',
+            'can_manage_settings': 'false',
+            'can_delete_products': 'true',
+            'can_delete_inventory': 'false',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        
+        self.pending_user1.refresh_from_db()
+        self.assertTrue(self.pending_user1.is_active)
+        
+        profile = self.pending_user1.profile
+        self.assertTrue(profile.can_export)
+        self.assertTrue(profile.can_manage_all_orders)
+        self.assertFalse(profile.can_manage_settings)
+        self.assertTrue(profile.can_delete_products)
+        self.assertFalse(profile.can_delete_inventory)
+
     def test_reject_user_api(self):
         self.client.login(username='admin_user', password='password123')
         url = reverse('reject_user_api', kwargs={'user_id': self.pending_user1.pk})
@@ -332,6 +357,15 @@ class RBACSettingsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('settingsuser', password='password123', is_active=True)
         self.admin = User.objects.create_superuser('settingsadmin', password='password123')
+        
+        # Complete settings setup wizard so user can be blocked
+        from aps.models import ProductCodeSettings
+        ProductCodeSettings.objects.create(user=self.user, enabled=True)
+        
+        # Disable setting management on their profile
+        profile = self.user.profile
+        profile.can_manage_settings = False
+        profile.save()
 
     def test_regular_user_cannot_access_settings(self):
         self.client.login(username='settingsuser', password='password123')
@@ -581,6 +615,16 @@ class CategoriesTests(TestCase):
         self.admin = User.objects.create_superuser('catadmin', password='password123')
         self.categories_url = reverse('categories_list')
 
+        # Complete setup wizard for both catuser and catadmin
+        from aps.models import Category, SubCategory, ProductCodeSettings
+        ProductCodeSettings.objects.create(user=self.user, enabled=True)
+        c = Category.objects.create(name='DummyCat', created_by=self.user)
+        SubCategory.objects.create(category=c, name='DummySub')
+
+        ProductCodeSettings.objects.create(user=self.admin, enabled=True)
+        c2 = Category.objects.create(name='AdminDummyCat', created_by=self.admin)
+        SubCategory.objects.create(category=c2, name='AdminDummySub')
+
     def test_anonymous_cannot_access_categories(self):
         response = self.client.get(self.categories_url)
         self.assertEqual(response.status_code, 302)
@@ -619,6 +663,106 @@ class CategoriesTests(TestCase):
         })
         self.assertRedirects(response, self.categories_url)
         self.assertTrue(SubCategory.objects.filter(name='New Subcategory', category=cat).exists())
+
+    def test_edit_category(self):
+        from aps.models import Category
+        self.client.login(username='catuser', password='password123')
+        cat = Category.objects.filter(created_by=self.user).first()
+        
+        response = self.client.post(reverse('category_edit_api'), {
+            'category_id': cat.id,
+            'name': 'Updated Category Name'
+        })
+        self.assertRedirects(response, self.categories_url)
+        cat.refresh_from_db()
+        self.assertEqual(cat.name, 'Updated Category Name')
+
+    def test_edit_subcategory(self):
+        from aps.models import SubCategory
+        self.client.login(username='catuser', password='password123')
+        sub = SubCategory.objects.filter(category__created_by=self.user).first()
+        
+        response = self.client.post(reverse('subcategory_edit_api'), {
+            'subcategory_id': sub.id,
+            'category': sub.category.id,
+            'name': 'Updated Subcat Name'
+        })
+        self.assertRedirects(response, self.categories_url)
+        sub.refresh_from_db()
+        self.assertEqual(sub.name, 'Updated Subcat Name')
+
+
+class AsinCodeCollisionTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('produser', password='password123', is_active=True)
+        from aps.models import ProductCodeSettings
+        ProductCodeSettings.objects.create(user=self.user, enabled=True, prefix_format='TEST{SEQ}', sequence_length=4)
+
+    def test_asin_collision_resolution(self):
+        from aps.models import Product
+        # Create a product with a hardcoded code matching the first generated sequence code
+        # The first sequence generated will be TEST0001
+        Product.objects.create(
+            product_name='Pre-existing Product',
+            asin_code='TEST0001',
+            created_by=self.user
+        )
+
+        # Now, try to create another product where code is auto-generated
+        p2 = Product.objects.create(
+            product_name='New Product',
+            created_by=self.user
+        )
+
+        # Verify that it resolved the collision by incrementing sequence to TEST0002
+        self.assertEqual(p2.asin_code, 'TEST0002')
+
+
+class ProductCodeFormTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('testformuser', password='password123', is_active=True)
+        from aps.models import Category
+        self.category = Category.objects.create(name='Electronics', created_by=self.user)
+
+    def test_product_form_asin_code_required(self):
+        from aps.forms import ProductForm
+        form = ProductForm(data={
+            'product_name': 'Test Product',
+            'category': self.category.id,
+        }, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('asin_code', form.errors)
+
+    def test_product_form_asin_code_disabled_on_edit(self):
+        from aps.models import Product
+        from aps.forms import ProductForm
+        product = Product.objects.create(
+            product_name='Old Product',
+            asin_code='PROD123',
+            category=self.category,
+            created_by=self.user
+        )
+        form = ProductForm(instance=product, user=self.user)
+        self.assertTrue(form.fields['asin_code'].disabled)
+
+    def test_product_form_asin_code_uniqueness_per_user(self):
+        from aps.models import Product
+        from aps.forms import ProductForm
+        Product.objects.create(
+            product_name='Product One',
+            asin_code='DUP123',
+            category=self.category,
+            created_by=self.user
+        )
+        # Attempting to create another product with same code DUP123 for same user
+        form = ProductForm(data={
+            'product_name': 'Product Two',
+            'asin_code': 'DUP123',
+            'category': self.category.id,
+        }, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('asin_code', form.errors)
+        self.assertEqual(form.errors['asin_code'][0], "You already have a product with this Product Code.")
 
 
 

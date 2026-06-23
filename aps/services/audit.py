@@ -100,12 +100,15 @@ class AuditService:
         )
 
     @classmethod
-    def log_user_action(cls, user, action, target_user, note='', request=None):
+    def log_user_action(cls, user, action, target_user, note='', request=None, details=None):
+        log_details = {'note': note}
+        if details:
+            log_details.update(details)
         return cls.log(
             user, action,
             object_type='user',
             object_id=target_user.pk,
             object_repr=target_user.username,
-            details={'note': note},
+            details=log_details,
             request=request,
         )

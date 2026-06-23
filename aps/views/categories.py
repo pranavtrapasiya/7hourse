@@ -53,3 +53,44 @@ def categories_list(request):
         'subcat_form': subcat_form,
         'categories': categories,
     })
+
+
+@business_user_required
+def category_edit_api(request):
+    from django.shortcuts import get_object_or_404
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = get_object_or_404(Category, pk=category_id, created_by=request.user)
+        form = CategoryForm(request.POST, instance=category, user=request.user)
+        if form.is_valid():
+            form.save()
+            AuditService.log(
+                request.user, AuditLog.ACTION_CATEGORY_UPDATED,
+                object_type='category', object_id=category.pk,
+                object_repr=category.name, request=request,
+            )
+            messages.success(request, 'Category updated.')
+        else:
+            messages.error(request, form.errors.as_text() or 'Failed to update category.')
+    return redirect('categories_list')
+
+
+@business_user_required
+def subcategory_edit_api(request):
+    from django.shortcuts import get_object_or_404
+    from aps.models import SubCategory
+    if request.method == 'POST':
+        subcategory_id = request.POST.get('subcategory_id')
+        subcategory = get_object_or_404(SubCategory, pk=subcategory_id, category__created_by=request.user)
+        form = SubCategoryForm(request.POST, instance=subcategory, user=request.user)
+        if form.is_valid():
+            form.save()
+            AuditService.log(
+                request.user, AuditLog.ACTION_SUBCATEGORY_UPDATED,
+                object_type='subcategory', object_id=subcategory.pk,
+                object_repr=str(subcategory), request=request,
+            )
+            messages.success(request, 'Subcategory updated.')
+        else:
+            messages.error(request, form.errors.as_text() or 'Failed to update subcategory.')
+    return redirect('categories_list')

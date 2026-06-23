@@ -127,12 +127,18 @@
               <i class="bi bi-tag-fill text-amber fs-5"></i>
             </div>
             <h5 class="mb-0 fw-600 text-white">{{ cat.name }}</h5>
+            <button type="button" class="btn btn-sm p-0 border-0 bg-transparent text-muted text-opacity-75 hover-accent" onclick="openEditCategoryModal({{ cat.pk }}, '{{ cat.name|escapejs }}')" title="Edit Category">
+              <i class="bi bi-pencil-square ms-1" style="font-size: 0.85rem; cursor: pointer;"></i>
+            </button>
             <span class="badge bg-secondary ms-auto">{{ cat.subcategories.count }}</span>
           </div>
           {% if cat.subcategories.all %}
           <div class="d-flex flex-wrap gap-2 mt-2">
             {% for sub in cat.subcategories.all %}
-            <span class="badge-subcat">{{ sub.name }}</span>
+            <span class="badge-subcat d-inline-flex align-items-center gap-1">
+              <span>{{ sub.name }}</span>
+              <i class="bi bi-pencil" style="font-size: 0.7rem; cursor: pointer;" onclick="openEditSubcategoryModal({{ sub.pk }}, '{{ sub.name|escapejs }}', {{ cat.pk }})" title="Edit Subcategory"></i>
+            </span>
             {% endfor %}
           </div>
           {% else %}
@@ -172,6 +178,66 @@
   color: #fff;
 }
 </style>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary text-white">
+      <form id="editCategoryForm" method="post" action="{% url 'category_edit_api' %}">
+        {% csrf_token %}
+        <input type="hidden" name="category_id" id="editCategoryId">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="editCategoryModalLabel"><i class="bi bi-pencil-square text-amber me-2"></i>Edit Category</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editCategoryName" class="form-label">Category Name</label>
+            <input type="text" class="form-control bg-black text-white border-secondary" id="editCategoryName" name="name" required autocomplete="off">
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Subcategory Modal -->
+<div class="modal fade" id="editSubcategoryModal" tabindex="-1" aria-labelledby="editSubcategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary text-white">
+      <form id="editSubcategoryForm" method="post" action="{% url 'subcategory_edit_api' %}">
+        {% csrf_token %}
+        <input type="hidden" name="subcategory_id" id="editSubcategoryId">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="editSubcategoryModalLabel"><i class="bi bi-pencil-square text-blue me-2"></i>Edit Subcategory</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editSubcategoryCategory" class="form-label">Category</label>
+            <select class="form-select bg-black text-white border-secondary" id="editSubcategoryCategory" name="category" required>
+              {% for c in categories %}
+                <option value="{{ c.pk }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editSubcategoryName" class="form-label">Subcategory Name</label>
+            <input type="text" class="form-control bg-black text-white border-secondary" id="editSubcategoryName" name="name" required autocomplete="off">
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -185,6 +251,22 @@ document.addEventListener('DOMContentLoaded', function() {
       this.clearActiveOption();
     }
   });
+
+  const editCategoryModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+  const editSubcategoryModal = new bootstrap.Modal(document.getElementById('editSubcategoryModal'));
+
+  window.openEditCategoryModal = function(id, name) {
+    document.getElementById('editCategoryId').value = id;
+    document.getElementById('editCategoryName').value = name;
+    editCategoryModal.show();
+  };
+
+  window.openEditSubcategoryModal = function(id, name, categoryId) {
+    document.getElementById('editSubcategoryId').value = id;
+    document.getElementById('editSubcategoryName').value = name;
+    document.getElementById('editSubcategoryCategory').value = categoryId;
+    editSubcategoryModal.show();
+  };
 });
 </script>
 {% endblock %}

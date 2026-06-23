@@ -15,18 +15,25 @@ from aps.services.audit import AuditService
 from aps.services.email import EmailService
 
 
-def _approve_user(target_user, performed_by, note='', request=None):
+def _approve_user(target_user, performed_by, note='', request=None, permissions=None):
     target_user.is_active = True
     target_user.save(update_fields=['is_active'])
     profile, _ = UserProfile.objects.get_or_create(user=target_user)
     profile.approved_at = timezone.now()
-    profile.save(update_fields=['approved_at'])
+    if permissions:
+        profile.can_export = permissions.get('can_export', False)
+        profile.can_manage_all_orders = permissions.get('can_manage_all_orders', False)
+        profile.can_manage_settings = permissions.get('can_manage_settings', True)
+        profile.can_delete_products = permissions.get('can_delete_products', False)
+        profile.can_delete_inventory = permissions.get('can_delete_inventory', False)
+    profile.save()
     ApprovalLog.objects.create(
         target_user=target_user, action='approved',
         performed_by=performed_by, note=note,
     )
     AuditService.log_user_action(
         performed_by, AuditLog.ACTION_USER_APPROVED, target_user, note=note, request=request,
+        details={'granted_permissions': permissions} if permissions else None
     )
     EmailService.send_approval_email(target_user, performed_by=performed_by, request=request)
 
@@ -117,7 +124,20 @@ def approve_user_api(request, user_id):
             'error': f'User "{target_user.username}" is already active.',
         }, status=400)
 
-    _approve_user(target_user, request.user, note=note, request=request)
+    # Extract user permissions if any are provided in the request
+    permission_keys = ['can_export', 'can_manage_all_orders', 'can_manage_settings', 'can_delete_products', 'can_delete_inventory']
+    has_permissions = any(k in request.POST for k in permission_keys)
+    permissions = None
+    if has_permissions:
+        permissions = {
+            'can_export': request.POST.get('can_export') == 'true',
+            'can_manage_all_orders': request.POST.get('can_manage_all_orders') == 'true',
+            'can_manage_settings': request.POST.get('can_manage_settings') == 'true',
+            'can_delete_products': request.POST.get('can_delete_products') == 'true',
+            'can_delete_inventory': request.POST.get('can_delete_inventory') == 'true',
+        }
+
+    _approve_user(target_user, request.user, note=note, request=request, permissions=permissions)
 
     return JsonResponse({
         'success': True,

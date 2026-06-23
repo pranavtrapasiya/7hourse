@@ -3,7 +3,7 @@ View package — re-exports all view callables for URL routing.
 """
 from .dashboard import dashboard
 from .settings_views import settings_view, migrate_product_codes
-from .categories import categories_list
+from .categories import categories_list, category_edit_api, subcategory_edit_api
 from .products import (
     product_add, product_edit, product_delete, product_restore,
     product_permanent_delete, deleted_products, product_list,
@@ -36,7 +36,7 @@ from .users import (
 __all__ = [
     'dashboard',
     'settings_view', 'migrate_product_codes',
-    'categories_list',
+    'categories_list', 'category_edit_api', 'subcategory_edit_api',
     'product_add', 'product_edit', 'product_delete', 'product_restore',
     'product_permanent_delete', 'deleted_products', 'product_list',
     'product_detail', 'export_products_csv',

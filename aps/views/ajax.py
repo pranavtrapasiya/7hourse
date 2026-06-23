@@ -141,6 +141,7 @@ def api_product_search(request):
         'image_url': p.main_image.url if p.main_image else '',
         'has_image': bool(p.main_image),
         'wished': p.id in wishlist_ids,
+        'created_at_formatted': p.created_at.strftime('%d %b %Y') if p.created_at else '',
     } for p in page_obj]
 
     return JsonResponse({

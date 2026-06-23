@@ -34,8 +34,11 @@ class CategoryForm(forms.ModelForm):
         name = self.cleaned_data.get('name', '').strip()
         if not name:
             raise ValidationError('Category name cannot be blank.')
-        # Check uniqueness per user
-        if self._user and Category.objects.filter(name=name, created_by=self._user).exists():
+        # Check uniqueness per user, excluding self if editing
+        qs = Category.objects.filter(name=name, created_by=self._user)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if self._user and qs.exists():
             raise ValidationError('You already have a category with this name.')
         return name
 
@@ -70,7 +73,10 @@ class SubCategoryForm(forms.ModelForm):
         category = cleaned_data.get('category')
         name = cleaned_data.get('name', '').strip()
         if category and name:
-            if SubCategory.objects.filter(category=category, name=name).exists():
+            qs = SubCategory.objects.filter(category=category, name=name)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
                 raise ValidationError(f'Subcategory "{name}" already exists in this category.')
         return cleaned_data
 
@@ -80,9 +86,10 @@ class SubCategoryForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['product_name', 'sh_code', 'category', 'subcategory', 'main_image', 'description', 'tags']
+        fields = ['product_name', 'asin_code', 'sh_code', 'category', 'subcategory', 'main_image', 'description', 'tags']
         labels = {
-            'sh_code': 'Product Code',
+            'asin_code': 'Product Code',
+            'sh_code': 'Secondary Code (optional)',
         }
         widgets = {
             'product_name': forms.TextInput(attrs={
@@ -90,9 +97,13 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Product name',
                 'autocomplete': 'off',
             }),
+            'asin_code': forms.TextInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Product Code (required)',
+            }),
             'sh_code': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
-                'placeholder': 'Product Code (optional)',
+                'placeholder': 'Secondary Code (optional)',
             }),
             'category': forms.Select(attrs={
                 'class': 'form-select form-select-lg',
@@ -124,6 +135,10 @@ class ProductForm(forms.ModelForm):
         self.fields['category'].empty_label = '— Select Category —'
         self.fields['subcategory'].empty_label = '— Select Subcategory —'
         self.fields['subcategory'].queryset = SubCategory.objects.none()
+        self.fields['asin_code'].required = True
+
+        if self.instance and self.instance.pk and self.instance.asin_code:
+            self.fields['asin_code'].disabled = True
 
         # Scope categories to user
         if user:
@@ -141,6 +156,18 @@ class ProductForm(forms.ModelForm):
             self.fields['subcategory'].queryset = SubCategory.objects.filter(
                 category=self.instance.category
             )
+
+    def clean_asin_code(self):
+        asin_code = self.cleaned_data.get('asin_code')
+        if not asin_code:
+            return asin_code
+        if self._user:
+            qs = Product.objects.filter(asin_code=asin_code, created_by=self._user)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise ValidationError("You already have a product with this Product Code.")
+        return asin_code
 
 
 # ── Warehouse Inventory Form ─────────────────────────────────────────────────
