@@ -53,7 +53,7 @@ def ajax_product_search(request):
 @business_user_required
 def ajax_preview_code(request):
     now = datetime.datetime.now()
-    preview = f"{now.year}{now.strftime('%b').upper()}{now.strftime('%d')}0001"
+    preview = f"{now.year}{now.strftime('%m')}{now.strftime('%d')}0001"
     return JsonResponse({'preview': preview})
 
 

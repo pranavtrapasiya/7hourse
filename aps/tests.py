@@ -701,7 +701,7 @@ class AsinCodeCollisionTests(TestCase):
         import datetime
         now = datetime.datetime.now()
         year = now.year
-        month = now.strftime('%b').upper()
+        month = now.strftime('%m')
         day = now.strftime('%d')
 
         expected_code_1 = f"{year}{month}{day}0001"
@@ -740,7 +740,7 @@ class ProductCodeFormTests(TestCase):
         import datetime
         now = datetime.datetime.now()
         year = now.year
-        month = now.strftime('%b').upper()
+        month = now.strftime('%m')
         day = now.strftime('%d')
 
         # Create first product
@@ -766,7 +766,7 @@ class ProductCodeFormTests(TestCase):
         import datetime
         now = datetime.datetime.now()
         year = now.year
-        month = now.strftime('%b').upper()
+        month = now.strftime('%m')
         day = now.strftime('%d')
 
         # Create a product

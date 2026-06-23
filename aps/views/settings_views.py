@@ -36,7 +36,7 @@ def settings_view(request):
             messages.error(request, 'Fix the errors below.')
 
     now = datetime.datetime.now()
-    preview_code = f"{now.year}{now.strftime('%b').upper()}{now.strftime('%d')}0001"
+    preview_code = f"{now.year}{now.strftime('%m')}{now.strftime('%d')}0001"
     products_without_code = Product.objects.filter(
         asin_code__isnull=True, is_deleted=False, created_by=request.user
     ).count()
