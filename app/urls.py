@@ -7,11 +7,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.http import HttpResponse
 from aps import views
 
 from aps.forms import ApprovedUserLoginForm
 
 urlpatterns = [
+    path("favicon.ico", lambda r: HttpResponse(status=204)),
+    path(".well-known/appspecific/com.chrome.devtools.json", lambda r: HttpResponse(status=404)),
     path("admin/", admin.site.urls),
     path(
         "login/",
