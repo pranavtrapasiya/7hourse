@@ -789,6 +789,19 @@ class ProductCodeFormTests(TestCase):
         )
         self.assertEqual(p2.asin_code, f"{year}{month}{day}0002")
 
+    def test_product_auto_generation_with_ref_date(self):
+        from aps.models import Product
+        import datetime
+        
+        # Test generation with a fixed reference date (e.g. 5 days ago)
+        ref_date = datetime.datetime.now() - datetime.timedelta(days=5)
+        year = ref_date.year
+        month = ref_date.strftime('%m')
+        day = ref_date.strftime('%d')
+
+        code = Product._generate_asin_code(user=self.user, ref_date=ref_date)
+        self.assertEqual(code, f"{year}{month}{day}0001")
+
 
 
 

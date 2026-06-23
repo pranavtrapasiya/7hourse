@@ -205,13 +205,13 @@ class Product(models.Model):
         self.save(update_fields=['is_deleted', 'deleted_at'])
 
     @staticmethod
-    def _generate_asin_code(user=None):
+    def _generate_asin_code(user=None, ref_date=None):
         """
         Generate the next product code in a fixed format: YYYYMMDD + Sequence (e.g. 202606230001).
         Uses select_for_update() for atomic, collision-proof generation.
         Thread-safe and concurrency-safe.
         """
-        now = datetime.datetime.now()
+        now = ref_date or datetime.datetime.now()
         year = now.year
         month = now.strftime('%m')  # 2-digit numeric month: 01, 02, ...
         day = now.strftime('%d')
