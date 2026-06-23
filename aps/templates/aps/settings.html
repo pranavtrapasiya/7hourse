@@ -10,83 +10,21 @@
         <i class="bi bi-upc-scan text-green"></i>
         <h5 class="mb-0">Product Code Settings</h5>
       </div>
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="product_code_settings">
+      <div class="mb-4">
+        <p class="text-muted small">
+          The system uses a fixed format for automatic product code generation:
+          <strong class="text-white">Year + Month + Date + Sequence</strong> (e.g. <code>2026JUN230001</code>).
+        </p>
+        <p class="text-muted small">
+          Sequence numbers are unique per user, incremented automatically without limit, and continue seamlessly even across user logouts/re-logins.
+        </p>
+      </div>
 
-        <div class="row g-3 mb-3">
-          <div class="col-12">
-            <div class="form-check form-switch">
-              {{ code_form.enabled }}
-              <label class="form-check-label fw-500" for="id_code_enabled">
-                Enable Auto Product Code Generation
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-3 mb-3">
-          <div class="col-12 col-md-6">
-            <label class="form-label fw-500">Product Code Format</label>
-            <select class="form-select form-select-lg mb-2" id="formatPresetSelect">
-              <option value="{YEAR}{MONTH}{SEQ}">Year + Month + Sequence (e.g. 2026JUN0001)</option>
-              <option value="{YEAR}{SEQ}">Year + Sequence (e.g. 20260001)</option>
-              <option value="{MONTH}{YEAR}{SEQ}">Month + Year + Sequence (e.g. JUN20260001)</option>
-              <option value="PPG-{YEAR}{SEQ}">Prefix 'PPG-' + Year + Sequence (e.g. PPG-20260001)</option>
-              <option value="PPG-{SEQ}">Prefix 'PPG-' + Sequence (e.g. PPG-0001)</option>
-              <option value="custom">Custom Format...</option>
-            </select>
-            
-            <div id="customFormatGroup" style="display: none;">
-              <label class="form-label fw-500 mt-2">Custom Prefix Format</label>
-              {{ code_form.prefix_format }}
-              
-              <div class="mt-3">
-                <span class="text-muted d-block small mb-2"><i class="bi bi-info-circle me-1"></i>Click to insert placeholders at cursor position:</span>
-                <div class="d-flex flex-wrap gap-2">
-                  <button type="button" class="btn btn-outline-primary btn-sm preset-insert-btn" data-placeholder="{YEAR}">
-                    <i class="bi bi-calendar3 me-1"></i>Year
-                  </button>
-                  <button type="button" class="btn btn-outline-info btn-sm preset-insert-btn" data-placeholder="{MONTH}">
-                    <i class="bi bi-calendar2-range me-1"></i>Month
-                  </button>
-                  <button type="button" class="btn btn-outline-warning btn-sm preset-insert-btn" data-placeholder="{DATE}">
-                    <i class="bi bi-calendar-date me-1"></i>Date
-                  </button>
-                  <button type="button" class="btn btn-outline-success btn-sm preset-insert-btn" data-placeholder="{SEQ}">
-                    <i class="bi bi-hash me-1"></i>Sequence
-                  </button>
-                  <button type="button" class="btn btn-outline-light btn-sm preset-insert-btn" data-placeholder="{PREFIX}">
-                    <i class="bi bi-tag me-1"></i>Prefix
-                  </button>
-                </div>
-              </div>
-              
-              <div class="form-text mt-2">Placeholders will be replaced when generating codes (e.g. {PREFIX} replaced with "PPG").</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label fw-500">Sequence Length</label>
-            {{ code_form.sequence_length }}
-          </div>
-          <div class="col-6 col-md-3 d-flex align-items-end">
-            <div class="form-check form-switch mb-2">
-              {{ code_form.reset_monthly }}
-              <label class="form-check-label fw-500" for="id_reset_monthly">Reset Monthly</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Preview -->
-        <div class="mb-4 p-3 rounded" style="background:var(--surface-2);border:1px solid var(--border);">
-          <span class="spec-label d-block mb-1">Preview Code</span>
-          <span class="fw-700 fs-5 text-accent" id="livePreview">{{ preview_code }}</span>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-lg w-100">
-          <i class="bi bi-check-circle-fill me-2"></i>Save Code Settings
-        </button>
-      </form>
+      <!-- Live Preview -->
+      <div class="mb-4 p-3 rounded" style="background:var(--surface-2);border:1px solid var(--border);">
+        <span class="spec-label d-block mb-1">Preview Code</span>
+        <span class="fw-700 fs-5 text-accent" id="livePreview">{{ preview_code }}</span>
+      </div>
 
       {% if products_without_code > 0 %}
       <div class="mt-3 p-3 rounded" style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);">
@@ -108,112 +46,4 @@
   </div>
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Live preview update
-const fmtInput = document.getElementById('id_prefix_format');
-const seqInput = document.getElementById('id_seq_length');
-const preview  = document.getElementById('livePreview');
-const presetSelect = document.getElementById('formatPresetSelect');
-const customGroup = document.getElementById('customFormatGroup');
-
-function updatePreview() {
-  if (!fmtInput || !seqInput) return;
-  fetch(`/ajax/preview-code/?format=${encodeURIComponent(fmtInput.value)}&seq_len=${seqInput.value}`)
-    .then(r => r.json())
-    .then(d => { preview.textContent = d.preview; })
-    .catch(() => {});
-}
-
-function updatePlaceholderButtons() {
-  if (!fmtInput) return;
-  const currentValue = fmtInput.value;
-  document.querySelectorAll('.preset-insert-btn').forEach(btn => {
-    const placeholder = btn.getAttribute('data-placeholder');
-    if (currentValue.includes(placeholder)) {
-      btn.disabled = true;
-      btn.classList.add('disabled');
-    } else {
-      btn.disabled = false;
-      btn.classList.remove('disabled');
-    }
-  });
-}
-
-function initPresetSelect() {
-  if (!presetSelect || !fmtInput) return;
-  const currentValue = fmtInput.value;
-  let matched = false;
-  
-  for (let i = 0; i < presetSelect.options.length; i++) {
-    if (presetSelect.options[i].value === currentValue) {
-      presetSelect.selectedIndex = i;
-      matched = true;
-      break;
-    }
-  }
-  
-  if (!matched) {
-    presetSelect.value = 'custom';
-    customGroup.style.display = 'block';
-  } else {
-    customGroup.style.display = 'none';
-  }
-}
-
-if (presetSelect) {
-  presetSelect.addEventListener('change', function() {
-    if (this.value === 'custom') {
-      customGroup.style.display = 'block';
-      fmtInput.value = ''; // Don't give predefined code in custom
-      updatePreview();
-      updatePlaceholderButtons();
-    } else {
-      customGroup.style.display = 'none';
-      fmtInput.value = this.value;
-      updatePreview();
-    }
-  });
-}
-
-if (fmtInput) {
-  fmtInput.addEventListener('input', () => {
-    updatePreview();
-    updatePlaceholderButtons();
-  });
-}
-if (seqInput) seqInput.addEventListener('input', updatePreview);
-
-function insertAtCursor(input, text) {
-  if (!input) return;
-  const startPos = input.selectionStart;
-  const endPos = input.selectionEnd;
-  const originalVal = input.value;
-  
-  input.value = originalVal.substring(0, startPos) + text + originalVal.substring(endPos, originalVal.length);
-  
-  // Set cursor position after inserted text
-  input.selectionStart = input.selectionEnd = startPos + text.length;
-  input.focus();
-}
-
-document.querySelectorAll('.preset-insert-btn').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    const placeholder = this.getAttribute('data-placeholder');
-    insertAtCursor(fmtInput, placeholder);
-    updatePreview();
-    updatePlaceholderButtons();
-  });
-});
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-  initPresetSelect();
-  updatePreview();
-  updatePlaceholderButtons();
-});
-</script>
 {% endblock %}

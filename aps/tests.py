@@ -695,16 +695,22 @@ class CategoriesTests(TestCase):
 class AsinCodeCollisionTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('produser', password='password123', is_active=True)
-        from aps.models import ProductCodeSettings
-        ProductCodeSettings.objects.create(user=self.user, enabled=True, prefix_format='TEST{SEQ}', sequence_length=4)
 
     def test_asin_collision_resolution(self):
         from aps.models import Product
+        import datetime
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.strftime('%b').upper()
+        day = now.strftime('%d')
+
+        expected_code_1 = f"{year}{month}{day}0001"
+        expected_code_2 = f"{year}{month}{day}0002"
+
         # Create a product with a hardcoded code matching the first generated sequence code
-        # The first sequence generated will be TEST0001
         Product.objects.create(
             product_name='Pre-existing Product',
-            asin_code='TEST0001',
+            asin_code=expected_code_1,
             created_by=self.user
         )
 
@@ -714,8 +720,8 @@ class AsinCodeCollisionTests(TestCase):
             created_by=self.user
         )
 
-        # Verify that it resolved the collision by incrementing sequence to TEST0002
-        self.assertEqual(p2.asin_code, 'TEST0002')
+        # Verify that it resolved the collision by incrementing sequence to expected_code_2
+        self.assertEqual(p2.asin_code, expected_code_2)
 
 
 class ProductCodeFormTests(TestCase):
@@ -724,45 +730,64 @@ class ProductCodeFormTests(TestCase):
         from aps.models import Category
         self.category = Category.objects.create(name='Electronics', created_by=self.user)
 
-    def test_product_form_asin_code_required(self):
+    def test_product_form_does_not_contain_asin_code(self):
         from aps.forms import ProductForm
-        form = ProductForm(data={
-            'product_name': 'Test Product',
-            'category': self.category.id,
-        }, user=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn('asin_code', form.errors)
+        form = ProductForm(user=self.user)
+        self.assertNotIn('asin_code', form.fields)
 
-    def test_product_form_asin_code_disabled_on_edit(self):
+    def test_product_auto_generation_format_and_sequence(self):
         from aps.models import Product
-        from aps.forms import ProductForm
-        product = Product.objects.create(
-            product_name='Old Product',
-            asin_code='PROD123',
-            category=self.category,
-            created_by=self.user
-        )
-        form = ProductForm(instance=product, user=self.user)
-        self.assertTrue(form.fields['asin_code'].disabled)
+        import datetime
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.strftime('%b').upper()
+        day = now.strftime('%d')
 
-    def test_product_form_asin_code_uniqueness_per_user(self):
-        from aps.models import Product
-        from aps.forms import ProductForm
-        Product.objects.create(
+        # Create first product
+        p1 = Product.objects.create(
             product_name='Product One',
-            asin_code='DUP123',
             category=self.category,
             created_by=self.user
         )
-        # Attempting to create another product with same code DUP123 for same user
-        form = ProductForm(data={
-            'product_name': 'Product Two',
-            'asin_code': 'DUP123',
-            'category': self.category.id,
-        }, user=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn('asin_code', form.errors)
-        self.assertEqual(form.errors['asin_code'][0], "You already have a product with this Product Code.")
+        expected_code_1 = f"{year}{month}{day}0001"
+        self.assertEqual(p1.asin_code, expected_code_1)
+
+        # Create second product (sequence increments)
+        p2 = Product.objects.create(
+            product_name='Product Two',
+            category=self.category,
+            created_by=self.user
+        )
+        expected_code_2 = f"{year}{month}{day}0002"
+        self.assertEqual(p2.asin_code, expected_code_2)
+
+    def test_product_sequence_persists_across_logins(self):
+        from aps.models import Product, ProductCodeSequence
+        import datetime
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.strftime('%b').upper()
+        day = now.strftime('%d')
+
+        # Create a product
+        p1 = Product.objects.create(
+            product_name='Product One',
+            category=self.category,
+            created_by=self.user
+        )
+        self.assertEqual(p1.asin_code, f"{year}{month}{day}0001")
+
+        # Simulate relogin (logging in again or retrieving sequence from DB)
+        # Verify that the sequence continues
+        seq = ProductCodeSequence.objects.get(user=self.user, year=0, month='ALL')
+        self.assertEqual(seq.last_sequence, 1)
+
+        p2 = Product.objects.create(
+            product_name='Product Two',
+            category=self.category,
+            created_by=self.user
+        )
+        self.assertEqual(p2.asin_code, f"{year}{month}{day}0002")
 
 
 

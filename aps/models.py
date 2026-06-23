@@ -207,45 +207,31 @@ class Product(models.Model):
     @staticmethod
     def _generate_asin_code(user=None):
         """
-        Generate the next product code using per-user ProductCodeSettings.
+        Generate the next product code in a fixed format: YYYYMMMDD + Sequence (e.g. 2026JUN230001).
         Uses select_for_update() for atomic, collision-proof generation.
         Thread-safe and concurrency-safe.
         """
-        settings = ProductCodeSettings.load(user=user)
-        if not settings.enabled:
-            return None
-
         now = datetime.datetime.now()
         year = now.year
         month = now.strftime('%b').upper()  # JAN, FEB, ...
+        day = now.strftime('%d')
 
         with transaction.atomic():
-            if settings.reset_monthly:
-                seq_obj, created = ProductCodeSequence.objects.select_for_update().get_or_create(
-                    user=user, year=year, month=month, defaults={'last_sequence': 0}
-                )
-            else:
-                seq_obj, created = ProductCodeSequence.objects.select_for_update().get_or_create(
-                    user=user, year=year, month='ALL', defaults={'last_sequence': 0}
-                )
+            # Use year=0 and month='ALL' to guarantee a single, globally continuous sequence per user
+            seq_obj, created = ProductCodeSequence.objects.select_for_update().get_or_create(
+                user=user, year=0, month='ALL', defaults={'last_sequence': 0}
+            )
 
             # Loop to find the next unused sequence number if a product with the generated code already exists
             while True:
-                # If created, last_sequence is 0. If not, it has some value.
-                # Increment sequence number safely.
                 if isinstance(seq_obj.last_sequence, F):
-                    # In case of any leftover Expressions, refresh first
                     seq_obj.refresh_from_db()
                 seq_obj.last_sequence += 1
                 seq_obj.save(update_fields=['last_sequence'])
 
-                seq_str = str(seq_obj.last_sequence).zfill(settings.sequence_length)
-                day = now.strftime('%d')
-                code = settings.prefix_format.replace('{YEAR}', str(year))
-                code = code.replace('{MONTH}', month)
-                code = code.replace('{DATE}', day)
-                code = code.replace('{PREFIX}', 'PPG')
-                code = code.replace('{SEQ}', seq_str)
+                # No limit on sequence number. Padded to 4 digits by default (e.g. 0001), grows naturally if larger.
+                seq_str = str(seq_obj.last_sequence).zfill(4)
+                code = f"{year}{month}{day}{seq_str}"
 
                 # Check if it already exists for this user (including soft-deleted)
                 if not Product.objects.filter(asin_code=code, created_by=user).exists():

@@ -86,10 +86,9 @@ class SubCategoryForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['product_name', 'asin_code', 'sh_code', 'category', 'subcategory', 'main_image', 'description', 'tags']
+        fields = ['product_name', 'sh_code', 'category', 'subcategory', 'main_image', 'description', 'tags']
         labels = {
-            'asin_code': 'Product Code',
-            'sh_code': 'Secondary Code (optional)',
+            'sh_code': 'Product Code',
         }
         widgets = {
             'product_name': forms.TextInput(attrs={
@@ -97,13 +96,9 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Product name',
                 'autocomplete': 'off',
             }),
-            'asin_code': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'Product Code (required)',
-            }),
             'sh_code': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
-                'placeholder': 'Secondary Code (optional)',
+                'placeholder': 'Product Code (optional)',
             }),
             'category': forms.Select(attrs={
                 'class': 'form-select form-select-lg',
@@ -135,10 +130,6 @@ class ProductForm(forms.ModelForm):
         self.fields['category'].empty_label = '— Select Category —'
         self.fields['subcategory'].empty_label = '— Select Subcategory —'
         self.fields['subcategory'].queryset = SubCategory.objects.none()
-        self.fields['asin_code'].required = True
-
-        if self.instance and self.instance.pk and self.instance.asin_code:
-            self.fields['asin_code'].disabled = True
 
         # Scope categories to user
         if user:
@@ -156,18 +147,6 @@ class ProductForm(forms.ModelForm):
             self.fields['subcategory'].queryset = SubCategory.objects.filter(
                 category=self.instance.category
             )
-
-    def clean_asin_code(self):
-        asin_code = self.cleaned_data.get('asin_code')
-        if not asin_code:
-            return asin_code
-        if self._user:
-            qs = Product.objects.filter(asin_code=asin_code, created_by=self._user)
-            if self.instance and self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise ValidationError("You already have a product with this Product Code.")
-        return asin_code
 
 
 # ── Warehouse Inventory Form ─────────────────────────────────────────────────

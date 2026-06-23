@@ -52,17 +52,8 @@ def ajax_product_search(request):
 
 @business_user_required
 def ajax_preview_code(request):
-    fmt = request.GET.get('format', '{YEAR}{MONTH}{SEQ}')
-    try:
-        seq_len = min(max(int(request.GET.get('seq_len', 4)), 1), 10)
-    except (ValueError, TypeError):
-        seq_len = 4
     now = datetime.datetime.now()
-    preview = fmt.replace('{YEAR}', str(now.year))
-    preview = preview.replace('{MONTH}', now.strftime('%b').upper())
-    preview = preview.replace('{DATE}', now.strftime('%d'))
-    preview = preview.replace('{PREFIX}', 'PPG')
-    preview = preview.replace('{SEQ}', '1'.zfill(seq_len))
+    preview = f"{now.year}{now.strftime('%b').upper()}{now.strftime('%d')}0001"
     return JsonResponse({'preview': preview})
 
 

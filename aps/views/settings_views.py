@@ -36,12 +36,7 @@ def settings_view(request):
             messages.error(request, 'Fix the errors below.')
 
     now = datetime.datetime.now()
-    preview_seq = '1'.zfill(code_settings.sequence_length)
-    preview_code = code_settings.prefix_format.replace('{YEAR}', str(now.year))
-    preview_code = preview_code.replace('{MONTH}', now.strftime('%b').upper())
-    preview_code = preview_code.replace('{DATE}', now.strftime('%d'))
-    preview_code = preview_code.replace('{PREFIX}', 'PPG')
-    preview_code = preview_code.replace('{SEQ}', preview_seq)
+    preview_code = f"{now.year}{now.strftime('%b').upper()}{now.strftime('%d')}0001"
     products_without_code = Product.objects.filter(
         asin_code__isnull=True, is_deleted=False, created_by=request.user
     ).count()
